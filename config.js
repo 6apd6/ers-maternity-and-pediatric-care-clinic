@@ -1,7 +1,7 @@
 const API_CONFIG = {
     // Supabase Backend
-    SUPABASE_URL: 'https://xxxxx.supabase.co', // From Phase 4.4
-    SUPABASE_KEY: 'eyJ...', // From Phase 4.4
+    SUPABASE_URL: 'https://zeexmwloygnabsgwxuov.supabase.co/rest/v1/', // From Phase 4.4
+    SUPABASE_KEY: 'sb_publishable_tOM_DfShnPPVTNQkFx7l7w_RKc5fjWP', // From Phase 4.4
     
     // EmailJS
     EMAILJS_SERVICE_ID: 'service_abc123', // From Phase 5.1
