@@ -4,11 +4,82 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Book Appointment | ERS Maternity Clinic</title>
-    <meta name="description" content="Book your appointment online at ERS Maternity & Pediatric Care Clinic. Easy scheduling for prenatal, delivery, and pediatric services.">
+    <meta name="description" content="Book your appointment online at ERS Maternity & Pediatric Care Clinic.">
+    
+    <!-- Fonts & Stylesheets (FIXED PATH) -->
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&family=Playfair+Display:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="main.css">
+    
+    <!-- Booking Page Specific Styles -->
+    <style>
+        .appointment-hero {
+            background: linear-gradient(135deg, #E91E63 0%, #FF6F00 100%);
+            color: white;
+            padding: 8rem 2rem 4rem;
+            text-align: center;
+            margin-top: 80px;
+        }
+        .appointment-hero h1 { font-size: 3rem; margin-bottom: 1rem; color: white; font-family: 'Playfair Display', serif; }
+        .appointment-hero p { font-size: 1.2rem; opacity: 0.95; }
+        
+        .booking-section { padding: 4rem 2rem; background: #FFF5F7; }
+        .booking-container {
+            max-width: 1000px; margin: 0 auto; background: white;
+            padding: 3rem; border-radius: 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+        }
+        
+        .booking-steps { display: flex; justify-content: space-between; margin-bottom: 3rem; position: relative; }
+        .booking-steps::before { content: ''; position: absolute; top: 20px; left: 10%; right: 10%; height: 2px; background: #e0e0e0; z-index: 0; }
+        
+        .step { display: flex; flex-direction: column; align-items: center; gap: 0.5rem; position: relative; z-index: 1; }
+        .step-number { width: 40px; height: 40px; background: #e0e0e0; color: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: bold; transition: all 0.3s; }
+        .step.active .step-number { background: linear-gradient(135deg, #E91E63 0%, #FF6F00 100%); }
+        .step.completed .step-number { background: #4CD964; }
+        .step-label { font-size: 0.9rem; color: #7F8C8D; }
+        .step.active .step-label { color: #E91E63; font-weight: 600; }
+        
+        .booking-step h2 { margin-bottom: 2rem; font-family: 'Playfair Display', serif; }
+        
+        .service-options { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 1.5rem; margin-bottom: 2rem; }
+        .service-option { cursor: pointer; }
+        .service-option input { display: none; }
+        .service-card-select {
+            background: white; border: 2px solid #e0e0e0; padding: 2rem; border-radius: 15px;
+            text-align: center; transition: all 0.3s;
+        }
+        .service-option input:checked + .service-card-select { border-color: #E91E63; background: #FFF5F7; box-shadow: 0 10px 30px rgba(233, 30, 99, 0.2); }
+        .service-card-select .service-icon { font-size: 3rem; margin-bottom: 1rem; }
+        .service-card-select h3 { margin-bottom: 0.5rem; color: #2C3E50; }
+        .service-card-select p { color: #7F8C8D; margin-bottom: 1rem; font-size: 0.9rem; }
+        .service-card-select .price { color: #E91E63; font-weight: 600; }
+        
+        .booking-nav { display: flex; justify-content: space-between; margin-top: 2rem; }
+        .hidden { display: none !important; }
+        
+        .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; }
+        .form-grid .full-width { grid-column: 1 / -1; }
+        .form-group { margin-bottom: 1.5rem; }
+        .form-group label { display: block; margin-bottom: 0.5rem; font-weight: 500; color: #2C3E50; }
+        .form-group input, .form-group textarea, .form-group select {
+            width: 100%; padding: 1rem; border: 2px solid #e0e0e0; border-radius: 10px; font-family: 'Poppins', sans-serif;
+        }
+        .form-group input:focus, .form-group textarea:focus, .form-group select:focus { outline: none; border-color: #E91E63; }
+        
+        .booking-summary { background: #FFF5F7; padding: 2rem; border-radius: 15px; margin-bottom: 2rem; }
+        .summary-item { display: flex; justify-content: space-between; padding: 1rem 0; border-bottom: 1px solid #e0e0e0; }
+        .summary-item:last-child { border-bottom: none; }
+        .summary-item strong { color: #2C3E50; }
+        .summary-item span { color: #7F8C8D; }
+
+        @media (max-width: 768px) {
+            .form-grid { grid-template-columns: 1fr; }
+            .booking-container { padding: 1.5rem; }
+            .appointment-hero h1 { font-size: 2rem; }
+        }
+    </style>
 </head>
 <body>
+    <!-- Navigation -->
     <nav class="navbar">
         <div class="nav-container">
             <div class="logo">
@@ -25,10 +96,15 @@
                 <li><a href="blog.html">Blog</a></li>
                 <li><a href="appointment.html" class="active">Book Appointment</a></li>
                 <li><a href="portal.html">Patient Portal</a></li>
+                <li><a href="index.html#contact">Contact</a></li>
             </ul>
+            <div class="mobile-menu">
+                <span></span><span></span><span></span>
+            </div>
         </div>
     </nav>
 
+    <!-- Hero Section -->
     <section class="appointment-hero">
         <div class="container">
             <h1>Book Your Appointment</h1>
@@ -36,6 +112,7 @@
         </div>
     </section>
 
+    <!-- Booking Form Section -->
     <section class="booking-section">
         <div class="booking-container">
             <!-- Step Indicator -->
@@ -125,51 +202,28 @@
                 <!-- Step 2: Date & Time -->
                 <div class="booking-step hidden" id="step2">
                     <h2>Choose Date & Time</h2>
-                    <div class="calendar-container">
-                        <div class="calendar-header">
-                            <button type="button" id="prevMonth">‹</button>
-                            <h3 id="currentMonth">July 2026</h3>
-                            <button type="button" id="nextMonth">›</button>
-                        </div>
-                        <div class="calendar-grid" id="calendarGrid">
-                            <!-- Days populated by JS -->
-                        </div>
-                    </div>
-                    <div class="time-slots" id="timeSlots">
-                        <h3>Available Time Slots</h3>
-                        <div class="time-options">
-                            <label class="time-option">
-                                <input type="radio" name="time" value="08:00">
-                                <span>8:00 AM</span>
-                            </label>
-                            <label class="time-option">
-                                <input type="radio" name="time" value="09:00">
-                                <span>9:00 AM</span>
-                            </label>
-                            <label class="time-option">
-                                <input type="radio" name="time" value="10:00">
-                                <span>10:00 AM</span>
-                            </label>
-                            <label class="time-option">
-                                <input type="radio" name="time" value="11:00">
-                                <span>11:00 AM</span>
-                            </label>
-                            <label class="time-option">
-                                <input type="radio" name="time" value="13:00">
-                                <span>1:00 PM</span>
-                            </label>
-                            <label class="time-option">
-                                <input type="radio" name="time" value="14:00">
-                                <span>2:00 PM</span>
-                            </label>
-                            <label class="time-option">
-                                <input type="radio" name="time" value="15:00">
-                                <span>3:00 PM</span>
-                            </label>
-                            <label class="time-option">
-                                <input type="radio" name="time" value="16:00">
-                                <span>4:00 PM</span>
-                            </label>
+                    <div class="calendar-container" style="background: #f9f9f9; padding: 1.5rem; border-radius: 15px; margin-bottom: 2rem; text-align: center;">
+                        <h3 id="currentMonth">July 2026</h3>
+                        <p style="color: #7F8C8D; margin-top: 1rem;">Please select your preferred date and time below.</p>
+                        <div class="form-grid" style="margin-top: 1.5rem;">
+                            <div class="form-group">
+                                <label>Preferred Date</label>
+                                <input type="date" name="appointmentDate" required>
+                            </div>
+                            <div class="form-group">
+                                <label>Preferred Time</label>
+                                <select name="appointmentTime" required>
+                                    <option value="">Select a time</option>
+                                    <option value="08:00">8:00 AM</option>
+                                    <option value="09:00">9:00 AM</option>
+                                    <option value="10:00">10:00 AM</option>
+                                    <option value="11:00">11:00 AM</option>
+                                    <option value="13:00">1:00 PM</option>
+                                    <option value="14:00">2:00 PM</option>
+                                    <option value="15:00">3:00 PM</option>
+                                    <option value="16:00">4:00 PM</option>
+                                </select>
+                            </div>
                         </div>
                     </div>
                     <div class="booking-nav">
@@ -215,8 +269,8 @@
                             <textarea name="notes" placeholder="Any special concerns or requests..."></textarea>
                         </div>
                         <div class="form-group full-width">
-                            <label>
-                                <input type="checkbox" name="consent" required>
+                            <label style="display: flex; align-items: center; gap: 0.5rem; font-weight: normal;">
+                                <input type="checkbox" name="consent" required style="width: auto;">
                                 I consent to the collection of my personal data for appointment scheduling purposes.
                             </label>
                         </div>
@@ -232,6 +286,7 @@
                     <h2>Review & Confirm</h2>
                     <div class="booking-summary" id="bookingSummary">
                         <!-- Populated by JS -->
+                        <p style="text-align: center; color: #7F8C8D;">Please fill out the previous steps to see your summary.</p>
                     </div>
                     <div class="booking-nav">
                         <button type="button" class="btn btn-secondary prev-step" data-prev="3">← Back</button>
@@ -242,9 +297,43 @@
         </div>
     </section>
 
-    <script src="api/config.js"></script>
-    <script src="api/backend.js"></script>
-    <script src="js/main.js"></script>
-    <script src="js/appointment.js"></script>
+    <!-- Footer -->
+    <footer style="background: #2C3E50; color: white; padding: 4rem 2rem 2rem;">
+        <div class="footer-container" style="max-width: 1200px; margin: 0 auto; display: grid; grid-template-columns: 2fr 1fr 1fr 1fr; gap: 3rem; margin-bottom: 3rem;">
+            <div class="footer-brand">
+                <h3 style="font-family: 'Playfair Display', serif; font-size: 1.8rem; margin-bottom: 1rem;">ERS Maternity & Pediatric Care</h3>
+                <p style="color: rgba(255, 255, 255, 0.7); line-height: 1.8; margin-bottom: 1.5rem;">Providing safe, gentle, and compassionate maternity care in Trece Martires, Cavite.</p>
+            </div>
+            <div class="footer-section">
+                <h4 style="margin-bottom: 1.5rem;">Quick Links</h4>
+                <ul style="list-style: none;">
+                    <li style="margin-bottom: 0.8rem;"><a href="index.html" style="color: rgba(255, 255, 255, 0.7); text-decoration: none;">Home</a></li>
+                    <li style="margin-bottom: 0.8rem;"><a href="services.html" style="color: rgba(255, 255, 255, 0.7); text-decoration: none;">Services</a></li>
+                    <li style="margin-bottom: 0.8rem;"><a href="appointment.html" style="color: rgba(255, 255, 255, 0.7); text-decoration: none;">Book Appointment</a></li>
+                </ul>
+            </div>
+            <div class="footer-section">
+                <h4 style="margin-bottom: 1.5rem;">Contact</h4>
+                <ul style="list-style: none;">
+                    <li style="margin-bottom: 0.8rem;"><a href="tel:+639704716507" style="color: rgba(255, 255, 255, 0.7); text-decoration: none;">+63 970 471 6507</a></li>
+                    <li style="margin-bottom: 0.8rem;"><a href="mailto:ersmaternityclinic@gmail.com" style="color: rgba(255, 255, 255, 0.7); text-decoration: none;">ersmaternityclinic@gmail.com</a></li>
+                </ul>
+            </div>
+        </div>
+        <div class="footer-bottom" style="max-width: 1200px; margin: 0 auto; padding-top: 2rem; border-top: 1px solid rgba(255, 255, 255, 0.1); text-align: center; color: rgba(255, 255, 255, 0.7);">
+            <p>&copy; 2026 ERS Maternity & Pediatric Care Clinic. All rights reserved.</p>
+        </div>
+    </footer>
+
+    <!-- AI Widgets -->
+    <div id="aiPhoneWidget"></div>
+    <div id="chatbotWidget"></div>
+
+    <!-- Scripts (FIXED PATHS) -->
+    <script src="config.js"></script>
+    <script src="main.js"></script>
+    <script src="chatbot.js"></script>
+    <script src="phone-agent.js"></script>
+    <script src="appointment.js"></script>
 </body>
 </html>
