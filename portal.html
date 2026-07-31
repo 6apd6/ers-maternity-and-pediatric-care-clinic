@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Patient Portal | ERS Maternity & Pediatric Care Clinic</title>
+    <meta name="description" content="Access your medical records, appointment history, and health information securely.">
+    
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&family=Playfair+Display:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="main.css">
+</head>
+<body>
+    <nav class="navbar">
+        <div class="nav-container">
+            <div class="logo">
+                <div class="logo-icon">ERS</div>
+                <div class="logo-text">
+                    <h1>ERS Maternity</h1>
+                    <p>& PEDIATRIC CARE</p>
+                </div>
+            </div>
+            <ul class="nav-links">
+                <li><a href="index.html">Home</a></li>
+                <li><a href="about.html">About</a></li>
+                <li><a href="services.html">Services</a></li>
+                <li><a href="blog.html">Blog</a></li>
+                <li><a href="appointment.html">Book Appointment</a></li>
+                <li><a href="portal.html" class="active">Patient Portal</a></li>
+                <li><a href="index.html#contact">Contact</a></li>
+            </ul>
+            <div class="lang-selector">
+                <button class="lang-btn">🌐 <span>EN</span></button>
+            </div>
+            <div class="mobile-menu">
+                <span></span><span></span><span></span>
+            </div>
+        </div>
+    </nav>
+
+    <div class="ai-phone-banner">
+        <span> Our AI speaks English, Tagalog, Bisaya & Ilocano!</span>
+        <div class="ai-phone-status">
+            <span class="status-indicator"></span>
+            <span>Active 24/7</span>
+        </div>
+    </div>
+
+    <section class="page-header" style="background: linear-gradient(135deg, rgba(102, 126, 234, 0.1) 0%, rgba(118, 75, 162, 0.1) 100%); padding: 8rem 2rem 4rem; text-align: center;">
+        <div class="container">
+            <div class="section-tag" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);">Patient Portal</div>
+            <h1 style="font-family: 'Playfair Display', serif; font-size: 3rem; margin: 1rem 0;">Access Your Health Records</h1>
+            <p style="font-size: 1.2rem; color: var(--text-light); max-width: 800px; margin: 0 auto;">Securely view your medical records, appointment history, and test results</p>
+        </div>
+    </section>
+
+    <section class="portal-section" style="padding: 6rem 2rem; background: white;">
+        <div class="container" style="max-width: 600px; margin: 0 auto;">
+            
+            <!-- Login Form -->
+            <div id="loginForm" class="login-card" style="background: white; padding: 3rem; border-radius: 20px; box-shadow: 0 20px 60px rgba(0,0,0,0.1);">
+                <h2 style="font-family: 'Playfair Display', serif; font-size: 2rem; margin-bottom: 0.5rem; text-align: center;">Patient Login</h2>
+                <p style="color: var(--text-light); text-align: center; margin-bottom: 2rem;">Access your medical records securely</p>
+                
+                <form style="display: flex; flex-direction: column; gap: 1.5rem;">
+                    <div class="form-group">
+                        <label style="display: block; margin-bottom: 0.5rem; font-weight: 500;">Email Address</label>
+                        <input type="email" placeholder="your@email.com" style="width: 100%; padding: 1rem; border: 2px solid #e0e0e0; border-radius: 10px; font-family: 'Poppins', sans-serif;">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label style="display: block; margin-bottom: 0.5rem; font-weight: 500;">Password</label>
+                        <input type="password" placeholder="••••••••" style="width: 100%; padding: 1rem; border: 2px solid #e0e0e0; border-radius: 10px; font-family: 'Poppins', sans-serif;">
+                    </div>
+                    
+                    <div style="display: flex; justify-content: space-between; align-items: center; font-size: 0.9rem;">
+                        <label style="display: flex; align-items: center; gap: 0.5rem; cursor: pointer;">
+                            <input type="checkbox" style="width: 18px; height: 18px;">
+                            <span>Remember me</span>
+                        </label>
+                        <a href="#" style="color: var(--primary-color); text-decoration: none;">Forgot password?</a>
+                    </div>
+                    
+                    <button type="button" class="btn" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 1rem; border: none; border-radius: 10px; font-weight: 600; cursor: pointer; font-family: 'Poppins', sans-serif; font-size: 1rem;">
+                        Login to Portal
+                    </button>
+                </form>
+                
+                <div style="margin-top: 2rem; padding-top: 2rem; border-top: 1px solid #e0e0e0; text-align: center;">
+                    <p style="color: var(--text-light); margin-bottom: 1rem;">Don't have an account?</p>
+                    <button class="btn" style="background: white; color: var(--primary-color); border: 2px solid var(--primary-color); padding: 0.8rem 2rem; border-radius: 50px; font-weight: 600; cursor: pointer;">
+                        Request Access
+                    </button>
+                </div>
+            </div>
+
+            <!-- Portal Dashboard (Hidden by default - shown after login) -->
+            <div id="portalDashboard" style="display: none;">
+                <div style="background: white; padding: 2rem; border-radius: 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.08); margin-bottom: 2rem;">
+                    <h2 style="font-family: 'Playfair Display', serif; margin-bottom: 1.5rem;">Welcome Back!</h2>
+                    <p style="color: var(--text-light);">Here's your health information</p>
+                </div>
+
+                <div style="display: grid; gap: 1.5rem;">
+                    <div style="background: white; padding: 2rem; border-radius: 15px; box-shadow: 0 10px 30px rgba(0,0,0,0.05);">
+                        <h3 style="margin-bottom: 1rem; display: flex; align-items: center; gap: 0.5rem;">📅 Upcoming Appointments</h3>
+                        <p style="color: var(--text-light);">No upcoming appointments</p>
+                        <a href="appointment.html" style="color: var(--primary-color); font-weight: 600; text-decoration: none; display: inline-block; margin-top: 1rem;">Book Now →</a>
+                    </div>
+
+                    <div style="background: white; padding: 2rem; border-radius: 15px; box-shadow: 0 10px 30px rgba(0,0,0,0.05);">
+                        <h3 style="margin-bottom: 1rem; display: flex; align-items: center; gap: 0.5rem;">📋 Medical Records</h3>
+                        <p style="color: var(--text-light);">Access your medical history, test results, and prescriptions</p>
+                        <button style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; border: none; padding: 0.8rem 1.5rem; border-radius: 10px; cursor: pointer; margin-top: 1rem;">View Records</button>
+                    </div>
+
+                    <div style="background: white; padding: 2rem; border-radius: 15px; box-shadow: 0 10px 30px rgba(0,0,0,0.05);">
+                        <h3 style="margin-bottom: 1rem; display: flex; align-items: center; gap: 0.5rem;">💊 Prescriptions</h3>
+                        <p style="color: var(--text-light);">View and manage your current prescriptions</p>
+                    </div>
+
+                    <div style="background: white; padding: 2rem; border-radius: 15px; box-shadow: 0 10px 30px rgba(0,0,0,0.05);">
+                        <h3 style="margin-bottom: 1rem; display: flex; align-items: center; gap: 0.5rem;">📊 Lab Results</h3>
+                        <p style="color: var(--text-light);">Check your recent lab test results</p>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </section>
+
+    <footer style="background: var(--text-dark); color: white; padding: 4rem 2rem 2rem;">
+        <div class="footer-container" style="max-width: 1200px; margin: 0 auto; display: grid; grid-template-columns: 2fr 1fr 1fr 1fr; gap: 3rem; margin-bottom: 3rem;">
+            <div class="footer-brand">
+                <h3 style="font-family: 'Playfair Display', serif; font-size: 1.8rem; margin-bottom: 1rem;">ERS Maternity & Pediatric Care</h3>
+                <p style="color: rgba(255, 255, 255, 0.7); line-height: 1.8; margin-bottom: 1.5rem;">Providing safe, gentle, and compassionate maternity care in Trece Martires, Cavite.</p>
+            </div>
+            <div class="footer-section">
+                <h4 style="margin-bottom: 1.5rem;">Quick Links</h4>
+                <ul style="list-style: none;">
+                    <li style="margin-bottom: 0.8rem;"><a href="index.html" style="color: rgba(255, 255, 255, 0.7); text-decoration: none;">Home</a></li>
+                    <li style="margin-bottom: 0.8rem;"><a href="portal.html" style="color: rgba(255, 255, 255, 0.7); text-decoration: none;">Patient Portal</a></li>
+                    <li style="margin-bottom: 0.8rem;"><a href="appointment.html" style="color: rgba(255, 255, 255, 0.7); text-decoration: none;">Book Appointment</a></li>
+                </ul>
+            </div>
+            <div class="footer-section">
+                <h4 style="margin-bottom: 1.5rem;">Contact</h4>
+                <ul style="list-style: none;">
+                    <li style="margin-bottom: 0.8rem;"><a href="tel:+639704716507" style="color: rgba(255, 255, 255, 0.7); text-decoration: none;">+63 970 471 6507</a></li>
+                    <li style="margin-bottom: 0.8rem;"><a href="mailto:ersmaternityclinic@gmail.com" style="color: rgba(255, 255, 255, 0.7); text-decoration: none;">ersmaternityclinic@gmail.com</a></li>
+                </ul>
+            </div>
+        </div>
+        <div class="footer-bottom" style="max-width: 1200px; margin: 0 auto; padding-top: 2rem; border-top: 1px solid rgba(255, 255, 255, 0.1); text-align: center; color: rgba(255, 255, 255, 0.7);">
+            <p>&copy; 2026 ERS Maternity & Pediatric Care Clinic. All rights reserved.</p>
+        </div>
+    </footer>
+
+    <div id="aiPhoneWidget"></div>
+    <div id="chatbotWidget"></div>
+
+    <script src="config.js"></script>
+    <script src="main.js"></script>
+    <script src="chatbot.js"></script>
+    <script src="phone-agent.js"></script>
+</body>
+</html>
