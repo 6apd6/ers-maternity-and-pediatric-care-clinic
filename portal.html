@@ -6,9 +6,6 @@
     <title>Patient Portal | ERS Maternity & Pediatric Care Clinic</title>
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&family=Playfair+Display:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="main.css">
-    
-    <!-- Supabase JS Library (Required for login) -->
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
 <body>
     <nav class="navbar">
@@ -69,7 +66,7 @@
                 
                 <div style="margin-top: 2rem; padding-top: 2rem; border-top: 1px solid #e0e0e0; text-align: center;">
                     <p style="color: var(--text-light); margin-bottom: 1rem;">Don't have an account?</p>
-                    <button onclick="showRegisterForm()" style="background: white; color: var(--primary-color); border: 2px solid var(--primary-color); padding: 0.8rem 2rem; border-radius: 50px; font-weight: 600; cursor: pointer;">
+                    <button onclick="alert('Please contact the clinic at +63 970 471 6507 to request portal access.')" style="background: white; color: var(--primary-color); border: 2px solid var(--primary-color); padding: 0.8rem 2rem; border-radius: 50px; font-weight: 600; cursor: pointer;">
                         Request Access
                     </button>
                 </div>
@@ -96,28 +93,45 @@
         </div>
     </footer>
 
-    <!-- Scripts -->
+    <!-- Scripts - Load in correct order -->
     <script src="config.js"></script>
     <script src="main.js"></script>
     <script src="chatbot.js"></script>
     <script src="phone-agent.js"></script>
     
+    <!-- Load Supabase Library FIRST -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    
     <!-- Portal Login Logic -->
     <script>
-        // 1. Connect to Supabase using the keys in your config.js
-        const supabaseUrl = window.API_CONFIG.SUPABASE_URL;
-        const supabaseKey = window.API_CONFIG.SUPABASE_KEY;
-        const supabaseClient = window.supabaseClient.createClient(supabaseUrl, supabaseKey);
-
-        // 2. Check if user is already logged in when page loads
+        // Initialize Supabase Client
+        let supabaseClient;
+        
         window.addEventListener('DOMContentLoaded', async () => {
+            // Make sure config is loaded
+            if (typeof window.API_CONFIG === 'undefined') {
+                console.error('API_CONFIG not loaded!');
+                document.getElementById('loginMessage').style.display = 'block';
+                document.getElementById('loginMessage').style.background = '#f8d7da';
+                document.getElementById('loginMessage').style.color = '#721c24';
+                document.getElementById('loginMessage').textContent = 'Configuration error. Please refresh the page.';
+                return;
+            }
+            
+            // Create Supabase client
+            supabaseClient = window.supabase.createClient(
+                window.API_CONFIG.SUPABASE_URL,
+                window.API_CONFIG.SUPABASE_KEY
+            );
+            
+            // Check if user is already logged in
             const { data: { session } } = await supabaseClient.auth.getSession();
             if (session) {
                 showDashboard(session.user.email);
             }
         });
 
-        // 3. Handle Login Form Submission
+        // Handle Login Form
         document.getElementById('loginFormElement').addEventListener('submit', async (e) => {
             e.preventDefault();
             const email = document.getElementById('loginEmail').value;
@@ -149,25 +163,20 @@
             }
         });
 
-        // 4. Show Dashboard
+        // Show Dashboard
         function showDashboard(email) {
             document.getElementById('loginForm').style.display = 'none';
             document.getElementById('portalDashboard').style.display = 'block';
             document.getElementById('userEmailDisplay').textContent = email;
         }
 
-        // 5. Handle Logout
+        // Logout
         async function logout() {
             await supabaseClient.auth.signOut();
             document.getElementById('portalDashboard').style.display = 'none';
             document.getElementById('loginForm').style.display = 'block';
             document.getElementById('loginEmail').value = '';
             document.getElementById('loginPassword').value = '';
-        }
-
-        // 6. Show Register Form (Placeholder for now)
-        function showRegisterForm() {
-            alert("Please contact the clinic at +63 970 471 6507 to request portal access.");
         }
     </script>
 </body>
