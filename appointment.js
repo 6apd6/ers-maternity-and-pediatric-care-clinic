@@ -148,20 +148,38 @@ class AppointmentBooking {
         `;
     }
 
-    async submitBooking() {
+       async submitBooking() {
         try {
-            // In production: await fetch('/api/appointments', { method: 'POST', body: JSON.stringify(this.bookingData) });
-            console.log('Booking submitted:', this.bookingData);
-            
+            // This actually saves the appointment to your Supabase database!
+            const { data, error } = await window.supabaseClient
+                .from('appointments')
+                .insert([
+                    {
+                        service: this.bookingData.service,
+                        appointment_date: this.bookingData.date,
+                        appointment_time: this.bookingData.time,
+                        patient_name: this.bookingData.patient.fullName,
+                        phone: this.bookingData.patient.phone,
+                        email: this.bookingData.patient.email,
+                        doctor: this.bookingData.patient.doctor,
+                        notes: this.bookingData.patient.notes,
+                        status: 'pending',
+                        user_id: null // Patient isn't logged in, so this is empty for now
+                    }
+                ]);
+
+            if (error) throw error;
+
             alert('✓ Appointment booked successfully!\n\nYou will receive a confirmation via SMS/email within 24 hours.\n\nReference: ERS-' + Date.now().toString().slice(-6));
             
             // Redirect to home after 3 seconds
             setTimeout(() => {
                 window.location.href = 'index.html';
             }, 3000);
+            
         } catch (error) {
             console.error('Booking failed:', error);
-            alert('Booking failed. Please try again or call us at +63 970 471 6507.');
+            alert('Booking failed: ' + error.message);
         }
     }
 }
