@@ -183,12 +183,24 @@ if (contactForm) {
         const data = Object.fromEntries(formData);
         
         try {
-            // In production: await fetch('/api/contact', { method: 'POST', body: JSON.stringify(data) });
-            console.log('Contact form submitted:', data);
-            alert('✓ Message sent! We will contact you soon.\n\nSalamat! Makikipag-ugnayan kami sa inyo.');
-            contactForm.reset();
+            const response = await fetch(`${API_CONFIG.SUPABASE_URL}/rest/v1/contact_messages`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'apikey': API_CONFIG.SUPABASE_KEY,
+                    'Authorization': `Bearer ${API_CONFIG.SUPABASE_KEY}`
+                },
+                body: JSON.stringify(data)
+            });
+            
+            if (response.ok) {
+                alert('✓ Message sent! We will contact you soon.');
+                contactForm.reset();
+            } else {
+                throw new Error('Failed to send');
+            }
         } catch (error) {
-            alert('Failed to send message. Please call us at +63 970 471 6507.');
+            alert('Please call us at +63 970 471 6507');
         }
     });
 }
