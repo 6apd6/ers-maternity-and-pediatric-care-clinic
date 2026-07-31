@@ -1,20 +1,16 @@
 /* =========================================
-   ONLINE APPOINTMENT BOOKING SYSTEM
+   APPOINTMENT BOOKING SYSTEM - FIXED
    ========================================= */
 
 class AppointmentBooking {
     constructor() {
         this.currentStep = 1;
         this.bookingData = {};
-        this.selectedDate = null;
-        this.currentMonth = new Date().getMonth();
-        this.currentYear = new Date().getFullYear();
         this.init();
     }
 
     init() {
         this.attachEvents();
-        this.renderCalendar();
     }
 
     attachEvents() {
@@ -33,12 +29,6 @@ class AppointmentBooking {
                 this.goToStep(parseInt(btn.dataset.prev));
             });
         });
-
-        // Calendar navigation
-        const prevMonth = document.getElementById('prevMonth');
-        const nextMonth = document.getElementById('nextMonth');
-        if (prevMonth) prevMonth.addEventListener('click', () => this.changeMonth(-1));
-        if (nextMonth) nextMonth.addEventListener('click', () => this.changeMonth(1));
 
         // Form submission
         const form = document.getElementById('bookingForm');
@@ -76,20 +66,26 @@ class AppointmentBooking {
             this.bookingData.service = service.value;
             return true;
         }
+        
         if (step === 2) {
-            if (!this.selectedDate) {
+            const dateInput = document.querySelector('input[name="appointmentDate"]');
+            const timeSelect = document.querySelector('select[name="appointmentTime"]');
+            
+            if (!dateInput || !dateInput.value) {
                 alert('Please select a date');
                 return false;
             }
-            const time = document.querySelector('input[name="time"]:checked');
-            if (!time) {
-                alert('Please select a time slot');
+            
+            if (!timeSelect || !timeSelect.value) {
+                alert('Please select a time');
                 return false;
             }
-            this.bookingData.date = this.selectedDate;
-            this.bookingData.time = time.value;
+            
+            this.bookingData.date = dateInput.value;
+            this.bookingData.time = timeSelect.value;
             return true;
         }
+        
         if (step === 3) {
             const form = document.getElementById('step3');
             const required = form.querySelectorAll('[required]');
@@ -113,63 +109,6 @@ class AppointmentBooking {
         return true;
     }
 
-    changeMonth(direction) {
-        this.currentMonth += direction;
-        if (this.currentMonth > 11) {
-            this.currentMonth = 0;
-            this.currentYear++;
-        } else if (this.currentMonth < 0) {
-            this.currentMonth = 11;
-            this.currentYear--;
-        }
-        this.renderCalendar();
-    }
-
-    renderCalendar() {
-        const grid = document.getElementById('calendarGrid');
-        if (!grid) return;
-
-        const monthNames = ['January','February','March','April','May','June','July','August','September','October','November','December'];
-        document.getElementById('currentMonth').textContent = `${monthNames[this.currentMonth]} ${this.currentYear}`;
-
-        const firstDay = new Date(this.currentYear, this.currentMonth, 1).getDay();
-        const daysInMonth = new Date(this.currentYear, this.currentMonth + 1, 0).getDate();
-        const today = new Date();
-
-        let html = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'].map(d => 
-            `<div class="calendar-day-header">${d}</div>`
-        ).join('');
-
-        for (let i = 0; i < firstDay; i++) {
-            html += '<div class="calendar-day"></div>';
-        }
-
-        for (let day = 1; day <= daysInMonth; day++) {
-            const date = new Date(this.currentYear, this.currentMonth, day);
-            const isPast = date < new Date(today.getFullYear(), today.getMonth(), today.getDate());
-            const isSunday = date.getDay() === 0;
-            const isToday = date.toDateString() === today.toDateString();
-            const isSelected = this.selectedDate && date.toDateString() === this.selectedDate.toDateString();
-            
-            const classes = ['calendar-day'];
-            if (isPast || isSunday) classes.push('disabled');
-            if (isToday) classes.push('today');
-            if (isSelected) classes.push('selected');
-
-            html += `<div class="${classes.join(' ')}" data-date="${date.toISOString()}">${day}</div>`;
-        }
-
-        grid.innerHTML = html;
-
-        grid.querySelectorAll('.calendar-day:not(.disabled)').forEach(day => {
-            day.addEventListener('click', () => {
-                grid.querySelectorAll('.calendar-day').forEach(d => d.classList.remove('selected'));
-                day.classList.add('selected');
-                this.selectedDate = new Date(day.dataset.date);
-            });
-        });
-    }
-
     renderSummary() {
         const summary = document.getElementById('bookingSummary');
         if (!summary) return;
@@ -189,13 +128,14 @@ class AppointmentBooking {
             'sinsay': 'Dr. Elli Sinsay'
         };
 
-        const dateStr = this.selectedDate.toLocaleDateString('en-US', { 
+        // Format date nicely
+        const dateObj = new Date(this.bookingData.date);
+        const dateStr = dateObj.toLocaleDateString('en-US', { 
             weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' 
         });
 
-        const timeStr = new Date(`2000-01-01T${this.bookingData.time}`).toLocaleTimeString('en-US', {
-            hour: 'numeric', minute: '2-digit', hour12: true
-        });
+        // Format time nicely
+        const timeStr = this.bookingData.time;
 
         summary.innerHTML = `
             <div class="summary-item"><strong>Service:</strong> <span>${serviceNames[this.bookingData.service]}</span></div>
