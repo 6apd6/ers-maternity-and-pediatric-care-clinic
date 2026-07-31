@@ -38,11 +38,11 @@
         </div>
     </section>
 
-    <section class="portal-section" style="padding: 4rem 2rem; background: white; min-height: 500px;">
-        <div class="container" style="max-width: 500px; margin: 0 auto;">
+    <section class="portal-section" style="padding: 4rem 2rem; background: #f8f9fa; min-height: 600px;">
+        <div class="container" style="max-width: 1200px; margin: 0 auto;">
             
-            <!-- LOGIN FORM -->
-            <div id="loginForm" style="background: white; padding: 3rem; border-radius: 20px; box-shadow: 0 20px 60px rgba(0,0,0,0.1);">
+            <!-- LOGIN FORM (Shown when not logged in) -->
+            <div id="loginForm" style="max-width: 500px; margin: 0 auto; background: white; padding: 3rem; border-radius: 20px; box-shadow: 0 20px 60px rgba(0,0,0,0.1);">
                 <h2 style="font-family: 'Playfair Display', serif; font-size: 2rem; margin-bottom: 0.5rem; text-align: center;">Patient Login</h2>
                 <p style="color: var(--text-light); text-align: center; margin-bottom: 2rem;">Access your medical records securely</p>
                 
@@ -72,16 +72,57 @@
                 </div>
             </div>
 
-            <!-- DASHBOARD (Hidden until logged in) -->
-            <div id="portalDashboard" style="display: none; background: white; padding: 3rem; border-radius: 20px; box-shadow: 0 20px 60px rgba(0,0,0,0.1); text-align: center;">
-                <div style="font-size: 4rem; margin-bottom: 1rem;">🎉</div>
-                <h2 style="font-family: 'Playfair Display', serif; font-size: 2rem; margin-bottom: 1rem;">Login Successful!</h2>
-                <p style="color: var(--text-light); margin-bottom: 2rem;">Welcome to your patient portal.</p>
-                <p style="background: #f0f0f0; padding: 1rem; border-radius: 10px; margin-bottom: 2rem;">Logged in as: <strong id="userEmailDisplay"></strong></p>
-                
-                <button onclick="logout()" style="background: #f44336; color: white; border: none; padding: 1rem 2rem; border-radius: 50px; cursor: pointer; font-weight: 600; font-size: 1rem;">
-                    Logout
-                </button>
+            <!-- DASHBOARD (Shown when logged in) -->
+            <div id="portalDashboard" style="display: none;">
+                <!-- Welcome Header -->
+                <div style="background: white; padding: 2rem; border-radius: 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.08); margin-bottom: 2rem; display: flex; justify-content: space-between; align-items: center;">
+                    <div>
+                        <h2 style="font-family: 'Playfair Display', serif; font-size: 2rem; margin-bottom: 0.5rem;">Welcome Back!</h2>
+                        <p id="userEmail" style="color: var(--text-light);"></p>
+                    </div>
+                    <button onclick="logout()" style="background: #f44336; color: white; border: none; padding: 1rem 2rem; border-radius: 50px; cursor: pointer; font-weight: 600;">
+                        Logout
+                    </button>
+                </div>
+
+                <!-- Stats Cards -->
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 1.5rem; margin-bottom: 2rem;">
+                    <div style="background: white; padding: 2rem; border-radius: 15px; box-shadow: 0 10px 30px rgba(0,0,0,0.05); text-align: center;">
+                        <div style="font-size: 2.5rem; margin-bottom: 0.5rem;">📅</div>
+                        <h3 style="font-size: 2rem; color: var(--primary-color); margin-bottom: 0.5rem;" id="appointmentCount">0</h3>
+                        <p style="color: var(--text-light);">Upcoming Appointments</p>
+                    </div>
+                    <div style="background: white; padding: 2rem; border-radius: 15px; box-shadow: 0 10px 30px rgba(0,0,0,0.05); text-align: center;">
+                        <div style="font-size: 2.5rem; margin-bottom: 0.5rem;">📋</div>
+                        <h3 style="font-size: 2rem; color: var(--primary-color); margin-bottom: 0.5rem;" id="recordsCount">0</h3>
+                        <p style="color: var(--text-light);">Medical Records</p>
+                    </div>
+                    <div style="background: white; padding: 2rem; border-radius: 15px; box-shadow: 0 10px 30px rgba(0,0,0,0.05); text-align: center;">
+                        <div style="font-size: 2.5rem; margin-bottom: 0.5rem;">💊</div>
+                        <h3 style="font-size: 2rem; color: var(--primary-color); margin-bottom: 0.5rem;">Active</h3>
+                        <p style="color: var(--text-light);">Patient Status</p>
+                    </div>
+                </div>
+
+                <!-- Appointments Section -->
+                <div style="background: white; padding: 2rem; border-radius: 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.08); margin-bottom: 2rem;">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
+                        <h3 style="font-family: 'Playfair Display', serif; font-size: 1.5rem;">📅 Upcoming Appointments</h3>
+                        <a href="appointment.html" style="color: var(--primary-color); font-weight: 600; text-decoration: none;">Book New →</a>
+                    </div>
+                    <div id="appointmentsList" style="min-height: 150px;">
+                        <p style="color: var(--text-light); text-align: center; padding: 2rem;">Loading appointments...</p>
+                    </div>
+                </div>
+
+                <!-- Medical Records Section -->
+                <div style="background: white; padding: 2rem; border-radius: 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.08); margin-bottom: 2rem;">
+                    <h3 style="font-family: 'Playfair Display', serif; font-size: 1.5rem; margin-bottom: 1.5rem;"> Medical Records</h3>
+                    <div id="medicalRecordsList" style="min-height: 150px;">
+                        <p style="color: var(--text-light); text-align: center; padding: 2rem;">Loading medical records...</p>
+                    </div>
+                </div>
+
             </div>
 
         </div>
@@ -93,45 +134,37 @@
         </div>
     </footer>
 
-    <!-- Scripts - Load in correct order -->
+    <!-- Scripts -->
     <script src="config.js"></script>
     <script src="main.js"></script>
     <script src="chatbot.js"></script>
     <script src="phone-agent.js"></script>
-    
-    <!-- Load Supabase Library FIRST -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     
-    <!-- Portal Login Logic -->
     <script>
-        // Initialize Supabase Client
         let supabaseClient;
-        
+        let currentUser = null;
+
         window.addEventListener('DOMContentLoaded', async () => {
-            // Make sure config is loaded
             if (typeof window.API_CONFIG === 'undefined') {
                 console.error('API_CONFIG not loaded!');
-                document.getElementById('loginMessage').style.display = 'block';
-                document.getElementById('loginMessage').style.background = '#f8d7da';
-                document.getElementById('loginMessage').style.color = '#721c24';
-                document.getElementById('loginMessage').textContent = 'Configuration error. Please refresh the page.';
                 return;
             }
             
-            // Create Supabase client
             supabaseClient = window.supabase.createClient(
                 window.API_CONFIG.SUPABASE_URL,
                 window.API_CONFIG.SUPABASE_KEY
             );
             
-            // Check if user is already logged in
             const { data: { session } } = await supabaseClient.auth.getSession();
             if (session) {
+                currentUser = session.user;
                 showDashboard(session.user.email);
+                await loadAppointments();
+                await loadMedicalRecords();
             }
         });
 
-        // Handle Login Form
         document.getElementById('loginFormElement').addEventListener('submit', async (e) => {
             e.preventDefault();
             const email = document.getElementById('loginEmail').value;
@@ -151,7 +184,10 @@
                 
                 if (error) throw error;
                 
+                currentUser = data.user;
                 showDashboard(data.user.email);
+                await loadAppointments();
+                await loadMedicalRecords();
                 
             } catch (error) {
                 messageDiv.style.display = 'block';
@@ -163,16 +199,112 @@
             }
         });
 
-        // Show Dashboard
+        async function loadAppointments() {
+            const listDiv = document.getElementById('appointmentsList');
+            const countEl = document.getElementById('appointmentCount');
+            
+            try {
+                const { data, error } = await supabaseClient
+                    .from('appointments')
+                    .select('*')
+                    .eq('user_id', currentUser.id)
+                    .order('appointment_date', { ascending: true });
+                
+                if (error) throw error;
+                
+                countEl.textContent = data.length;
+                
+                if (data.length === 0) {
+                    listDiv.innerHTML = '<p style="color: var(--text-light); text-align: center; padding: 2rem;">No upcoming appointments. <a href="appointment.html" style="color: var(--primary-color);">Book one now!</a></p>';
+                } else {
+                    listDiv.innerHTML = data.map(apt => `
+                        <div style="padding: 1.5rem; background: #f8f9fa; border-radius: 10px; margin-bottom: 1rem; border-left: 4px solid var(--primary-color);">
+                            <div style="display: flex; justify-content: space-between; align-items: start;">
+                                <div style="flex: 1;">
+                                    <h4 style="margin-bottom: 0.5rem; font-family: 'Playfair Display', serif;">${apt.service || 'Appointment'}</h4>
+                                    <p style="color: var(--text-light); margin-bottom: 0.5rem;">
+                                        📅 ${formatDate(apt.appointment_date)} at ${formatTime(apt.appointment_time)}
+                                    </p>
+                                    ${apt.doctor ? `<p style="color: var(--text-light); margin-bottom: 0.5rem;">👨‍⚕️ Dr. ${apt.doctor}</p>` : ''}
+                                    ${apt.notes ? `<p style="color: var(--text-light); font-size: 0.9rem;">📝 ${apt.notes}</p>` : ''}
+                                </div>
+                                <span style="padding: 0.5rem 1rem; background: ${getStatusColor(apt.status)}; color: white; border-radius: 20px; font-size: 0.85rem; font-weight: 600;">
+                                    ${apt.status || 'Pending'}
+                                </span>
+                            </div>
+                        </div>
+                    `).join('');
+                }
+            } catch (error) {
+                console.error('Error loading appointments:', error);
+                listDiv.innerHTML = '<p style="color: #721c24; text-align: center; padding: 2rem;">Error loading appointments</p>';
+            }
+        }
+
+        async function loadMedicalRecords() {
+            const listDiv = document.getElementById('medicalRecordsList');
+            const countEl = document.getElementById('recordsCount');
+            
+            try {
+                const { data, error } = await supabaseClient
+                    .from('medical_records')
+                    .select('*')
+                    .eq('user_id', currentUser.id)
+                    .order('created_at', { ascending: false });
+                
+                if (error) throw error;
+                
+                countEl.textContent = data.length;
+                
+                if (data.length === 0) {
+                    listDiv.innerHTML = '<p style="color: var(--text-light); text-align: center; padding: 2rem;">No medical records available yet.</p>';
+                } else {
+                    listDiv.innerHTML = data.map(record => `
+                        <div style="padding: 1.5rem; background: #f8f9fa; border-radius: 10px; margin-bottom: 1rem; border-left: 4px solid #667eea;">
+                            <h4 style="margin-bottom: 0.5rem; font-family: 'Playfair Display', serif;">${record.diagnosis || 'Medical Record'}</h4>
+                            <p style="color: var(--text-light); margin-bottom: 0.5rem;">📅 ${new Date(record.created_at).toLocaleDateString()}</p>
+                            ${record.treatment ? `<p style="color: var(--text-light); font-size: 0.9rem;">💊 ${record.treatment}</p>` : ''}
+                            ${record.notes ? `<p style="color: var(--text-light); font-size: 0.9rem;">📝 ${record.notes}</p>` : ''}
+                        </div>
+                    `).join('');
+                }
+            } catch (error) {
+                console.error('Error loading records:', error);
+                listDiv.innerHTML = '<p style="color: #721c24; text-align: center; padding: 2rem;">Error loading medical records</p>';
+            }
+        }
+
+        function formatDate(dateStr) {
+            if (!dateStr) return 'N/A';
+            return new Date(dateStr).toLocaleDateString('en-US', { 
+                weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' 
+            });
+        }
+
+        function formatTime(timeStr) {
+            if (!timeStr) return 'N/A';
+            return timeStr;
+        }
+
+        function getStatusColor(status) {
+            const colors = {
+                'pending': '#FF9800',
+                'confirmed': '#4CD964',
+                'completed': '#007AFF',
+                'cancelled': '#f44336'
+            };
+            return colors[status] || '#FF9800';
+        }
+
         function showDashboard(email) {
             document.getElementById('loginForm').style.display = 'none';
             document.getElementById('portalDashboard').style.display = 'block';
-            document.getElementById('userEmailDisplay').textContent = email;
+            document.getElementById('userEmail').textContent = email;
         }
 
-        // Logout
         async function logout() {
             await supabaseClient.auth.signOut();
+            currentUser = null;
             document.getElementById('portalDashboard').style.display = 'none';
             document.getElementById('loginForm').style.display = 'block';
             document.getElementById('loginEmail').value = '';
