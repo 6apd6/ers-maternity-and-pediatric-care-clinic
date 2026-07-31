@@ -1,0 +1,349 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Staff Dashboard | ERS Maternity Clinic</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&family=Playfair+Display:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="main.css">
+</head>
+<body>
+    <nav class="navbar" style="background: #2C3E50;">
+        <div class="nav-container">
+            <div class="logo">
+                <div class="logo-icon" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);">ERS</div>
+                <div class="logo-text">
+                    <h1>Staff Dashboard</h1>
+                    <p>ADMINISTRATION PANEL</p>
+                </div>
+            </div>
+            <ul class="nav-links">
+                <li><a href="index.html">← Back to Website</a></li>
+            </ul>
+        </div>
+    </nav>
+
+    <!-- LOGIN SECTION -->
+    <section id="staffLogin" style="min-height: 100vh; display: flex; align-items: center; justify-content: center; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); padding: 2rem;">
+        <div style="max-width: 500px; width: 100%; background: white; padding: 3rem; border-radius: 20px; box-shadow: 0 20px 60px rgba(0,0,0,0.3);">
+            <div style="text-align: center; margin-bottom: 2rem;">
+                <div style="font-size: 4rem; margin-bottom: 1rem;"></div>
+                <h2 style="font-family: 'Playfair Display', serif; font-size: 2rem; margin-bottom: 0.5rem;">Staff Login</h2>
+                <p style="color: var(--text-light);">Authorized personnel only</p>
+            </div>
+            
+            <div id="loginMessage" style="padding: 1rem; border-radius: 10px; margin-bottom: 1rem; display: none;"></div>
+            
+            <form id="staffLoginForm" style="display: flex; flex-direction: column; gap: 1.5rem;">
+                <div class="form-group">
+                    <label style="display: block; margin-bottom: 0.5rem; font-weight: 500;">Staff Email</label>
+                    <input type="email" id="staffEmail" placeholder="admin@ersmaternity.com" required style="width: 100%; padding: 1rem; border: 2px solid #e0e0e0; border-radius: 10px;">
+                </div>
+                
+                <div class="form-group">
+                    <label style="display: block; margin-bottom: 0.5rem; font-weight: 500;">Password</label>
+                    <input type="password" id="staffPassword" placeholder="••••••••" required style="width: 100%; padding: 1rem; border: 2px solid #e0e0e0; border-radius: 10px;">
+                </div>
+                
+                <button type="submit" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 1rem; border: none; border-radius: 10px; font-weight: 600; cursor: pointer; font-size: 1rem;">
+                    Login to Dashboard
+                </button>
+            </form>
+        </div>
+    </section>
+
+    <!-- DASHBOARD SECTION (Hidden until logged in) -->
+    <section id="staffDashboard" style="display: none; background: #f8f9fa; min-height: 100vh; padding: 2rem;">
+        <div style="max-width: 1400px; margin: 0 auto;">
+            
+            <!-- Welcome Header -->
+            <div style="background: white; padding: 2rem; border-radius: 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.08); margin-bottom: 2rem;">
+                <div style="display: flex; justify-content: space-between; align-items: center;">
+                    <div>
+                        <h2 style="font-family: 'Playfair Display', serif; font-size: 2rem; margin-bottom: 0.5rem;">Welcome, Staff!</h2>
+                        <p id="staffEmailDisplay" style="color: var(--text-light);"></p>
+                    </div>
+                    <button onclick="staffLogout()" style="background: #f44336; color: white; border: none; padding: 1rem 2rem; border-radius: 50px; cursor: pointer; font-weight: 600;">
+                        Logout
+                    </button>
+                </div>
+            </div>
+
+            <!-- Stats Cards -->
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 1.5rem; margin-bottom: 2rem;">
+                <div style="background: white; padding: 2rem; border-radius: 15px; box-shadow: 0 10px 30px rgba(0,0,0,0.05);">
+                    <div style="display: flex; align-items: center; gap: 1rem;">
+                        <div style="font-size: 2.5rem;">📅</div>
+                        <div>
+                            <h3 style="font-size: 2rem; color: var(--primary-color); margin-bottom: 0.5rem;" id="totalAppointments">0</h3>
+                            <p style="color: var(--text-light);">Total Appointments</p>
+                        </div>
+                    </div>
+                </div>
+                <div style="background: white; padding: 2rem; border-radius: 15px; box-shadow: 0 10px 30px rgba(0,0,0,0.05);">
+                    <div style="display: flex; align-items: center; gap: 1rem;">
+                        <div style="font-size: 2.5rem;">📞</div>
+                        <div>
+                            <h3 style="font-size: 2rem; color: var(--primary-color); margin-bottom: 0.5rem;" id="totalCallbacks">0</h3>
+                            <p style="color: var(--text-light);">Pending Callbacks</p>
+                        </div>
+                    </div>
+                </div>
+                <div style="background: white; padding: 2rem; border-radius: 15px; box-shadow: 0 10px 30px rgba(0,0,0,0.05);">
+                    <div style="display: flex; align-items: center; gap: 1rem;">
+                        <div style="font-size: 2.5rem;">👥</div>
+                        <div>
+                            <h3 style="font-size: 2rem; color: var(--primary-color); margin-bottom: 0.5rem;" id="totalPatients">0</h3>
+                            <p style="color: var(--text-light);">Total Patients</p>
+                        </div>
+                    </div>
+                </div>
+                <div style="background: white; padding: 2rem; border-radius: 15px; box-shadow: 0 10px 30px rgba(0,0,0,0.05);">
+                    <div style="display: flex; align-items: center; gap: 1rem;">
+                        <div style="font-size: 2.5rem;">💬</div>
+                        <div>
+                            <h3 style="font-size: 2rem; color: var(--primary-color); margin-bottom: 0.5rem;" id="totalMessages">0</h3>
+                            <p style="color: var(--text-light);">New Messages</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Callbacks Section (Missed Calls) -->
+            <div style="background: white; padding: 2rem; border-radius: 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.08); margin-bottom: 2rem;">
+                <h3 style="font-family: 'Playfair Display', serif; font-size: 1.5rem; margin-bottom: 1.5rem;">📞 Recent Missed Calls</h3>
+                <div id="callbacksList" style="min-height: 200px;">
+                    <p style="color: var(--text-light); text-align: center; padding: 2rem;">Loading callbacks...</p>
+                </div>
+            </div>
+
+            <!-- Appointments Section -->
+            <div style="background: white; padding: 2rem; border-radius: 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.08); margin-bottom: 2rem;">
+                <h3 style="font-family: 'Playfair Display', serif; font-size: 1.5rem; margin-bottom: 1.5rem;">📅 All Appointments</h3>
+                <div id="appointmentsList" style="min-height: 200px;">
+                    <p style="color: var(--text-light); text-align: center; padding: 2rem;">Loading appointments...</p>
+                </div>
+            </div>
+
+        </div>
+    </section>
+
+    <script src="config.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    
+    <script>
+        let supabaseClient;
+        let currentStaff = null;
+
+        window.addEventListener('DOMContentLoaded', async () => {
+            supabaseClient = window.supabase.createClient(
+                window.API_CONFIG.SUPABASE_URL,
+                window.API_CONFIG.SUPABASE_KEY
+            );
+            
+            const { data: { session } } = await supabaseClient.auth.getSession();
+            if (session && session.user.user_metadata.role === 'staff') {
+                currentStaff = session.user;
+                showStaffDashboard(session.user.email);
+                await loadAllData();
+            }
+        });
+
+        document.getElementById('staffLoginForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const email = document.getElementById('staffEmail').value;
+            const password = document.getElementById('staffPassword').value;
+            const messageDiv = document.getElementById('loginMessage');
+            
+            try {
+                const { data, error } = await supabaseClient.auth.signInWithPassword({
+                    email: email,
+                    password: password
+                });
+                
+                if (error) throw error;
+                
+                // Check if user is staff
+                if (data.user.user_metadata.role !== 'staff') {
+                    throw new Error('Access denied. Staff privileges required.');
+                }
+                
+                currentStaff = data.user;
+                showStaffDashboard(data.user.email);
+                await loadAllData();
+                
+            } catch (error) {
+                messageDiv.style.display = 'block';
+                messageDiv.style.background = '#f8d7da';
+                messageDiv.style.color = '#721c24';
+                messageDiv.textContent = 'Login failed: ' + error.message;
+            }
+        });
+
+        function showStaffDashboard(email) {
+            document.getElementById('staffLogin').style.display = 'none';
+            document.getElementById('staffDashboard').style.display = 'block';
+            document.getElementById('staffEmailDisplay').textContent = email;
+        }
+
+        async function loadAllData() {
+            await loadCallbacks();
+            await loadAllAppointments();
+            await loadStats();
+        }
+
+        async function loadCallbacks() {
+            const listDiv = document.getElementById('callbacksList');
+            
+            try {
+                const { data, error } = await supabaseClient
+                    .from('callbacks')
+                    .select('*')
+                    .order('created_at', { ascending: false })
+                    .limit(10);
+                
+                if (error) throw error;
+                
+                document.getElementById('totalCallbacks').textContent = data.length;
+                
+                if (data.length === 0) {
+                    listDiv.innerHTML = '<p style="color: var(--text-light); text-align: center; padding: 2rem;">No pending callbacks</p>';
+                } else {
+                    listDiv.innerHTML = data.map(callback => `
+                        <div style="padding: 1.5rem; background: #f8f9fa; border-radius: 10px; margin-bottom: 1rem; border-left: 4px solid #667eea;">
+                            <div style="display: flex; justify-content: space-between; align-items: start;">
+                                <div style="flex: 1;">
+                                    <h4 style="margin-bottom: 0.5rem; font-family: 'Playfair Display', serif;">
+                                        📞 ${callback.phone} ${getFlagEmoji(callback.language)}
+                                    </h4>
+                                    <p style="color: var(--text-light); margin-bottom: 0.5rem;">
+                                        📅 ${new Date(callback.created_at).toLocaleString()}
+                                    </p>
+                                    ${callback.reason ? `<p style="color: var(--text-light);">💬 "${callback.reason}"</p>` : ''}
+                                    ${callback.preferred_time ? `<p style="color: var(--text-light);">⏰ Prefers: ${callback.preferred_time}</p>` : ''}
+                                </div>
+                                <button onclick="markCallbackDone('${callback.id}')" style="padding: 0.8rem 1.5rem; background: #4CD964; color: white; border: none; border-radius: 50px; cursor: pointer; font-weight: 600;">
+                                    Follow Up
+                                </button>
+                            </div>
+                        </div>
+                    `).join('');
+                }
+            } catch (error) {
+                console.error('Error loading callbacks:', error);
+                listDiv.innerHTML = '<p style="color: #721c24; text-align: center; padding: 2rem;">Error loading callbacks</p>';
+            }
+        }
+
+        async function loadAllAppointments() {
+            const listDiv = document.getElementById('appointmentsList');
+            
+            try {
+                const { data, error } = await supabaseClient
+                    .from('appointments')
+                    .select('*')
+                    .order('appointment_date', { ascending: false })
+                    .limit(20);
+                
+                if (error) throw error;
+                
+                document.getElementById('totalAppointments').textContent = data.length;
+                
+                if (data.length === 0) {
+                    listDiv.innerHTML = '<p style="color: var(--text-light); text-align: center; padding: 2rem;">No appointments yet</p>';
+                } else {
+                    listDiv.innerHTML = data.map(apt => `
+                        <div style="padding: 1.5rem; background: #f8f9fa; border-radius: 10px; margin-bottom: 1rem; border-left: 4px solid var(--primary-color);">
+                            <div style="display: flex; justify-content: space-between; align-items: start;">
+                                <div style="flex: 1;">
+                                    <h4 style="margin-bottom: 0.5rem; font-family: 'Playfair Display', serif;">${apt.service || 'Appointment'}</h4>
+                                    <p style="color: var(--text-light); margin-bottom: 0.5rem;">
+                                        👤 ${apt.patient_name || 'Patient'} | 📞 ${apt.phone || 'N/A'}
+                                    </p>
+                                    <p style="color: var(--text-light); margin-bottom: 0.5rem;">
+                                        📅 ${new Date(apt.appointment_date).toLocaleDateString()} at ${apt.appointment_time}
+                                    </p>
+                                    ${apt.doctor ? `<p style="color: var(--text-light);">‍⚕️ Dr. ${apt.doctor}</p>` : ''}
+                                </div>
+                                <select onchange="updateAppointmentStatus('${apt.id}', this.value)" style="padding: 0.5rem 1rem; border-radius: 20px; border: 2px solid #e0e0e0; font-weight: 600; cursor: pointer;">
+                                    <option value="pending" ${apt.status === 'pending' ? 'selected' : ''}>Pending</option>
+                                    <option value="confirmed" ${apt.status === 'confirmed' ? 'selected' : ''}>Confirmed</option>
+                                    <option value="completed" ${apt.status === 'completed' ? 'selected' : ''}>Completed</option>
+                                    <option value="cancelled" ${apt.status === 'cancelled' ? 'selected' : ''}>Cancelled</option>
+                                </select>
+                            </div>
+                        </div>
+                    `).join('');
+                }
+            } catch (error) {
+                console.error('Error loading appointments:', error);
+                listDiv.innerHTML = '<p style="color: #721c24; text-align: center; padding: 2rem;">Error loading appointments</p>';
+            }
+        }
+
+        async function loadStats() {
+            // Get total patients
+            const { count: patientsCount } = await supabaseClient
+                .from('patients')
+                .select('*', { count: 'exact', head: true });
+            document.getElementById('totalPatients').textContent = patientsCount || 0;
+            
+            // Get total messages (from contact_messages table)
+            const { count: messagesCount } = await supabaseClient
+                .from('contact_messages')
+                .select('*', { count: 'exact', head: true });
+            document.getElementById('totalMessages').textContent = messagesCount || 0;
+        }
+
+        async function updateAppointmentStatus(appointmentId, newStatus) {
+            try {
+                const { error } = await supabaseClient
+                    .from('appointments')
+                    .update({ status: newStatus })
+                    .eq('id', appointmentId);
+                
+                if (error) throw error;
+                alert(`Appointment status updated to ${newStatus}`);
+            } catch (error) {
+                console.error('Error updating status:', error);
+                alert('Failed to update status');
+            }
+        }
+
+        async function markCallbackDone(callbackId) {
+            try {
+                const { error } = await supabaseClient
+                    .from('callbacks')
+                    .update({ status: 'completed' })
+                    .eq('id', callbackId);
+                
+                if (error) throw error;
+                alert('Callback marked as completed!');
+                await loadCallbacks();
+            } catch (error) {
+                console.error('Error updating callback:', error);
+                alert('Failed to update callback');
+            }
+        }
+
+        async function staffLogout() {
+            await supabaseClient.auth.signOut();
+            currentStaff = null;
+            document.getElementById('staffDashboard').style.display = 'none';
+            document.getElementById('staffLogin').style.display = 'flex';
+            document.getElementById('staffEmail').value = '';
+            document.getElementById('staffPassword').value = '';
+        }
+
+        function getFlagEmoji(lang) {
+            const flags = {
+                'tl': '🇵🇭',
+                'ceb': '🇭',
+                'ilo': '🇭',
+                'en': '🇬🇧'
+            };
+            return flags[lang] || '🇵🇭';
+        }
+    </script>
+</body>
+</html>
