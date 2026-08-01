@@ -375,6 +375,10 @@ class MultilingualChatbot {
             this.hideTyping();
             const result = this.getAIResponse(text);
             this.addMessage(result.text, 'bot');
+           // Log the conversation
+if (window.supabaseClient) {
+    logAIInteraction(text, result.text, null, this.detectLanguage(text));
+}
             
             if (!this.hasGreeted || 
                 text.toLowerCase().match(/hello|hi|kumusta|maayong|naimbag/)) {
@@ -411,3 +415,23 @@ class MultilingualChatbot {
 document.addEventListener('DOMContentLoaded', () => {
     window.chatbot = new MultilingualChatbot();
 });
+
+// Function to save conversations to Supabase
+async function logAIInteraction(userMsg, aiMsg, helpful, lang) {
+    try {
+        await window.supabaseClient
+            .from('ai_conversations')
+            .insert([
+                {
+                    user_message: userMsg,
+                    ai_response: aiMsg,
+                    language: lang || 'English',
+                    was_helpful: helpful,
+                    source: 'chatbot'
+                }
+            ]);
+        console.log('Conversation logged successfully');
+    } catch (error) {
+        console.error('Failed to log conversation:', error);
+    }
+}
