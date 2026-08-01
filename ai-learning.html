@@ -53,22 +53,24 @@
     </div>
 
     <script>
-        // Initialize Supabase
-        const supabase = window.supabase.createClient(window.API_CONFIG.SUPABASE_URL, window.API_CONFIG.SUPABASE_KEY);
+    // Use the existing Supabase client from config.js
+    const supabase = window.supabaseClient;
 
-        async function loadDashboard() {
-            // Load stats
-            const { count: convCount } = await supabase.from('ai_conversations').select('*', { count: 'exact', head: true });
-            const { count: impCount } = await supabase.from('ai_conversations').select('*', { count: 'exact', head: true }).eq('needs_improvement', true);
-            const { count: faqCount } = await supabase.from('faq_improvements').select('*', { count: 'exact', head: true }).eq('is_approved', false);
+    async function loadDashboard() {
+        // Load stats
+        const { count: convCount } = await supabase.from('ai_conversations').select('*', { count: 'exact', head: true });
+        const { count: impCount } = await supabase.from('ai_conversations').select('*', { count: 'exact', head: true }).eq('needs_improvement', true);
+        const { count: faqCount } = await supabase.from('faq_improvements').select('*', { count: 'exact', head: true }).eq('is_approved', false);
 
-            document.getElementById('totalConv').textContent = convCount || 0;
-            document.getElementById('needsImp').textContent = impCount || 0;
-            document.getElementById('pendingFaq').textContent = faqCount || 0;
+        document.getElementById('totalConv').textContent = convCount || 0;
+        document.getElementById('needsImp').textContent = impCount || 0;
+        document.getElementById('pendingFaq').textContent = faqCount || 0;
 
-            // Load recent conversations
-            const { data: conversations } = await supabase.from('ai_conversations').select('*').order('created_at', { ascending: false }).limit(20);
-            const convList = document.getElementById('conversationList');
+        // Load recent conversations
+        const { data: conversations } = await supabase.from('ai_conversations').select('*').order('created_at', { ascending: false }).limit(20);
+        const convList = document.getElementById('conversationList');
+        
+        if (conversations && conversations.length > 0) {
             convList.innerHTML = conversations.map(c => `
                 <div style="border-bottom: 1px solid #eee; padding: 1rem 0;">
                     <div style="display: flex; justify-content: space-between; margin-bottom: 0.5rem;">
@@ -80,10 +82,15 @@
                     ${c.was_helpful === false ? '<span style="background: #ffebee; color: #c62828; padding: 2px 8px; border-radius: 4px; font-size: 0.8rem;">Needs Improvement</span>' : ''}
                 </div>
             `).join('');
+        } else {
+            convList.innerHTML = '<p style="color: #7F8C8D; text-align: center; padding: 2rem;">No conversations yet</p>';
+        }
 
-            // Load FAQ suggestions
-            const { data: faqs } = await supabase.from('faq_improvements').select('*').order('created_at', { ascending: false });
-            const faqListEl = document.getElementById('faqList');
+        // Load FAQ suggestions
+        const { data: faqs } = await supabase.from('faq_improvements').select('*').order('created_at', { ascending: false });
+        const faqListEl = document.getElementById('faqList');
+        
+        if (faqs && faqs.length > 0) {
             faqListEl.innerHTML = faqs.map(f => `
                 <div style="border: 1px solid #eee; padding: 1rem; border-radius: 8px; margin-bottom: 1rem;">
                     <h4 style="margin: 0 0 0.5rem;">Q: ${f.question}</h4>
@@ -94,19 +101,22 @@
                     </div>
                 </div>
             `).join('');
+        } else {
+            faqListEl.innerHTML = '<p style="color: #7F8C8D; text-align: center; padding: 2rem;">No pending suggestions</p>';
         }
+    }
 
-        async function approveFaq(id) {
-            const answer = document.getElementById(`answer-${id}`).value;
-            if (!answer) return alert('Please enter an answer first');
-            
-            await supabase.from('faq_improvements').update({ is_approved: true, approved_answer: answer }).eq('id', id);
-            alert('FAQ Approved! The AI will now use this answer.');
-            loadDashboard(); // Refresh
-        }
+    async function approveFaq(id) {
+        const answer = document.getElementById(`answer-${id}`).value;
+        if (!answer) return alert('Please enter an answer first');
+        
+        await supabase.from('faq_improvements').update({ is_approved: true, approved_answer: answer }).eq('id', id);
+        alert('FAQ Approved! The AI will now use this answer.');
+        loadDashboard(); // Refresh
+    }
 
-        // Load on page load
-        loadDashboard();
-    </script>
+    // Load on page load
+    loadDashboard();
+</script>
 </body>
 </html>
