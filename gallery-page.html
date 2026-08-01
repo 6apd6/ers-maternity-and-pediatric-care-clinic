@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gallery | ERS Maternity & Pediatric Care Clinic</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&family=Playfair+Display:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="main.css">
+</head>
+<body>
+    <nav class="navbar">
+        <div class="nav-container">
+            <div class="logo">
+                <div class="logo-icon">ERS</div>
+                <div class="logo-text">
+                    <h1>ERS Maternity</h1>
+                    <p>& PEDIATRIC CARE</p>
+                </div>
+            </div>
+            <ul class="nav-links">
+                <li><a href="index.html">Home</a></li>
+                <li><a href="about.html">About</a></li>
+                <li><a href="services.html">Services</a></li>
+                <li><a href="blog.html">Blog</a></li>
+                <li><a href="appointment.html">Book Appointment</a></li>
+                <li><a href="portal.html">Patient Portal</a></li>
+                <li><a href="index.html#contact">Contact</a></li>
+            </ul>
+            <div class="mobile-menu"><span></span><span></span><span></span></div>
+        </div>
+    </nav>
+
+    <section class="page-header" style="background: linear-gradient(135deg, rgba(233, 30, 99, 0.1) 0%, rgba(255, 111, 0, 0.1) 100%); padding: 8rem 2rem 4rem; text-align: center;">
+        <div class="container">
+            <div class="section-tag">Our Gallery</div>
+            <h1 style="font-family: 'Playfair Display', serif; font-size: 3rem; margin: 1rem 0;">Our Clinic & Happy Families</h1>
+            <p style="font-size: 1.2rem; color: var(--text-light); max-width: 800px; margin: 0 auto;">A glimpse into our warm and caring environment</p>
+        </div>
+    </section>
+
+    <section class="gallery-section" style="padding: 4rem 2rem; background: white;">
+        <div class="container" style="max-width: 1200px; margin: 0 auto;">
+            
+            <!-- Gallery Categories -->
+            <div style="text-align: center; margin-bottom: 3rem;">
+                <button onclick="filterGallery('all')" class="gallery-filter active" style="padding: 0.8rem 2rem; margin: 0 0.5rem; border: 2px solid var(--primary-color); background: var(--primary-color); color: white; border-radius: 50px; cursor: pointer; font-weight: 600;">All Photos</button>
+                <button onclick="filterGallery('clinic')" class="gallery-filter" style="padding: 0.8rem 2rem; margin: 0 0.5rem; border: 2px solid var(--primary-color); background: white; color: var(--primary-color); border-radius: 50px; cursor: pointer; font-weight: 600;">Our Clinic</button>
+                <button onclick="filterGallery('families')" class="gallery-filter" style="padding: 0.8rem 2rem; margin: 0 0.5rem; border: 2px solid var(--primary-color); background: white; color: var(--primary-color); border-radius: 50px; cursor: pointer; font-weight: 600;">Happy Families</button>
+                <button onclick="filterGallery('team')" class="gallery-filter" style="padding: 0.8rem 2rem; margin: 0 0.5rem; border: 2px solid var(--primary-color); background: white; color: var(--primary-color); border-radius: 50px; cursor: pointer; font-weight: 600;">Our Team</button>
+            </div>
+
+            <!-- Gallery Grid -->
+            <div class="gallery-grid" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 2rem;">
+                
+                <!-- Clinic Photos -->
+                <div class="gallery-item clinic" style="position: relative; overflow: hidden; border-radius: 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.1);">
+                    <img src="https://images.unsplash.com/photo-1519494026892-80bbd2d6fd0d?w=600" alt="Reception Area" style="width: 100%; height: 300px; object-fit: cover; display: block;">
+                    <div class="gallery-overlay" style="position: absolute; bottom: 0; left: 0; right: 0; background: linear-gradient(to top, rgba(0,0,0,0.8), transparent); color: white; padding: 2rem 1.5rem 1.5rem;">
+                        <h3 style="margin: 0; font-family: 'Playfair Display', serif;">Welcoming Reception</h3>
+                        <p style="margin: 0.5rem 0 0; font-size: 0.9rem; opacity: 0.9;">A warm and comfortable waiting area</p>
+                    </div>
+                </div>
+
+                <div class="gallery-item clinic" style="position: relative; overflow: hidden; border-radius: 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.1);">
+                    <img src="https://images.unsplash.com/photo-1586773860458-775264641b6a?w=600" alt="Birthing Room" style="width: 100%; height: 300px; object-fit: cover; display: block;">
+                    <div class="gallery-overlay" style="position: absolute; bottom: 0; left: 0; right: 0; background: linear-gradient(to top, rgba(0,0,0,0.8), transparent); color: white; padding: 2rem 1.5rem 1.5rem;">
+                        <h3 style="margin: 0; font-family: 'Playfair Display', serif;">Modern Birthing Rooms</h3>
+                        <p style="margin: 0.5rem 0 0; font-size: 0.9rem; opacity: 0.9;">Safe and comfortable delivery suites</p>
+                    </div>
+                </div>
+
+                <div class="gallery-item clinic" style="position: relative; overflow: hidden; border-radius: 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.1);">
+                    <img src="https://images.unsplash.com/photo-1516574187841-69301976e499?w=600" alt="Pediatric Area" style="width: 100%; height: 300px; object-fit: cover; display: block;">
+                    <div class="gallery-overlay" style="position: absolute; bottom: 0; left: 0; right: 0; background: linear-gradient(to top, rgba(0,0,0,0.8), transparent); color: white; padding: 2rem 1.5rem 1.5rem;">
+                        <h3 style="margin: 0; font-family: 'Playfair Display', serif;">Pediatric Care Area</h3>
+                        <p style="margin: 0.5rem 0 0; font-size: 0.9rem; opacity: 0.9;">Child-friendly examination rooms</p>
+                    </div>
+                </div>
+
+                <div class="gallery-item clinic" style="position: relative; overflow: hidden; border-radius: 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.1);">
+                    <img src="https://images.unsplash.com/photo-1551076805-e181d658798d?w=600" alt="Consultation Room" style="width: 100%; height: 300px; object-fit: cover; display: block;">
+                    <div class="gallery-overlay" style="position: absolute; bottom: 0; left: 0; right: 0; background: linear-gradient(to top, rgba(0,0,0,0.8), transparent); color: white; padding: 2rem 1.5rem 1.5rem;">
+                        <h3 style="margin: 0; font-family: 'Playfair Display', serif;">Private Consultation Rooms</h3>
+                        <p style="margin: 0.5rem 0 0; font-size: 0.9rem; opacity: 0.9;">Confidential and comfortable</p>
+                    </div>
+                </div>
+
+                <!-- Happy Families -->
+                <div class="gallery-item families" style="position: relative; overflow: hidden; border-radius: 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.1);">
+                    <img src="https://images.unsplash.com/photo-1555252333-9f8e95e1bb6f?w=600" alt="Newborn Baby" style="width: 100%; height: 300px; object-fit: cover; display: block;">
+                    <div class="gallery-overlay" style="position: absolute; bottom: 0; left: 0; right: 0; background: linear-gradient(to top, rgba(0,0,0,0.8), transparent); color: white; padding: 2rem 1.5rem 1.5rem;">
+                        <h3 style="margin: 0; font-family: 'Playfair Display', serif;">Precious New Beginnings</h3>
+                        <p style="margin: 0.5rem 0 0; font-size: 0.9rem; opacity: 0.9;">Welcome to the world, little ones!</p>
+                    </div>
+                </div>
+
+                <div class="gallery-item families" style="position: relative; overflow: hidden; border-radius: 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.1);">
+                    <img src="https://images.unsplash.com/photo-1519689680256-35d56e8a9dca?w=600" alt="Mother and Baby" style="width: 100%; height: 300px; object-fit: cover; display: block;">
+                    <div class="gallery-overlay" style="position: absolute; bottom: 0; left: 0; right: 0; background: linear-gradient(to top, rgba(0,0,0,0.8), transparent); color: white; padding: 2rem 1.5rem 1.5rem;">
+                        <h3 style="margin: 0; font-family: 'Playfair Display', serif;">Mother's Love</h3>
+                        <p style="margin: 0.5rem 0 0; font-size: 0.9rem; opacity: 0.9;">Cherishing every precious moment</p>
+                    </div>
+                </div>
+
+                <div class="gallery-item families" style="position: relative; overflow: hidden; border-radius: 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.1);">
+                    <img src="https://images.unsplash.com/photo-1544779493-aa27a26f71a6?w=600" alt="Happy Family" style="width: 100%; height: 300px; object-fit: cover; display: block;">
+                    <div class="gallery-overlay" style="position: absolute; bottom: 0; left: 0; right: 0; background: linear-gradient(to top, rgba(0,0,0,0.8), transparent); color: white; padding: 2rem 1.5rem 1.5rem;">
+                        <h3 style="margin: 0; font-family: 'Playfair Display', serif;">Growing Families</h3>
+                        <p style="margin: 0.5rem 0 0; font-size: 0.9rem; opacity: 0.9;">Complete and blessed</p>
+                    </div>
+                </div>
+
+                <div class="gallery-item families" style="position: relative; overflow: hidden; border-radius: 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.1);">
+                    <img src="https://images.unsplash.com/photo-1485546784815-e7ad8f45e647?w=600" alt="Baby Checkup" style="width: 100%; height: 300px; object-fit: cover; display: block;">
+                    <div class="gallery-overlay" style="position: absolute; bottom: 0; left: 0; right: 0; background: linear-gradient(to top, rgba(0,0,0,0.8), transparent); color: white; padding: 2rem 1.5rem 1.5rem;">
+                        <h3 style="margin: 0; font-family: 'Playfair Display', serif;">Healthy Checkups</h3>
+                        <p style="margin: 0.5rem 0 0; font-size: 0.9rem; opacity: 0.9;">Caring for your little ones</p>
+                    </div>
+                </div>
+
+                <!-- Team Photos -->
+                <div class="gallery-item team" style="position: relative; overflow: hidden; border-radius: 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.1);">
+                    <img src="https://images.unsplash.com/photo-1551076805-e181d658798d?w=600" alt="Medical Team" style="width: 100%; height: 300px; object-fit: cover; display: block;">
+                    <div class="gallery-overlay" style="position: absolute; bottom: 0; left: 0; right: 0; background: linear-gradient(to top, rgba(0,0,0,0.8), transparent); color: white; padding: 2rem 1.5rem 1.5rem;">
+                        <h3 style="margin: 0; font-family: 'Playfair Display', serif;">Our Dedicated Team</h3>
+                        <p style="margin: 0.5rem 0 0; font-size: 0.9rem; opacity: 0.9;">Compassionate care professionals</p>
+                    </div>
+                </div>
+
+                <div class="gallery-item team" style="position: relative; overflow: hidden; border-radius: 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.1);">
+                    <img src="https://images.unsplash.com/photo-1612349317150-e413f6a5b16d?w=600" alt="Doctor Consultation" style="width: 100%; height: 300px; object-fit: cover; display: block;">
+                    <div class="gallery-overlay" style="position: absolute; bottom: 0; left: 0; right: 0; background: linear-gradient(to top, rgba(0,0,0,0.8), transparent); color: white; padding: 2rem 1.5rem 1.5rem;">
+                        <h3 style="margin: 0; font-family: 'Playfair Display', serif;">Expert Care</h3>
+                        <p style="margin: 0.5rem 0 0; font-size: 0.9rem; opacity: 0.9;">Experienced OB-GYN specialists</p>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </section>
+
+    <footer style="background: var(--text-dark); color: white; padding: 4rem 2rem 2rem;">
+        <div style="max-width: 1200px; margin: 0 auto; text-align: center;">
+            <p>&copy; 2026 ERS Maternity & Pediatric Care Clinic. All rights reserved.</p>
+        </div>
+    </footer>
+
+    <script src="main.js"></script>
+    <script>
+        function filterGallery(category) {
+            const items = document.querySelectorAll('.gallery-item');
+            const buttons = document.querySelectorAll('.gallery-filter');
+            
+            // Update active button
+            buttons.forEach(btn => {
+                btn.classList.remove('active');
+                if (btn.textContent.toLowerCase().includes(category) || (category === 'all' && btn.textContent === 'All Photos')) {
+                    btn.classList.add('active');
+                }
+            });
+            
+            // Filter items
+            items.forEach(item => {
+                if (category === 'all' || item.classList.contains(category)) {
+                    item.style.display = 'block';
+                } else {
+                    item.style.display = 'none';
+                }
+            });
+        }
+    </script>
+</body>
+</html>
