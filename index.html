@@ -444,5 +444,18 @@
 <script src="appointment.js"></script>
 
 <script src="config.js"></script>
+    <!-- Initialize Supabase for Chatbot Logging -->
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="config.js"></script>
+<script>
+    // This makes the database connection available to chatbot.js
+    if (window.API_CONFIG && window.supabase) {
+        window.supabaseClient = window.supabase.createClient(
+            window.API_CONFIG.SUPABASE_URL, 
+            window.API_CONFIG.SUPABASE_KEY
+        );
+        console.log("Database connected for AI logging!");
+    }
+</script>
 </body>
 </html>
