@@ -50,13 +50,26 @@
 
     </div>
 
-    <!-- Load config.js first (contains Supabase setup) -->
+    <!-- 1. Load Supabase library -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    
+    <!-- 2. Load config.js (contains your API keys) -->
     <script src="config.js"></script>
     
+    <!-- 3. Create the Supabase client so the dashboard can talk to the database -->
     <script>
-        // Wait for config to load
+        if (window.API_CONFIG && window.supabase) {
+            window.supabaseClient = window.supabase.createClient(
+                window.API_CONFIG.SUPABASE_URL,
+                window.API_CONFIG.SUPABASE_KEY
+            );
+            console.log('Supabase client created for dashboard!');
+        }
+    </script>
+    
+    <!-- 4. The main dashboard loading logic -->
+    <script>
         setTimeout(async function() {
-            // Use the existing Supabase client
             const supabase = window.supabaseClient;
             
             if (!supabase) {
@@ -79,12 +92,7 @@
             // Load recent conversations
             const { data: conversations, error: convError } = await supabase.from('ai_conversations').select('*').order('created_at', { ascending: false }).limit(20);
             
-            if (convError) {
-                console.error('Error loading conversations:', convError);
-            }
-
             const convList = document.getElementById('conversationList');
-            
             if (conversations && conversations.length > 0) {
                 convList.innerHTML = conversations.map(c => `
                     <div style="border-bottom: 1px solid #eee; padding: 1rem 0;">
@@ -103,11 +111,6 @@
 
             // Load FAQ suggestions
             const { data: faqs, error: faqError } = await supabase.from('faq_improvements').select('*').order('created_at', { ascending: false });
-            
-            if (faqError) {
-                console.error('Error loading FAQs:', faqError);
-            }
-
             const faqListEl = document.getElementById('faqList');
             
             if (faqs && faqs.length > 0) {
@@ -126,7 +129,6 @@
             }
 
             console.log('Dashboard loaded successfully!');
-
         }, 500);
 
         // Approve FAQ function
