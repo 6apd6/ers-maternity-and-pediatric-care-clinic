@@ -360,11 +360,19 @@ class MultilingualChatbot {
         if (indicator) indicator.classList.remove('active');
     }
 
-      getAIResponse(input) {
+    async getAIResponse(input) {
         const lower = input.toLowerCase();
         const lang = this.detectLanguage(input);
 
-        // First, check local knowledge base
+        // FIRST: Check the database for approved FAQs (highest priority)
+        if (window.supabaseClient) {
+            const dbAnswer = await this.getApprovedAnswer(input);
+            if (dbAnswer) {
+                return { text: dbAnswer, lang };
+            }
+        }
+
+        // SECOND: Check local knowledge base
         for (const [category, keywords] of Object.entries(this.knowledgeBase)) {
             const allKeywords = Object.values(keywords).flat();
             if (allKeywords.some(kw => lower.includes(kw))) {
@@ -372,59 +380,63 @@ class MultilingualChatbot {
             }
         }
 
-        // If no local match, check the database for approved FAQs
-        if (window.supabaseClient) {
-            this.checkDatabaseForAnswer(input, lang);
-        }
-
-        // Return fallback for now (database check will update if found)
+        // THIRD: Return fallback
         return { text: this.responses.fallback[lang], lang };
     }
 
-    async checkDatabaseForAnswer(input, lang) {
+    async getApprovedAnswer(input) {
         try {
             const supabase = window.supabaseClient;
+            const lowerInput = input.toLowerCase();
             
             // Get all approved FAQs
-            const { data: approvedFaqs } = await supabase
+            const { data: approvedFaqs, error } = await supabase
                 .from('faq_improvements')
-                .select('*')
+                .select('question, approved_answer')
                 .eq('is_approved', true);
             
-            if (approvedFaqs && approvedFaqs.length > 0) {
-                // Check if any approved FAQ matches the user's question
-                const lowerInput = input.toLowerCase();
-                const match = approvedFaqs.find(faq => 
-                    lowerInput.includes(faq.question.toLowerCase()) || 
-                    faq.question.toLowerCase().includes(lowerInput)
+            if (error) {
+                console.error('Error fetching FAQs:', error);
+                return null;
+            }
+            
+            if (!approvedFaqs || approvedFaqs.length === 0) {
+                return null;
+            }
+
+            console.log('Checking', approvedFaqs.length, 'approved FAQs for:', input);
+
+            // Try to find a match - check each approved FAQ
+            for (const faq of approvedFaqs) {
+                const faqQuestion = faq.question.toLowerCase();
+                
+                // Match if:
+                // 1. User's question contains the FAQ question keywords
+                // 2. OR FAQ question contains user's question keywords
+                // 3. OR they share important words (like "nsd", "price", "magkano")
+                
+                const faqWords = faqQuestion.split(' ');
+                const inputWords = lowerInput.split(' ');
+                
+                // Check for keyword overlap
+                const commonWords = faqWords.filter(word => 
+                    inputWords.includes(word) && word.length > 2
                 );
                 
-                if (match && match.approved_answer) {
-                    // Display the approved answer in the chat
-                    const messagesDiv = document.getElementById('chatbotMessages');
-                    const lastMessage = messagesDiv.lastElementChild;
-                    
-                    // Replace the fallback message with the correct answer
-                    if (lastMessage && lastMessage.classList.contains('message-bot')) {
-                        lastMessage.innerHTML = match.approved_answer.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>').replace(/\n/g, '<br>');
-                        
-                        // Update the conversation log with the correct answer
-                        const convId = lastMessage.dataset.conversationId;
-                        if (convId) {
-                            await supabase
-                                .from('ai_conversations')
-                                .update({ ai_response: match.approved_answer })
-                                .eq('id', convId);
-                        }
-                    }
+                if (commonWords.length > 0 || lowerInput.includes(faqQuestion) || faqQuestion.includes(lowerInput)) {
+                    console.log('✅ Found match:', faq.question, '->', faq.approved_answer);
+                    return faq.approved_answer;
                 }
             }
+            
+            console.log('No approved FAQ match found');
+            return null;
         } catch (error) {
-            console.error('Error checking database for answer:', error);
+            console.error('Error in getApprovedAnswer:', error);
+            return null;
         }
     }
-
-    processUserMessage(text) {
+        async processUserMessage(text) {
         if (!text || !text.trim()) return;
         
         const input = document.getElementById('chatbotInput');
@@ -432,24 +444,23 @@ class MultilingualChatbot {
         input.value = '';
         this.showTyping();
         
-        setTimeout(() => {
+        setTimeout(async () => {
             this.hideTyping();
-            const result = this.getAIResponse(text);
+            const result = await this.getAIResponse(text); 
             this.addMessage(result.text, 'bot');
-// Log the conversation and store the ID (Safe Version)
-if (window.supabaseClient) {
-    logAIInteraction(text, result.text, null, this.detectLanguage(text)).then(id => {
-        if (id) {
-            const lastMessage = document.getElementById('chatbotMessages').lastElementChild;
-            if (lastMessage) {
-                lastMessage.dataset.conversationId = id;
-            }
-        }
-    });
-}
             
-            if (!this.hasGreeted || 
-                text.toLowerCase().match(/hello|hi|kumusta|maayong|naimbag/)) {
+            // Log the conversation
+            if (window.supabaseClient) {
+                const conversationId = await logAIInteraction(text, result.text, null, this.detectLanguage(text));
+                if (conversationId) {
+                    const lastMessage = document.getElementById('chatbotMessages').lastElementChild;
+                    if (lastMessage) {
+                        lastMessage.dataset.conversationId = conversationId;
+                    }
+                }
+            }
+            
+            if (!this.hasGreeted || text.toLowerCase().match(/hello|hi|kumusta|maayong|naimbag/)) {
                 this.addQuickReplies();
             }
         }, 1000 + Math.random() * 500);
