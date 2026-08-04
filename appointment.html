@@ -32,12 +32,24 @@
         .success-message { text-align: center; padding: 2rem; }
         .success-message h2 { color: #00b894; font-size: 2rem; margin: 0 0 1rem 0; }
         .success-message p { color: #636e72; font-size: 1.1rem; }
-        .error-message { background: #ffe6e6; color: #d63031; padding: 1rem; border-radius: 8px; margin-bottom: 1rem; display: none; text-align: center; }
+        .error-message { background: #ffe6e6; color: #d63031; padding: 1rem; border-radius: 8px; margin-bottom: 1rem; display: none; text-align: center; font-weight: 500; }
         .error-message.show { display: block; }
+        .loading-overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.5); display: none; align-items: center; justify-content: center; z-index: 9999; }
+        .loading-overlay.show { display: flex; }
+        .loading-spinner { background: white; padding: 2rem; border-radius: 12px; text-align: center; }
+        .loading-spinner h3 { margin: 0 0 1rem 0; color: #2d3436; }
         @media (max-width: 600px) { .form-row { grid-template-columns: 1fr; } .form-container { padding: 2rem 1rem; } }
     </style>
 </head>
 <body>
+
+    <!-- Loading Overlay -->
+    <div id="loadingOverlay" class="loading-overlay">
+        <div class="loading-spinner">
+            <h3>⏳ Processing...</h3>
+            <p>Please wait while we save your appointment</p>
+        </div>
+    </div>
 
     <!-- Navigation -->
     <nav class="navbar" style="background: white; padding: 1rem 2rem; box-shadow: 0 2px 10px rgba(0,0,0,0.05);">
@@ -191,9 +203,11 @@
                     </div>
                 </div>
 
+                <div id="confirmError" class="error-message"></div>
+
                 <div style="display: flex; gap: 1rem;">
                     <button onclick="backToForm()" class="btn btn-secondary" style="flex: 1;">← Back</button>
-                    <button onclick="confirmBooking(event)" class="btn btn-primary" style="flex: 1;">✓ Confirm Booking</button>
+                    <button onclick="confirmBooking()" class="btn btn-primary" id="confirmBtn" style="flex: 1;">✓ Confirm Booking</button>
                 </div>
             </div>
 
@@ -216,12 +230,17 @@
     
     <script>
         // Initialize Supabase
+        let supabaseClient = null;
+        
         if (window.API_CONFIG && window.supabase) {
-            window.supabaseClient = window.supabase.createClient(
+            supabaseClient = window.supabase.createClient(
                 window.API_CONFIG.SUPABASE_URL,
                 window.API_CONFIG.SUPABASE_KEY
             );
-            console.log('✅ Supabase connected');
+            console.log('✅ Supabase client created');
+            console.log('URL:', window.API_CONFIG.SUPABASE_URL);
+        } else {
+            console.error('❌ Supabase not configured! Check config.js');
         }
 
         // Set minimum date to today
@@ -231,6 +250,8 @@
         }
 
         function showReview() {
+            console.log(' showReview called');
+            
             // Get form values
             const service = document.getElementById('service');
             const doctor = document.getElementById('doctor');
@@ -258,22 +279,48 @@
             // Show review section
             document.getElementById('bookingForm').style.display = 'none';
             document.getElementById('reviewSection').classList.add('active');
+            document.getElementById('errorMessage').classList.remove('show');
+            document.getElementById('confirmError').classList.remove('show');
             window.scrollTo(0, 0);
+            
+            console.log('✅ Review section displayed');
         }
 
         function backToForm() {
+            console.log('⬅️ Back to form');
             document.getElementById('bookingForm').style.display = 'block';
             document.getElementById('reviewSection').classList.remove('active');
+            document.getElementById('errorMessage').classList.remove('show');
+            document.getElementById('confirmError').classList.remove('show');
             window.scrollTo(0, 0);
         }
 
-        // FIXED: Added 'event' parameter here
-        async function confirmBooking(event) {
-            const submitBtn = event.target;
-            submitBtn.disabled = true;
-            submitBtn.textContent = 'Processing...';
-
+        async function confirmBooking() {
+            console.log(' Confirm Booking clicked');
+            
+            const confirmBtn = document.getElementById('confirmBtn');
+            const errorDiv = document.getElementById('confirmError');
+            const loadingOverlay = document.getElementById('loadingOverlay');
+            
+            // Reset error
+            errorDiv.classList.remove('show');
+            errorDiv.textContent = '';
+            
+            // Check Supabase
+            if (!supabaseClient) {
+                console.error(' Supabase client not initialized');
+                errorDiv.textContent = 'Database connection error. Please refresh the page.';
+                errorDiv.classList.add('show');
+                return;
+            }
+            
+            // Disable button and show loading
+            confirmBtn.disabled = true;
+            confirmBtn.textContent = 'Processing...';
+            loadingOverlay.classList.add('show');
+            
             try {
+                // Collect form data
                 const appointmentData = {
                     patient_name: document.getElementById('patientName').value,
                     phone: document.getElementById('phone').value,
@@ -288,33 +335,42 @@
                     created_at: new Date().toISOString()
                 };
 
-                console.log('Saving appointment:', appointmentData);
+                console.log('📤 Sending to database:', appointmentData);
 
-                const supabase = window.supabaseClient;
-                const { data, error } = await supabase
+                // Insert into database
+                const { data, error } = await supabaseClient
                     .from('appointments')
                     .insert([appointmentData])
                     .select();
 
                 if (error) {
-                    throw error;
+                    console.error('❌ Database error:', error);
+                    throw new Error('Database error: ' + error.message);
                 }
 
-                console.log('✅ Appointment saved:', data);
+                console.log('✅ Appointment saved successfully:', data);
 
                 // Show success
+                loadingOverlay.classList.remove('show');
                 document.getElementById('reviewSection').classList.remove('active');
                 document.getElementById('successSection').classList.add('active');
                 window.scrollTo(0, 0);
 
             } catch (error) {
-                console.error('Error saving appointment:', error);
-                document.getElementById('errorMessage').textContent = 'Error: ' + error.message;
-                document.getElementById('errorMessage').classList.add('show');
-                submitBtn.disabled = false;
-                submitBtn.textContent = '✓ Confirm Booking';
+                console.error('❌ Error in confirmBooking:', error);
+                
+                loadingOverlay.classList.remove('show');
+                errorDiv.textContent = 'Error: ' + error.message + '. Please try again or contact us directly.';
+                errorDiv.classList.add('show');
+                
+                confirmBtn.disabled = false;
+                confirmBtn.textContent = '✓ Confirm Booking';
+                
+                window.scrollTo(0, 0);
             }
         }
+        
+        console.log(' Page loaded, Supabase ready:', !!supabaseClient);
     </script>
 </body>
 </html>
