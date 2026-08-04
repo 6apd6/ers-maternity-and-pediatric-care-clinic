@@ -3,347 +3,407 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Staff Dashboard | ERS Maternity Clinic</title>
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&family=Playfair+Display:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <title>Staff Dashboard | ERS Maternity</title>
     <link rel="stylesheet" href="main.css">
+    <style>
+        body { font-family: 'Poppins', sans-serif; background: #f4f6f9; margin: 0; }
+        .top-nav { background: #2C3E50; color: white; padding: 1rem 2rem; display: flex; justify-content: space-between; align-items: center; position: fixed; top: 0; left: 0; right: 0; z-index: 1000; }
+        .top-nav h2 { margin: 0; font-size: 1.5rem; }
+        .top-nav a { color: white; text-decoration: none; font-size: 0.9rem; margin-left: 20px; }
+        .top-nav a:hover { text-decoration: underline; }
+        
+        .main-content { padding: 100px 2rem 2rem 2rem; max-width: 1400px; margin: 0 auto; }
+        
+        /* Stats Grid */
+        .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 1.5rem; margin-bottom: 2rem; }
+        .stat-card { background: white; padding: 1.5rem; border-radius: 12px; box-shadow: 0 2px 10px rgba(0,0,0,0.05); display: flex; align-items: center; gap: 1rem; }
+        .stat-icon { font-size: 2.5rem; }
+        .stat-info h3 { margin: 0; color: #7F8C8D; font-size: 0.9rem; text-transform: uppercase; }
+        .stat-info p { font-size: 2rem; font-weight: bold; margin: 0.25rem 0 0; color: #2C3E50; }
+        
+        /* Section Cards */
+        .section-card { background: white; padding: 2rem; border-radius: 12px; box-shadow: 0 2px 10px rgba(0,0,0,0.05); margin-bottom: 2rem; }
+        .section-card h2 { margin-top: 0; color: #2C3E50; display: flex; align-items: center; gap: 0.5rem; }
+        
+        /* Toolbar */
+        .toolbar { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem; padding-bottom: 1rem; border-bottom: 1px solid #eee; flex-wrap: wrap; gap: 10px; }
+        .btn { border: none; padding: 8px 16px; border-radius: 4px; cursor: pointer; font-size: 0.9rem; color: white; font-weight: 500; }
+        .btn-danger { background: #e74c3c; }
+        .btn-danger:hover { background: #c0392b; }
+        .btn-primary { background: #3498db; }
+        .btn-success { background: #27ae60; }
+        .btn-warning { background: #f39c12; }
+        .btn-secondary { background: #95a5a6; }
+        
+        /* Tables */
+        .data-table { width: 100%; border-collapse: collapse; }
+        .data-table th, .data-table td { padding: 12px; text-align: left; border-bottom: 1px solid #eee; }
+        .data-table th { background: #f8f9fa; color: #7F8C8D; font-weight: 600; font-size: 0.85rem; text-transform: uppercase; }
+        .data-table tr:hover { background: #fafafa; }
+        .data-table input[type="checkbox"] { transform: scale(1.2); cursor: pointer; }
+        
+        /* Status Badges */
+        .status-badge { padding: 4px 12px; border-radius: 12px; font-size: 0.75rem; font-weight: bold; display: inline-block; }
+        .status-pending { background: #fff3cd; color: #856404; }
+        .status-confirmed { background: #d1ecf1; color: #0c5460; }
+        .status-completed { background: #d4edda; color: #155724; }
+        .status-cancelled { background: #f8d7da; color: #721c24; }
+        
+        /* Status Dropdown */
+        .status-select { padding: 6px 12px; border: 1px solid #ddd; border-radius: 4px; background: white; cursor: pointer; font-size: 0.9rem; }
+        
+        /* Appointment Item */
+        .appointment-item { background: #f8f9fa; padding: 1rem; border-radius: 8px; margin-bottom: 1rem; border-left: 4px solid #e74c3c; }
+        .appointment-item.confirmed { border-left-color: #3498db; }
+        .appointment-item.completed { border-left-color: #27ae60; }
+        .appointment-item.cancelled { border-left-color: #95a5a6; }
+        
+        .appointment-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem; }
+        .appointment-type { font-weight: bold; color: #2C3E50; font-size: 1.1rem; }
+        .appointment-meta { display: flex; gap: 1rem; color: #7F8C8D; font-size: 0.9rem; margin: 0.5rem 0; }
+        .appointment-meta span { display: flex; align-items: center; gap: 0.25rem; }
+        
+        .login-container { max-width: 400px; margin: 100px auto; padding: 2rem; }
+        .form-group { margin-bottom: 1.5rem; }
+        .form-group label { display: block; margin-bottom: 0.5rem; font-weight: 500; }
+        .form-group input { width: 100%; padding: 1rem; border: 2px solid #e0e0e0; border-radius: 10px; font-size: 1rem; }
+        .form-group input:focus { outline: none; border-color: #667eea; }
+        .btn-login { width: 100%; padding: 1rem; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; border: none; border-radius: 10px; font-size: 1rem; font-weight: 600; cursor: pointer; }
+        
+        .hidden { display: none !important; }
+    </style>
 </head>
 <body>
-    <nav class="navbar" style="background: #2C3E50;">
-        <div class="nav-container">
-            <div class="logo">
-                <div class="logo-icon" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);">ERS</div>
-                <div class="logo-text">
-                    <h1>Staff Dashboard</h1>
-                    <p>ADMINISTRATION PANEL</p>
-                </div>
+
+    <!-- Top Navigation -->
+    <div class="top-nav">
+        <div style="display: flex; align-items: center; gap: 1rem;">
+            <div style="background: #9b59b6; width: 40px; height: 40px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: bold;">ERS</div>
+            <div>
+                <h2 style="margin: 0; font-size: 1.3rem;">Staff Dashboard</h2>
+                <p style="margin: 0; font-size: 0.8rem; opacity: 0.8;">ADMINISTRATION PANEL</p>
             </div>
-            <ul class="nav-links">
-                <li><a href="index.html">← Back to Website</a></li>
-                <li><a href="ai-learning.html" style="color: white; text-decoration: none;">🤖 AI Learning Dashboard</a></li>
-            </ul>
         </div>
-    </nav>
-
-    <!-- LOGIN SECTION -->
-    <section id="staffLogin" style="min-height: 100vh; display: flex; align-items: center; justify-content: center; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); padding: 2rem;">
-        <div style="max-width: 500px; width: 100%; background: white; padding: 3rem; border-radius: 20px; box-shadow: 0 20px 60px rgba(0,0,0,0.3);">
-            <div style="text-align: center; margin-bottom: 2rem;">
-                <div style="font-size: 4rem; margin-bottom: 1rem;"></div>
-                <h2 style="font-family: 'Playfair Display', serif; font-size: 2rem; margin-bottom: 0.5rem;">Staff Login</h2>
-                <p style="color: var(--text-light);">Authorized personnel only</p>
-            </div>
-            
-            <div id="loginMessage" style="padding: 1rem; border-radius: 10px; margin-bottom: 1rem; display: none;"></div>
-            
-            <form id="staffLoginForm" style="display: flex; flex-direction: column; gap: 1.5rem;">
-                <div class="form-group">
-                    <label style="display: block; margin-bottom: 0.5rem; font-weight: 500;">Staff Email</label>
-                    <input type="email" id="staffEmail" placeholder="admin@ersmaternity.com" required style="width: 100%; padding: 1rem; border: 2px solid #e0e0e0; border-radius: 10px;">
-                </div>
-                
-                <div class="form-group">
-                    <label style="display: block; margin-bottom: 0.5rem; font-weight: 500;">Password</label>
-                    <input type="password" id="staffPassword" placeholder="••••••••" required style="width: 100%; padding: 1rem; border: 2px solid #e0e0e0; border-radius: 10px;">
-                </div>
-                
-                <button type="submit" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 1rem; border: none; border-radius: 10px; font-weight: 600; cursor: pointer; font-size: 1rem;">
-                    Login to Dashboard
-                </button>
-            </form>
+        <div>
+            <a href="ai-learning.html">🤖 AI Learning Dashboard</a>
+            <button onclick="staffLogout()" class="btn btn-danger" style="margin-left: 20px;">Logout</button>
         </div>
-    </section>
+    </div>
 
-    <!-- DASHBOARD SECTION (Hidden until logged in) -->
-    <section id="staffDashboard" style="display: none; background: #f8f9fa; min-height: 100vh; padding: 2rem;">
-        <div style="max-width: 1400px; margin: 0 auto;">
-            
-            <!-- Welcome Header -->
-            <div style="background: white; padding: 2rem; border-radius: 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.08); margin-bottom: 2rem;">
-                <div style="display: flex; justify-content: space-between; align-items: center;">
-                    <div>
-                        <h2 style="font-family: 'Playfair Display', serif; font-size: 2rem; margin-bottom: 0.5rem;">Welcome, Staff!</h2>
-                        <p id="staffEmailDisplay" style="color: var(--text-light);"></p>
-                    </div>
-                    <button onclick="staffLogout()" style="background: #f44336; color: white; border: none; padding: 1rem 2rem; border-radius: 50px; cursor: pointer; font-weight: 600;">
-                        Logout
-                    </button>
-                </div>
-            </div>
-
-            <!-- Stats Cards -->
-            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 1.5rem; margin-bottom: 2rem;">
-                <div style="background: white; padding: 2rem; border-radius: 15px; box-shadow: 0 10px 30px rgba(0,0,0,0.05);">
-                    <div style="display: flex; align-items: center; gap: 1rem;">
-                        <div style="font-size: 2.5rem;">📅</div>
-                        <div>
-                            <h3 style="font-size: 2rem; color: var(--primary-color); margin-bottom: 0.5rem;" id="totalAppointments">0</h3>
-                            <p style="color: var(--text-light);">Total Appointments</p>
-                        </div>
-                    </div>
-                </div>
-                <div style="background: white; padding: 2rem; border-radius: 15px; box-shadow: 0 10px 30px rgba(0,0,0,0.05);">
-                    <div style="display: flex; align-items: center; gap: 1rem;">
-                        <div style="font-size: 2.5rem;">📞</div>
-                        <div>
-                            <h3 style="font-size: 2rem; color: var(--primary-color); margin-bottom: 0.5rem;" id="totalCallbacks">0</h3>
-                            <p style="color: var(--text-light);">Pending Callbacks</p>
-                        </div>
-                    </div>
-                </div>
-                <div style="background: white; padding: 2rem; border-radius: 15px; box-shadow: 0 10px 30px rgba(0,0,0,0.05);">
-                    <div style="display: flex; align-items: center; gap: 1rem;">
-                        <div style="font-size: 2.5rem;">👥</div>
-                        <div>
-                            <h3 style="font-size: 2rem; color: var(--primary-color); margin-bottom: 0.5rem;" id="totalPatients">0</h3>
-                            <p style="color: var(--text-light);">Total Patients</p>
-                        </div>
-                    </div>
-                </div>
-                <div style="background: white; padding: 2rem; border-radius: 15px; box-shadow: 0 10px 30px rgba(0,0,0,0.05);">
-                    <div style="display: flex; align-items: center; gap: 1rem;">
-                        <div style="font-size: 2.5rem;">💬</div>
-                        <div>
-                            <h3 style="font-size: 2rem; color: var(--primary-color); margin-bottom: 0.5rem;" id="totalMessages">0</h3>
-                            <p style="color: var(--text-light);">New Messages</p>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Callbacks Section (Missed Calls) -->
-            <div style="background: white; padding: 2rem; border-radius: 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.08); margin-bottom: 2rem;">
-                <h3 style="font-family: 'Playfair Display', serif; font-size: 1.5rem; margin-bottom: 1.5rem;">📞 Recent Missed Calls</h3>
-                <div id="callbacksList" style="min-height: 200px;">
-                    <p style="color: var(--text-light); text-align: center; padding: 2rem;">Loading callbacks...</p>
-                </div>
-            </div>
-
-            <!-- Appointments Section -->
-            <div style="background: white; padding: 2rem; border-radius: 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.08); margin-bottom: 2rem;">
-                <h3 style="font-family: 'Playfair Display', serif; font-size: 1.5rem; margin-bottom: 1.5rem;">📅 All Appointments</h3>
-                <div id="appointmentsList" style="min-height: 200px;">
-                    <p style="color: var(--text-light); text-align: center; padding: 2rem;">Loading appointments...</p>
-                </div>
-            </div>
-
+    <!-- Login Section -->
+    <div id="loginSection" class="login-container">
+        <div style="text-align: center; margin-bottom: 2rem;">
+            <h1 style="color: #2C3E50;">Staff Login</h1>
+            <p style="color: #7F8C8D;">Please sign in to continue</p>
         </div>
-    </section>
+        <form id="staffLoginForm" onsubmit="handleStaffLogin(event)">
+            <div class="form-group">
+                <label>Email</label>
+                <input type="email" id="staffEmail" placeholder="admin@ersmaternity.com" required>
+            </div>
+            <div class="form-group">
+                <label>Password</label>
+                <input type="password" id="staffPassword" placeholder="••••••••" required>
+            </div>
+            <button type="submit" class="btn-login">Login to Dashboard</button>
+        </form>
+        <div id="loginMessage" style="margin-top: 1rem; color: #e74c3c; text-align: center;"></div>
+    </div>
 
-    <script src="config.js"></script>
+    <!-- Dashboard Section -->
+    <div id="dashboardSection" class="main-content hidden">
+        
+        <!-- Stats Cards -->
+        <div class="stats-grid">
+            <div class="stat-card">
+                <div class="stat-icon">📅</div>
+                <div class="stat-info">
+                    <h3>Total Appointments</h3>
+                    <p id="totalAppointments">0</p>
+                </div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon">📞</div>
+                <div class="stat-info">
+                    <h3>Pending Callbacks</h3>
+                    <p id="pendingCallbacks" style="color: #e74c3c;">0</p>
+                </div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon">👥</div>
+                <div class="stat-info">
+                    <h3>Total Patients</h3>
+                    <p id="totalPatients">0</p>
+                </div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon"></div>
+                <div class="stat-info">
+                    <h3>New Messages</h3>
+                    <p id="newMessages" style="color: #27ae60;">0</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Pending Appointments Section -->
+        <div class="section-card">
+            <h2>⏳ Pending Appointments</h2>
+            <div class="toolbar">
+                <label style="font-weight: bold; cursor: pointer;"><input type="checkbox" id="selectAllPending" onchange="toggleSelectAll('pending')"> Select All</label>
+                <div>
+                    <button onclick="batchUpdateStatus('pending', 'confirmed')" class="btn btn-success">✓ Confirm Selected</button>
+                    <button onclick="batchUpdateStatus('pending', 'cancelled')" class="btn btn-danger">✕ Cancel Selected</button>
+                    <button onclick="batchDelete('pending')" class="btn btn-danger">️ Delete Selected</button>
+                </div>
+            </div>
+            <table class="data-table" id="pendingTable">
+                <thead>
+                    <tr>
+                        <th style="width: 40px;"></th>
+                        <th>Patient</th>
+                        <th>Type</th>
+                        <th>Date & Time</th>
+                        <th>Doctor</th>
+                        <th>Contact</th>
+                        <th style="width: 150px;">Actions</th>
+                    </tr>
+                </thead>
+                <tbody id="pendingListBody">
+                    <tr><td colspan="7" style="text-align:center; color:#7F8C8D;">Loading...</td></tr>
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Confirmed Appointments Section -->
+        <div class="section-card">
+            <h2>✅ Confirmed Appointments</h2>
+            <div class="toolbar">
+                <label style="font-weight: bold; cursor: pointer;"><input type="checkbox" id="selectAllConfirmed" onchange="toggleSelectAll('confirmed')"> Select All</label>
+                <div>
+                    <button onclick="batchUpdateStatus('confirmed', 'completed')" class="btn btn-success">✓ Mark Completed</button>
+                    <button onclick="batchUpdateStatus('confirmed', 'cancelled')" class="btn btn-danger">✕ Cancel Selected</button>
+                    <button onclick="batchDelete('confirmed')" class="btn btn-danger">🗑️ Delete Selected</button>
+                </div>
+            </div>
+            <table class="data-table" id="confirmedTable">
+                <thead>
+                    <tr>
+                        <th style="width: 40px;"></th>
+                        <th>Patient</th>
+                        <th>Type</th>
+                        <th>Date & Time</th>
+                        <th>Doctor</th>
+                        <th>Contact</th>
+                        <th style="width: 150px;">Actions</th>
+                    </tr>
+                </thead>
+                <tbody id="confirmedListBody">
+                    <tr><td colspan="7" style="text-align:center; color:#7F8C8D;">Loading...</td></tr>
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Completed Appointments Section -->
+        <div class="section-card">
+            <h2> Completed Appointments</h2>
+            <div class="toolbar">
+                <label style="font-weight: bold; cursor: pointer;"><input type="checkbox" id="selectAllCompleted" onchange="toggleSelectAll('completed')"> Select All</label>
+                <button onclick="batchDelete('completed')" class="btn btn-danger">🗑️ Delete Selected</button>
+            </div>
+            <table class="data-table" id="completedTable">
+                <thead>
+                    <tr>
+                        <th style="width: 40px;"></th>
+                        <th>Patient</th>
+                        <th>Type</th>
+                        <th>Date & Time</th>
+                        <th>Doctor</th>
+                        <th>Contact</th>
+                        <th style="width: 100px;">Actions</th>
+                    </tr>
+                </thead>
+                <tbody id="completedListBody">
+                    <tr><td colspan="7" style="text-align:center; color:#7F8C8D;">Loading...</td></tr>
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Recent Missed Calls -->
+        <div class="section-card">
+            <h2>📞 Recent Missed Calls</h2>
+            <div id="missedCallsList" style="text-align: center; color: #7F8C8D; padding: 2rem;">
+                No pending callbacks
+            </div>
+        </div>
+
+    </div>
+
+    <!-- Load Supabase -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="config.js"></script>
     
     <script>
-        let supabaseClient;
-        let currentStaff = null;
-
-        window.addEventListener('DOMContentLoaded', async () => {
-            supabaseClient = window.supabase.createClient(
+        // Initialize Supabase
+        if (window.API_CONFIG && window.supabase) {
+            window.supabaseClient = window.supabase.createClient(
                 window.API_CONFIG.SUPABASE_URL,
                 window.API_CONFIG.SUPABASE_KEY
             );
-            
-            const { data: { session } } = await supabaseClient.auth.getSession();
-            if (session && session.user.user_metadata.role === 'staff') {
-                currentStaff = session.user;
-                showStaffDashboard(session.user.email);
-                await loadAllData();
-            }
-        });
+        }
 
-        document.getElementById('staffLoginForm').addEventListener('submit', async (e) => {
+        // Check if already logged in
+        window.onload = function() {
+            if (localStorage.getItem('staffLoggedIn') === 'true') {
+                showDashboard();
+            }
+        };
+
+        function handleStaffLogin(e) {
             e.preventDefault();
             const email = document.getElementById('staffEmail').value;
             const password = document.getElementById('staffPassword').value;
-            const messageDiv = document.getElementById('loginMessage');
             
-            try {
-                const { data, error } = await supabaseClient.auth.signInWithPassword({
-                    email: email,
-                    password: password
-                });
-                
-                if (error) throw error;
-                
-                // Check if user is staff
-                if (data.user.user_metadata.role !== 'staff') {
-                    throw new Error('Access denied. Staff privileges required.');
-                }
-                
-                currentStaff = data.user;
-                showStaffDashboard(data.user.email);
-                await loadAllData();
-                
-            } catch (error) {
-                messageDiv.style.display = 'block';
-                messageDiv.style.background = '#f8d7da';
-                messageDiv.style.color = '#721c24';
-                messageDiv.textContent = 'Login failed: ' + error.message;
+            // Simple authentication (you can enhance this later)
+            if (email === 'admin@ersmaternity.com' && password === 'admin123') {
+                localStorage.setItem('staffLoggedIn', 'true');
+                localStorage.setItem('staffEmail', email);
+                showDashboard();
+            } else {
+                document.getElementById('loginMessage').textContent = 'Invalid credentials. Please try again.';
             }
-        });
+        }
 
-        function showStaffDashboard(email) {
-            document.getElementById('staffLogin').style.display = 'none';
-            document.getElementById('staffDashboard').style.display = 'block';
-            document.getElementById('staffEmailDisplay').textContent = email;
+        function showDashboard() {
+            document.getElementById('loginSection').classList.add('hidden');
+            document.getElementById('dashboardSection').classList.remove('hidden');
+            document.getElementById('staffEmailDisplay').textContent = localStorage.getItem('staffEmail');
+            loadAllData();
+        }
+
+        function staffLogout() {
+            localStorage.removeItem('staffLoggedIn');
+            localStorage.removeItem('staffEmail');
+            location.reload();
+        }
+
+        function toggleSelectAll(type) {
+            const checkbox = document.getElementById('selectAll' + type.charAt(0).toUpperCase() + type.slice(1));
+            const checkboxes = document.querySelectorAll('.cb-' + type);
+            checkboxes.forEach(cb => cb.checked = checkbox.checked);
         }
 
         async function loadAllData() {
-            await loadCallbacks();
-            await loadAllAppointments();
-            await loadStats();
-        }
+            const supabase = window.supabaseClient;
+            if (!supabase) return;
 
-        async function loadCallbacks() {
-            const listDiv = document.getElementById('callbacksList');
+            // Load Appointments
+            const { data: appointments } = await supabase.from('appointments').select('*').order('created_at', { ascending: false });
             
-            try {
-                const { data, error } = await supabaseClient
-                    .from('callbacks')
-                    .select('*')
-                    .order('created_at', { ascending: false })
-                    .limit(10);
-                
-                if (error) throw error;
-                
-                document.getElementById('totalCallbacks').textContent = data.length;
-                
-                if (data.length === 0) {
-                    listDiv.innerHTML = '<p style="color: var(--text-light); text-align: center; padding: 2rem;">No pending callbacks</p>';
-                } else {
-                    listDiv.innerHTML = data.map(callback => `
-                        <div style="padding: 1.5rem; background: #f8f9fa; border-radius: 10px; margin-bottom: 1rem; border-left: 4px solid #667eea;">
-                            <div style="display: flex; justify-content: space-between; align-items: start;">
-                                <div style="flex: 1;">
-                                    <h4 style="margin-bottom: 0.5rem; font-family: 'Playfair Display', serif;">
-                                        📞 ${callback.phone} ${getFlagEmoji(callback.language)}
-                                    </h4>
-                                    <p style="color: var(--text-light); margin-bottom: 0.5rem;">
-                                        📅 ${new Date(callback.created_at).toLocaleString()}
-                                    </p>
-                                    ${callback.reason ? `<p style="color: var(--text-light);">💬 "${callback.reason}"</p>` : ''}
-                                    ${callback.preferred_time ? `<p style="color: var(--text-light);">⏰ Prefers: ${callback.preferred_time}</p>` : ''}
-                                </div>
-                                <button onclick="markCallbackDone('${callback.id}')" style="padding: 0.8rem 1.5rem; background: #4CD964; color: white; border: none; border-radius: 50px; cursor: pointer; font-weight: 600;">
-                                    Follow Up
-                                </button>
-                            </div>
-                        </div>
-                    `).join('');
-                }
-            } catch (error) {
-                console.error('Error loading callbacks:', error);
-                listDiv.innerHTML = '<p style="color: #721c24; text-align: center; padding: 2rem;">Error loading callbacks</p>';
+            // Separate by status
+            const pending = appointments.filter(a => a.status === 'pending');
+            const confirmed = appointments.filter(a => a.status === 'confirmed');
+            const completed = appointments.filter(a => a.status === 'completed');
+
+            // Update Stats
+            document.getElementById('totalAppointments').textContent = appointments.length || 0;
+            document.getElementById('pendingCallbacks').textContent = pending.length || 0;
+
+            // Render Tables
+            renderAppointmentsTable('pendingListBody', pending, 'pending');
+            renderAppointmentsTable('confirmedListBody', confirmed, 'confirmed');
+            renderAppointmentsTable('completedListBody', completed, 'completed');
+
+            // Load Callbacks
+            const { data: callbacks } = await supabase.from('callbacks').select('*').order('created_at', { ascending: false }).limit(10);
+            const missedCallsDiv = document.getElementById('missedCallsList');
+            if (callbacks && callbacks.length > 0) {
+                missedCallsDiv.innerHTML = callbacks.map(c => `
+                    <div style="background: #f8f9fa; padding: 1rem; border-radius: 8px; margin-bottom: 1rem; text-align: left;">
+                        <strong>${c.name}</strong> - ${c.phone}<br>
+                        <small style="color: #7F8C8D;">${new Date(c.created_at).toLocaleString()}</small>
+                    </div>
+                `).join('');
+            } else {
+                missedCallsDiv.innerHTML = 'No pending callbacks';
             }
         }
 
-        async function loadAllAppointments() {
-            const listDiv = document.getElementById('appointmentsList');
+        function renderAppointmentsTable(tbodyId, appointments, status) {
+            const tbody = document.getElementById(tbodyId);
+            if (!appointments || appointments.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="7" style="text-align:center; color:#7F8C8D;">No appointments</td></tr>';
+                return;
+            }
+
+            tbody.innerHTML = appointments.map(a => `
+                <tr>
+                    <td><input type="checkbox" class="cb-${status}" value="${a.id}"></td>
+                    <td><strong>${a.patient_name}</strong></td>
+                    <td>${a.appointment_type}</td>
+                    <td>${new Date(a.appointment_date).toLocaleDateString()} at ${a.appointment_time}</td>
+                    <td>${a.doctor_name || 'N/A'}</td>
+                    <td>${a.phone}</td>
+                    <td>
+                        <select onchange="updateStatus('${a.id}', this.value)" class="status-select">
+                            <option value="pending" ${a.status === 'pending' ? 'selected' : ''}>Pending</option>
+                            <option value="confirmed" ${a.status === 'confirmed' ? 'selected' : ''}>Confirmed</option>
+                            <option value="completed" ${a.status === 'completed' ? 'selected' : ''}>Completed</option>
+                            <option value="cancelled" ${a.status === 'cancelled' ? 'selected' : ''}>Cancelled</option>
+                        </select>
+                    </td>
+                </tr>
+            `).join('');
+        }
+
+        async function updateStatus(id, newStatus) {
+            const supabase = window.supabaseClient;
+            const { error } = await supabase.from('appointments').update({ status: newStatus }).eq('id', id);
             
-            try {
-                const { data, error } = await supabaseClient
-                    .from('appointments')
-                    .select('*')
-                    .order('appointment_date', { ascending: false })
-                    .limit(20);
-                
-                if (error) throw error;
-                
-                document.getElementById('totalAppointments').textContent = data.length;
-                
-                if (data.length === 0) {
-                    listDiv.innerHTML = '<p style="color: var(--text-light); text-align: center; padding: 2rem;">No appointments yet</p>';
-                } else {
-                    listDiv.innerHTML = data.map(apt => `
-                        <div style="padding: 1.5rem; background: #f8f9fa; border-radius: 10px; margin-bottom: 1rem; border-left: 4px solid var(--primary-color);">
-                            <div style="display: flex; justify-content: space-between; align-items: start;">
-                                <div style="flex: 1;">
-                                    <h4 style="margin-bottom: 0.5rem; font-family: 'Playfair Display', serif;">${apt.service || 'Appointment'}</h4>
-                                    <p style="color: var(--text-light); margin-bottom: 0.5rem;">
-                                        👤 ${apt.patient_name || 'Patient'} | 📞 ${apt.phone || 'N/A'}
-                                    </p>
-                                    <p style="color: var(--text-light); margin-bottom: 0.5rem;">
-                                        📅 ${new Date(apt.appointment_date).toLocaleDateString()} at ${apt.appointment_time}
-                                    </p>
-                                    ${apt.doctor ? `<p style="color: var(--text-light);">‍⚕️ Dr. ${apt.doctor}</p>` : ''}
-                                </div>
-                                <select onchange="updateAppointmentStatus('${apt.id}', this.value)" style="padding: 0.5rem 1rem; border-radius: 20px; border: 2px solid #e0e0e0; font-weight: 600; cursor: pointer;">
-                                    <option value="pending" ${apt.status === 'pending' ? 'selected' : ''}>Pending</option>
-                                    <option value="confirmed" ${apt.status === 'confirmed' ? 'selected' : ''}>Confirmed</option>
-                                    <option value="completed" ${apt.status === 'completed' ? 'selected' : ''}>Completed</option>
-                                    <option value="cancelled" ${apt.status === 'cancelled' ? 'selected' : ''}>Cancelled</option>
-                                </select>
-                            </div>
-                        </div>
-                    `).join('');
-                }
-            } catch (error) {
-                console.error('Error loading appointments:', error);
-                listDiv.innerHTML = '<p style="color: #721c24; text-align: center; padding: 2rem;">Error loading appointments</p>';
+            if (error) {
+                alert('Error updating status');
+                console.error(error);
+            } else {
+                // Reload to show in correct section
+                loadAllData();
             }
         }
 
-        async function loadStats() {
-            // Get total patients
-            const { count: patientsCount } = await supabaseClient
-                .from('patients')
-                .select('*', { count: 'exact', head: true });
-            document.getElementById('totalPatients').textContent = patientsCount || 0;
+        async function batchUpdateStatus(type, newStatus) {
+            const checkboxes = document.querySelectorAll('.cb-' + type + ':checked');
+            if (checkboxes.length === 0) return alert('Please select appointments to update.');
             
-            // Get total messages (from contact_messages table)
-            const { count: messagesCount } = await supabaseClient
-                .from('contact_messages')
-                .select('*', { count: 'exact', head: true });
-            document.getElementById('totalMessages').textContent = messagesCount || 0;
-        }
-
-        async function updateAppointmentStatus(appointmentId, newStatus) {
-            try {
-                const { error } = await supabaseClient
-                    .from('appointments')
-                    .update({ status: newStatus })
-                    .eq('id', appointmentId);
-                
-                if (error) throw error;
-                alert(`Appointment status updated to ${newStatus}`);
-            } catch (error) {
-                console.error('Error updating status:', error);
-                alert('Failed to update status');
+            const ids = Array.from(checkboxes).map(cb => cb.value);
+            const supabase = window.supabaseClient;
+            
+            const { error } = await supabase.from('appointments').update({ status: newStatus }).in('id', ids);
+            
+            if (error) {
+                alert('Error updating appointments');
+                console.error(error);
+            } else {
+                alert(`Successfully updated ${ids.length} appointments to ${newStatus}`);
+                loadAllData();
             }
         }
 
-        async function markCallbackDone(callbackId) {
-            try {
-                const { error } = await supabaseClient
-                    .from('callbacks')
-                    .update({ status: 'completed' })
-                    .eq('id', callbackId);
-                
-                if (error) throw error;
-                alert('Callback marked as completed!');
-                await loadCallbacks();
-            } catch (error) {
-                console.error('Error updating callback:', error);
-                alert('Failed to update callback');
+        async function batchDelete(type) {
+            const checkboxes = document.querySelectorAll('.cb-' + type + ':checked');
+            if (checkboxes.length === 0) return alert('Please select appointments to delete.');
+            
+            if (!confirm(`Are you sure you want to delete ${checkboxes.length} appointments?`)) return;
+            
+            const ids = Array.from(checkboxes).map(cb => cb.value);
+            const supabase = window.supabaseClient;
+            
+            const { error } = await supabase.from('appointments').delete().in('id', ids);
+            
+            if (error) {
+                alert('Error deleting appointments');
+                console.error(error);
+            } else {
+                alert('Appointments deleted successfully');
+                loadAllData();
             }
-        }
-
-        async function staffLogout() {
-            await supabaseClient.auth.signOut();
-            currentStaff = null;
-            document.getElementById('staffDashboard').style.display = 'none';
-            document.getElementById('staffLogin').style.display = 'flex';
-            document.getElementById('staffEmail').value = '';
-            document.getElementById('staffPassword').value = '';
-        }
-
-        function getFlagEmoji(lang) {
-            const flags = {
-                'tl': '🇵🇭',
-                'ceb': '🇭',
-                'ilo': '🇭',
-                'en': '🇬🇧'
-            };
-            return flags[lang] || '🇵🇭';
         }
     </script>
 </body>
