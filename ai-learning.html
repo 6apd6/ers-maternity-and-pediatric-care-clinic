@@ -15,14 +15,15 @@
         .section-card { background: white; padding: 2rem; border-radius: 12px; box-shadow: 0 2px 10px rgba(0,0,0,0.05); margin-bottom: 2rem; }
         .section-card h2 { margin-top: 0; color: #2C3E50; }
         .conversation-item { border-bottom: 1px solid #eee; padding: 1rem 0; }
-        .conversation-item:last-child { border-bottom: none; }
-        .faq-item { border: 1px solid #eee; padding: 1rem; border-radius: 8px; margin-bottom: 1rem; }
+        .faq-item { border: 1px solid #eee; padding: 1rem; border-radius: 8px; margin-bottom: 1rem; background: #fafafa; }
         .btn { border: none; padding: 6px 12px; border-radius: 4px; cursor: pointer; font-size: 0.9rem; color: white; }
         .btn-save { background: #3498db; }
         .btn-approve { background: #27ae60; }
+        .btn-update { background: #9b59b6; }
         .btn-toggle { background: #f39c12; font-size: 0.8rem; padding: 4px 8px; }
         .correction-box { display: none; background: #f8f9fa; padding: 10px; border-radius: 5px; border-left: 3px solid #f39c12; margin-top: 5px; }
-        textarea { width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px; box-sizing: border-box; font-family: inherit; }
+        textarea { width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px; box-sizing: border-box; font-family: inherit; margin-top: 5px; }
+        .current-answer { font-weight: bold; color: #27ae60; margin-bottom: 5px; }
     </style>
 </head>
 <body>
@@ -52,17 +53,26 @@
 
         <!-- Recent Conversations -->
         <div class="section-card">
-            <h2> Recent AI Conversations</h2>
+            <h2>📝 Recent AI Conversations</h2>
             <div id="conversationList">
                 <p style="color: #7F8C8D;">Loading conversations...</p>
             </div>
         </div>
 
-        <!-- FAQ Improvements -->
+        <!-- Pending FAQ Improvements -->
         <div class="section-card">
-            <h2>💡 Suggested FAQ Improvements</h2>
+            <h2>💡 Suggested FAQ Improvements (Pending Approval)</h2>
             <div id="faqList">
                 <p style="color: #7F8C8D;">Loading suggestions...</p>
+            </div>
+        </div>
+
+        <!-- NEW SECTION: Manage Approved FAQs -->
+        <div class="section-card">
+            <h2>📚 Manage Approved FAQs (Update Prices/Info)</h2>
+            <p style="color: #7F8C8D; margin-bottom: 1rem;">These are the answers the AI is currently using. You can edit them here to update prices or information.</p>
+            <div id="approvedFaqList">
+                <p style="color: #7F8C8D;">Loading approved FAQs...</p>
             </div>
         </div>
 
@@ -100,7 +110,6 @@
             // 1. Load Stats
             const { count: convCount } = await supabase.from('ai_conversations').select('*', { count: 'exact', head: true });
             const { count: impCount } = await supabase.from('ai_conversations').select('*', { count: 'exact', head: true }).eq('needs_improvement', true);
-            // FIX: Only show unapproved FAQs
             const { count: faqCount } = await supabase.from('faq_improvements').select('*', { count: 'exact', head: true }).eq('is_approved', false);
 
             document.getElementById('totalConv').textContent = convCount || 0;
@@ -113,7 +122,6 @@
             
             if (conversations && conversations.length > 0) {
                 convList.innerHTML = ''; 
-                
                 conversations.forEach(c => {
                     const isBad = c.needs_improvement === true || c.was_helpful === false;
                     const statusHtml = isBad 
@@ -126,8 +134,8 @@
                             <button onclick="toggleCorrection('${c.id}')" class="btn btn-toggle">✏️ Add/Update Correction</button>
                             <div id="correction-box-${c.id}" class="correction-box">
                                 <label style="font-size: 0.9rem; font-weight: bold; display:block; margin-bottom:5px;">✏️ Staff Correction:</label>
-                                <textarea id="correction-${c.id}" rows="2" placeholder="Type the correct answer the AI should have given..."></textarea>
-                                <button onclick="saveCorrection('${c.id}', '${safeQuestion}')" class="btn btn-save" style="margin-top: 5px;">💾 Save to FAQ Database</button>
+                                <textarea id="correction-${c.id}" rows="2" placeholder="Type the correct answer..."></textarea>
+                                <button onclick="saveCorrection('${c.id}', '${safeQuestion}')" class="btn btn-save" style="margin-top: 5px;"> Save to FAQ Database</button>
                             </div>
                         </div>
                     `;
@@ -149,7 +157,7 @@
                 convList.innerHTML = '<p style="color: #7F8C8D; text-align: center; padding: 2rem;">No conversations yet</p>';
             }
 
-            // 3. Load FAQ Suggestions (FIX: Only show unapproved ones)
+            // 3. Load Pending FAQ Suggestions
             const { data: faqs } = await supabase.from('faq_improvements').select('*').eq('is_approved', false).order('created_at', { ascending: false });
             const faqListEl = document.getElementById('faqList');
             
@@ -168,7 +176,26 @@
                 faqListEl.innerHTML = '<p style="color: #7F8C8D; text-align: center; padding: 2rem;">No pending suggestions</p>';
             }
 
+            // 4. Load Approved FAQs (For Updating)
+            const { data: approvedFaqs } = await supabase.from('faq_improvements').select('*').eq('is_approved', true).order('created_at', { ascending: false });
+            const approvedListEl = document.getElementById('approvedFaqList');
+            
+            if (approvedFaqs && approvedFaqs.length > 0) {
+                approvedListEl.innerHTML = approvedFaqs.map(f => `
+                    <div class="faq-item" style="border-left: 4px solid #27ae60;">
+                        <h4 style="margin: 0 0 0.5rem;">❓ Q: ${f.question}</h4>
+                        <p class="current-answer">Current Answer: ${f.approved_answer}</p>
+                        <textarea id="update-answer-${f.id}" rows="2">${f.approved_answer}</textarea>
+                        <button onclick="updateApprovedFaq('${f.id}')" class="btn btn-update" style="margin-top: 5px;">💾 Update Answer</button>
+                    </div>
+                `).join('');
+            } else {
+                approvedListEl.innerHTML = '<p style="color: #7F8C8D; text-align: center; padding: 2rem;">No approved FAQs yet. Approve some from the list above!</p>';
+            }
+
         }, 500);
+
+        // --- Helper Functions ---
 
         function toggleCorrection(id) {
             const box = document.getElementById(`correction-box-${id}`);
@@ -178,33 +205,43 @@
         async function saveCorrection(convId, userQuestion) {
             const textArea = document.getElementById(`correction-${convId}`);
             const newAnswer = textArea.value;
-            
             if (!newAnswer) return alert('Please type a correction first.');
 
             const supabase = window.supabaseClient;
             const { error } = await supabase.from('faq_improvements').insert([{
-                question: userQuestion,
-                suggested_answer: newAnswer,
-                is_approved: false
+                question: userQuestion, suggested_answer: newAnswer, is_approved: false
             }]);
 
-            if (error) {
-                console.error(error);
-                alert('Error saving correction.');
-            } else {
-                alert('Correction saved! It is now in the "Pending FAQ Updates" list below.');
-                location.reload();
-            }
+            if (error) alert('Error saving correction.');
+            else { alert('Correction saved! Check the "Pending FAQ Updates" section.'); location.reload(); }
         }
 
         async function approveFaq(id) {
             const answerInput = document.getElementById(`final-answer-${id}`);
             const finalAnswer = answerInput.value;
-            
             const supabase = window.supabaseClient;
             await supabase.from('faq_improvements').update({ is_approved: true, approved_answer: finalAnswer }).eq('id', id);
             alert('FAQ Approved!');
             location.reload();
+        }
+
+        // NEW FUNCTION: Update an already approved FAQ
+        async function updateApprovedFaq(id) {
+            const textArea = document.getElementById(`update-answer-${id}`);
+            const newAnswer = textArea.value;
+            
+            if (!newAnswer) return alert('Please enter an answer first.');
+
+            const supabase = window.supabaseClient;
+            const { error } = await supabase.from('faq_improvements').update({ approved_answer: newAnswer }).eq('id', id);
+
+            if (error) {
+                console.error(error);
+                alert('Error updating FAQ.');
+            } else {
+                alert('✅ Answer Updated! The AI will now use this new response.');
+                location.reload();
+            }
         }
     </script>
 </body>
