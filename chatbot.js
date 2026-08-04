@@ -386,17 +386,16 @@ class MultilingualChatbot {
             this.hideTyping();
             const result = this.getAIResponse(text);
             this.addMessage(result.text, 'bot');
-           // Log the conversation
-// Log the conversation and store the ID
+// Log the conversation and store the ID (Safe Version)
 if (window.supabaseClient) {
-    const conversationId = await logAIInteraction(text, result.text, null, this.detectLanguage(text));
-    // Store the ID on the message element for feedback
-    if (conversationId) {
-        const lastMessage = document.getElementById('chatbotMessages').lastElementChild;
-        if (lastMessage) {
-            lastMessage.dataset.conversationId = conversationId;
+    logAIInteraction(text, result.text, null, this.detectLanguage(text)).then(id => {
+        if (id) {
+            const lastMessage = document.getElementById('chatbotMessages').lastElementChild;
+            if (lastMessage) {
+                lastMessage.dataset.conversationId = id;
+            }
         }
-    }
+    });
 }
             
             if (!this.hasGreeted || 
