@@ -336,6 +336,17 @@ class MultilingualChatbot {
         div.className = `message ${sender}`;
         div.innerHTML = text.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>').replace(/\n/g, '<br>');
         messages.appendChild(div);
+           // Add feedback buttons for bot messages
+    if (sender === 'bot' && window.supabaseClient) {
+        const feedbackDiv = document.createElement('div');
+        feedbackDiv.className = 'feedback-buttons';
+        feedbackDiv.style.marginTop = '5px';
+        feedbackDiv.innerHTML = `
+            <button onclick="this.parentElement.parentElement.querySelector('.feedback-buttons').remove(); window.supabaseClient.from('ai_conversations').insert([{user_message: '${text.replace(/'/g, "\\'")}', ai_response: '${text.replace(/'/g, "\\'")}', was_helpful: true, source: 'chatbot'}]);" style="background: none; border: none; cursor: pointer; font-size: 16px; padding: 2px;">👍</button>
+            <button onclick="this.parentElement.parentElement.querySelector('.feedback-buttons').remove(); window.supabaseClient.from('ai_conversations').insert([{user_message: '${text.replace(/'/g, "\\'")}', ai_response: '${text.replace(/'/g, "\\'")}', was_helpful: false, needs_improvement: true, source: 'chatbot'}]);" style="background: none; border: none; cursor: pointer; font-size: 16px; padding: 2px;">👎</button>
+        `;
+        div.appendChild(feedbackDiv);
+    }
         messages.scrollTop = messages.scrollHeight;
     }
 
