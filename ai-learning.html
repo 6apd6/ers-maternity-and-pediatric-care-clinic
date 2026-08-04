@@ -52,7 +52,7 @@
 
         <!-- Recent Conversations -->
         <div class="section-card">
-            <h2>📝 Recent AI Conversations</h2>
+            <h2> Recent AI Conversations</h2>
             <div id="conversationList">
                 <p style="color: #7F8C8D;">Loading conversations...</p>
             </div>
@@ -100,6 +100,7 @@
             // 1. Load Stats
             const { count: convCount } = await supabase.from('ai_conversations').select('*', { count: 'exact', head: true });
             const { count: impCount } = await supabase.from('ai_conversations').select('*', { count: 'exact', head: true }).eq('needs_improvement', true);
+            // FIX: Only show unapproved FAQs
             const { count: faqCount } = await supabase.from('faq_improvements').select('*', { count: 'exact', head: true }).eq('is_approved', false);
 
             document.getElementById('totalConv').textContent = convCount || 0;
@@ -148,8 +149,8 @@
                 convList.innerHTML = '<p style="color: #7F8C8D; text-align: center; padding: 2rem;">No conversations yet</p>';
             }
 
-            // 3. Load FAQ Suggestions
-            const { data: faqs } = await supabase.from('faq_improvements').select('*').order('created_at', { ascending: false });
+            // 3. Load FAQ Suggestions (FIX: Only show unapproved ones)
+            const { data: faqs } = await supabase.from('faq_improvements').select('*').eq('is_approved', false).order('created_at', { ascending: false });
             const faqListEl = document.getElementById('faqList');
             
             if (faqs && faqs.length > 0) {
