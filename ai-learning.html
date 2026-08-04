@@ -6,110 +6,194 @@
     <title>AI Learning Dashboard | ERS Staff</title>
     <link rel="stylesheet" href="main.css">
     <style>
-        body { font-family: 'Poppins', sans-serif; background: #f8f9fa; margin: 0; }
-        .container { max-width: 1200px; margin: 0 auto; padding: 2rem; }
-        .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 1.5rem; margin-bottom: 2rem; }
-        .stat-card { background: white; padding: 1.5rem; border-radius: 12px; box-shadow: 0 2px 10px rgba(0,0,0,0.05); }
-        .stat-card h3 { margin: 0; color: #7F8C8D; font-size: 1rem; }
-        .stat-card p { font-size: 2rem; font-weight: bold; margin: 0.5rem 0 0; }
-        .section-card { background: white; padding: 2rem; border-radius: 12px; box-shadow: 0 2px 10px rgba(0,0,0,0.05); margin-bottom: 2rem; }
-        .section-card h2 { margin-top: 0; color: #2C3E50; }
-        .conversation-item { border-bottom: 1px solid #eee; padding: 1rem 0; position: relative; }
-        .faq-item { border: 1px solid #eee; padding: 1rem; border-radius: 8px; margin-bottom: 1rem; background: #fafafa; }
-        .btn { border: none; padding: 6px 12px; border-radius: 4px; cursor: pointer; font-size: 0.9rem; color: white; margin-right: 5px; }
-        .btn-save { background: #3498db; }
-        .btn-approve { background: #27ae60; }
-        .btn-update { background: #9b59b6; }
-        .btn-delete { background: #e74c3c; }
-        .btn-toggle { background: #f39c12; font-size: 0.8rem; padding: 4px 8px; }
-        .correction-box { display: none; background: #f8f9fa; padding: 10px; border-radius: 5px; border-left: 3px solid #f39c12; margin-top: 5px; }
+        body { font-family: 'Poppins', sans-serif; background: #f4f6f9; margin: 0; }
+        
+        /* Top Navigation */
+        .top-nav { background: #2C3E50; color: white; padding: 1rem 2rem; display: flex; justify-content: space-between; align-items: center; }
+        .top-nav h2 { margin: 0; font-size: 1.5rem; }
+        .top-nav a { color: white; text-decoration: none; font-size: 0.9rem; }
+
+        /* Tab Navigation */
+        .tab-container { max-width: 1200px; margin: 2rem auto 0; padding: 0 2rem; }
+        .tabs { display: flex; gap: 10px; margin-bottom: 0; }
+        .tab-btn { padding: 12px 24px; background: #e0e0e0; border: none; border-radius: 8px 8px 0 0; cursor: pointer; font-size: 1rem; font-weight: 600; color: #555; transition: 0.3s; }
+        .tab-btn.active { background: white; color: #2C3E50; box-shadow: 0 -2px 5px rgba(0,0,0,0.05); }
+        
+        /* Content Area */
+        .content-area { background: white; padding: 2rem; border-radius: 0 8px 8px 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.05); min-height: 500px; }
+        .tab-content { display: none; }
+        .tab-content.active { display: block; }
+
+        /* Stats Grid */
+        .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1.5rem; margin-bottom: 2rem; }
+        .stat-card { background: #f8f9fa; padding: 1.5rem; border-radius: 8px; border-left: 4px solid #3498db; }
+        .stat-card h3 { margin: 0; color: #7F8C8D; font-size: 0.9rem; text-transform: uppercase; }
+        .stat-card p { font-size: 2rem; font-weight: bold; margin: 0.5rem 0 0; color: #2C3E50; }
+
+        /* Toolbar (Batch Actions) */
+        .toolbar { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem; padding-bottom: 1rem; border-bottom: 1px solid #eee; }
+        .btn { border: none; padding: 8px 16px; border-radius: 4px; cursor: pointer; font-size: 0.9rem; color: white; font-weight: 500; }
+        .btn-danger { background: #e74c3c; }
+        .btn-danger:hover { background: #c0392b; }
+        .btn-primary { background: #3498db; }
+        .btn-success { background: #27ae60; }
+        .btn-warning { background: #f39c12; }
+
+        /* Tables & Lists */
+        .data-list { width: 100%; border-collapse: collapse; }
+        .data-list th, .data-list td { padding: 12px; text-align: left; border-bottom: 1px solid #eee; }
+        .data-list th { background: #f8f9fa; color: #7F8C8D; font-weight: 600; font-size: 0.85rem; text-transform: uppercase; }
+        .data-list tr:hover { background: #fafafa; }
+        
+        .status-badge { padding: 4px 8px; border-radius: 12px; font-size: 0.75rem; font-weight: bold; }
+        .status-bad { background: #ffebee; color: #c62828; }
+        .status-good { background: #e8f5e9; color: #2e7d32; }
+
+        .action-cell { display: flex; gap: 5px; }
         textarea { width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px; box-sizing: border-box; font-family: inherit; margin-top: 5px; }
-        .current-answer { font-weight: bold; color: #27ae60; margin-bottom: 5px; }
-        .delete-btn-container { margin-top: 10px; text-align: right; }
+        
+        /* Checkbox styling */
+        input[type="checkbox"] { transform: scale(1.2); cursor: pointer; }
     </style>
 </head>
 <body>
 
-    <nav class="navbar" style="background: #2C3E50; color: white; padding: 1rem 2rem; display: flex; justify-content: space-between; align-items: center;">
-        <h2 style="margin: 0;">🤖 AI Learning Dashboard</h2>
-        <a href="staff.html" style="color: white; text-decoration: none;">← Back to Staff Dashboard</a>
-    </nav>
-
-    <div class="container">
-        
-        <!-- Stats Cards -->
-        <div class="stats-grid">
-            <div class="stat-card">
-                <h3>Total Conversations</h3>
-                <p id="totalConv" style="color: #2C3E50;">Loading...</p>
-            </div>
-            <div class="stat-card">
-                <h3>Needs Improvement</h3>
-                <p id="needsImp" style="color: #e74c3c;">Loading...</p>
-            </div>
-            <div class="stat-card">
-                <h3>Pending FAQ Updates</h3>
-                <p id="pendingFaq" style="color: #f39c12;">Loading...</p>
-            </div>
-        </div>
-
-        <!-- Recent Conversations -->
-        <div class="section-card">
-            <h2>📝 Recent AI Conversations</h2>
-            <div id="conversationList">
-                <p style="color: #7F8C8D;">Loading conversations...</p>
-            </div>
-        </div>
-
-        <!-- Pending FAQ Improvements -->
-        <div class="section-card">
-            <h2>💡 Suggested FAQ Improvements (Pending Approval)</h2>
-            <div id="faqList">
-                <p style="color: #7F8C8D;">Loading suggestions...</p>
-            </div>
-        </div>
-
-        <!-- Manage Approved FAQs -->
-        <div class="section-card">
-            <h2>📚 Manage Approved FAQs (Update Prices/Info)</h2>
-            <p style="color: #7F8C8D; margin-bottom: 1rem;">These are the answers the AI is currently using. You can edit or delete them here.</p>
-            <div id="approvedFaqList">
-                <p style="color: #7F8C8D;">Loading approved FAQs...</p>
-            </div>
-        </div>
-
+    <!-- Top Header -->
+    <div class="top-nav">
+        <h2>🤖 AI Learning Dashboard</h2>
+        <a href="staff.html">← Back to Staff Dashboard</a>
     </div>
 
-    <!-- Load Supabase library -->
+    <!-- Tab Navigation -->
+    <div class="tab-container">
+        <div class="tabs">
+            <button class="tab-btn active" onclick="switchTab('dashboard')">📊 Dashboard Overview</button>
+            <button class="tab-btn" onclick="switchTab('knowledge')">📚 Knowledge Base (FAQs)</button>
+            <button class="tab-btn" onclick="switchTab('pending')">💡 Pending Review</button>
+        </div>
+
+        <div class="content-area">
+            
+            <!-- TAB 1: DASHBOARD OVERVIEW -->
+            <div id="tab-dashboard" class="tab-content active">
+                <div class="stats-grid">
+                    <div class="stat-card" style="border-color: #3498db;">
+                        <h3>Total Conversations</h3>
+                        <p id="totalConv">0</p>
+                    </div>
+                    <div class="stat-card" style="border-color: #e74c3c;">
+                        <h3>Needs Improvement</h3>
+                        <p id="needsImp" style="color: #e74c3c;">0</p>
+                    </div>
+                    <div class="stat-card" style="border-color: #f39c12;">
+                        <h3>Pending Updates</h3>
+                        <p id="pendingFaq" style="color: #f39c12;">0</p>
+                    </div>
+                </div>
+
+                <h3>Recent Activity</h3>
+                <div class="toolbar">
+                    <label style="font-weight: bold; cursor: pointer;"><input type="checkbox" id="selectAllConv" onchange="toggleSelectAll('conv')"> Select All</label>
+                    <button onclick="batchDelete('conv')" class="btn btn-danger">🗑️ Delete Selected</button>
+                </div>
+                <table class="data-list" id="convTable">
+                    <thead>
+                        <tr>
+                            <th style="width: 40px;"></th>
+                            <th>Date</th>
+                            <th>Patient Question</th>
+                            <th>AI Response</th>
+                            <th>Status</th>
+                        </tr>
+                    </thead>
+                    <tbody id="convListBody">
+                        <tr><td colspan="5" style="text-align:center; color:#7F8C8D;">Loading...</td></tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- TAB 2: KNOWLEDGE BASE -->
+            <div id="tab-knowledge" class="tab-content">
+                <h3>Manage Approved FAQs</h3>
+                <p style="color: #7F8C8D; margin-bottom: 1rem;">These are the answers the AI is currently using. Edit prices or info here.</p>
+                
+                <div class="toolbar">
+                    <label style="font-weight: bold; cursor: pointer;"><input type="checkbox" id="selectAllApproved" onchange="toggleSelectAll('approved')"> Select All</label>
+                    <button onclick="batchDelete('approved')" class="btn btn-danger">🗑️ Delete Selected</button>
+                </div>
+
+                <table class="data-list" id="approvedTable">
+                    <thead>
+                        <tr>
+                            <th style="width: 40px;"></th>
+                            <th>Question</th>
+                            <th>Current Answer</th>
+                            <th style="width: 250px;">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="approvedListBody">
+                        <tr><td colspan="4" style="text-align:center; color:#7F8C8D;">Loading...</td></tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- TAB 3: PENDING REVIEW -->
+            <div id="tab-pending" class="tab-content">
+                <h3>Suggested Improvements</h3>
+                <p style="color: #7F8C8D; margin-bottom: 1rem;">Corrections submitted by staff. Approve them to teach the AI.</p>
+
+                <div class="toolbar">
+                    <label style="font-weight: bold; cursor: pointer;"><input type="checkbox" id="selectAllPending" onchange="toggleSelectAll('pending')"> Select All</label>
+                    <button onclick="batchDelete('pending')" class="btn btn-danger">️ Delete Selected</button>
+                </div>
+
+                <table class="data-list" id="pendingTable">
+                    <thead>
+                        <tr>
+                            <th style="width: 40px;"></th>
+                            <th>Question</th>
+                            <th>Suggested Answer</th>
+                            <th style="width: 200px;">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="pendingListBody">
+                        <tr><td colspan="4" style="text-align:center; color:#7F8C8D;">Loading...</td></tr>
+                    </tbody>
+                </table>
+            </div>
+
+        </div>
+    </div>
+
+    <!-- Scripts -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    <!-- Load config.js (contains your API keys) -->
     <script src="config.js"></script>
-    
-    <!-- Create the Supabase client -->
     <script>
         if (window.API_CONFIG && window.supabase) {
-            window.supabaseClient = window.supabase.createClient(
-                window.API_CONFIG.SUPABASE_URL,
-                window.API_CONFIG.SUPABASE_KEY
-            );
-            console.log('Supabase client created for dashboard!');
+            window.supabaseClient = window.supabase.createClient(window.API_CONFIG.SUPABASE_URL, window.API_CONFIG.SUPABASE_KEY);
         }
-    </script>
 
-    <!-- Main Dashboard Logic -->
-    <script>
+        // Tab Switching Logic
+        function switchTab(tabId) {
+            document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
+            document.querySelectorAll('.tab-btn').forEach(el => el.classList.remove('active'));
+            document.getElementById('tab-' + tabId).classList.add('active');
+            event.target.classList.add('active');
+        }
+
+        // Select All Logic
+        function toggleSelectAll(type) {
+            const checkbox = document.getElementById('selectAll' + type.charAt(0).toUpperCase() + type.slice(1));
+            const checkboxes = document.querySelectorAll('.cb-' + type);
+            checkboxes.forEach(cb => cb.checked = checkbox.checked);
+        }
+
+        // Main Load Function
         setTimeout(async function() {
             const supabase = window.supabaseClient;
-            
-            if (!supabase) {
-                console.error('Supabase client not found!');
-                document.getElementById('totalConv').textContent = 'Error';
-                return;
-            }
+            if (!supabase) return;
 
-            console.log('Loading AI Dashboard...');
-
-            // 1. Load Stats
+            // 1. Stats
             const { count: convCount } = await supabase.from('ai_conversations').select('*', { count: 'exact', head: true });
             const { count: impCount } = await supabase.from('ai_conversations').select('*', { count: 'exact', head: true }).eq('needs_improvement', true);
             const { count: faqCount } = await supabase.from('faq_improvements').select('*', { count: 'exact', head: true }).eq('is_approved', false);
@@ -118,168 +202,115 @@
             document.getElementById('needsImp').textContent = impCount || 0;
             document.getElementById('pendingFaq').textContent = faqCount || 0;
 
-            // 2. Load Recent Conversations
-            const { data: conversations } = await supabase.from('ai_conversations').select('*').order('created_at', { ascending: false }).limit(20);
-            const convList = document.getElementById('conversationList');
+            // 2. Load Conversations (Tab 1)
+            const { data: conversations } = await supabase.from('ai_conversations').select('*').order('created_at', { ascending: false }).limit(50);
+            const convBody = document.getElementById('convListBody');
+            convBody.innerHTML = '';
             
             if (conversations && conversations.length > 0) {
-                convList.innerHTML = ''; 
                 conversations.forEach(c => {
                     const isBad = c.needs_improvement === true || c.was_helpful === false;
-                    const statusHtml = isBad 
-                        ? '<span style="background: #ffebee; color: #c62828; padding: 2px 8px; border-radius: 4px; font-size: 0.8rem;">❌ Needs Improvement</span>' 
-                        : '<span style="background: #e8f5e9; color: #2e7d32; padding: 2px 8px; border-radius: 4px; font-size: 0.8rem;">✅ Helpful</span>';
+                    const statusBadge = isBad ? '<span class="status-badge status-bad">Needs Fix</span>' : '<span class="status-badge status-good">Good</span>';
+                    const shortAns = c.ai_response.length > 50 ? c.ai_response.substring(0, 50) + '...' : c.ai_response;
                     
-                    const safeQuestion = c.user_message.replace(/'/g, "\\'").replace(/"/g, '&quot;');
-                    const correctionHtml = `
-                        <div style="margin-top: 10px;">
-                            <button onclick="toggleCorrection('${c.id}')" class="btn btn-toggle">✏️ Add/Update Correction</button>
-                            <div id="correction-box-${c.id}" class="correction-box">
-                                <label style="font-size: 0.9rem; font-weight: bold; display:block; margin-bottom:5px;">✏️ Staff Correction:</label>
-                                <textarea id="correction-${c.id}" rows="2" placeholder="Type the correct answer..."></textarea>
-                                <button onclick="saveCorrection('${c.id}', '${safeQuestion}')" class="btn btn-save" style="margin-top: 5px;"> Save to FAQ Database</button>
-                            </div>
-                        </div>
-                    `;
-
-                    convList.innerHTML += `
-                        <div class="conversation-item">
-                            <div style="display: flex; justify-content: space-between; margin-bottom: 0.5rem;">
-                                <strong style="color: #2C3E50;">Patient:</strong>
-                                <span style="font-size: 0.85rem; color: #7F8C8D;">${new Date(c.created_at).toLocaleString()} • ${c.language || 'EN'}</span>
-                            </div>
-                            <p style="margin: 0.5rem 0;"><strong>Q:</strong> ${c.user_message}</p>
-                            <p style="margin: 0.5rem 0; color: #2980b9;"><strong>A:</strong> ${c.ai_response}</p>
-                            ${statusHtml}
-                            ${correctionHtml}
-                            <div class="delete-btn-container">
-                                <button onclick="deleteConversation('${c.id}')" class="btn btn-delete">️ Delete Conversation</button>
-                            </div>
-                        </div>
+                    convBody.innerHTML += `
+                        <tr>
+                            <td><input type="checkbox" class="cb-conv" value="${c.id}"></td>
+                            <td style="font-size:0.85rem; color:#7F8C8D;">${new Date(c.created_at).toLocaleDateString()}</td>
+                            <td><strong>${c.user_message}</strong></td>
+                            <td style="color:#555;">${shortAns}</td>
+                            <td>${statusBadge}</td>
+                        </tr>
                     `;
                 });
             } else {
-                convList.innerHTML = '<p style="color: #7F8C8D; text-align: center; padding: 2rem;">No conversations yet</p>';
+                convBody.innerHTML = '<tr><td colspan="5" style="text-align:center;">No data</td></tr>';
             }
 
-            // 3. Load Pending FAQ Suggestions
-            const { data: faqs } = await supabase.from('faq_improvements').select('*').eq('is_approved', false).order('created_at', { ascending: false });
-            const faqListEl = document.getElementById('faqList');
-            
-            if (faqs && faqs.length > 0) {
-                faqListEl.innerHTML = faqs.map(f => `
-                    <div class="faq-item">
-                        <h4 style="margin: 0 0 0.5rem;">❓ Q: ${f.question}</h4>
-                        <p style="margin: 0 0 1rem; color: #7F8C8D;">Suggested Answer: ${f.suggested_answer || 'Pending review'}</p>
-                        <div style="display: flex; gap: 0.5rem; align-items: center;">
-                            <input type="text" id="final-answer-${f.id}" value="${f.suggested_answer || ''}" placeholder="Final approved answer..." style="flex: 1; padding: 0.5rem; border: 1px solid #ddd; border-radius: 4px;">
-                            <button onclick="approveFaq('${f.id}')" class="btn btn-approve">✅ Approve</button>
-                            <button onclick="deleteFaq('${f.id}')" class="btn btn-delete">️ Delete</button>
-                        </div>
-                    </div>
-                `).join('');
-            } else {
-                faqListEl.innerHTML = '<p style="color: #7F8C8D; text-align: center; padding: 2rem;">No pending suggestions</p>';
-            }
+            // 3. Load Approved FAQs (Tab 2)
+            const { data: approvedFaqs } = await supabase.from('faq_improvements').select('*').eq('is_approved', true);
+            const appBody = document.getElementById('approvedListBody');
+            appBody.innerHTML = '';
 
-            // 4. Load Approved FAQs (For Updating)
-            const { data: approvedFaqs } = await supabase.from('faq_improvements').select('*').eq('is_approved', true).order('created_at', { ascending: false });
-            const approvedListEl = document.getElementById('approvedFaqList');
-            
             if (approvedFaqs && approvedFaqs.length > 0) {
-                approvedListEl.innerHTML = approvedFaqs.map(f => `
-                    <div class="faq-item" style="border-left: 4px solid #27ae60;">
-                        <h4 style="margin: 0 0 0.5rem;"> Q: ${f.question}</h4>
-                        <p class="current-answer">Current Answer: ${f.approved_answer}</p>
-                        <textarea id="update-answer-${f.id}" rows="2">${f.approved_answer}</textarea>
-                        <div style="margin-top: 5px;">
-                            <button onclick="updateApprovedFaq('${f.id}')" class="btn btn-update">💾 Update Answer</button>
-                            <button onclick="deleteFaq('${f.id}')" class="btn btn-delete">🗑️ Delete FAQ</button>
-                        </div>
-                    </div>
-                `).join('');
+                approvedFaqs.forEach(f => {
+                    appBody.innerHTML += `
+                        <tr>
+                            <td><input type="checkbox" class="cb-approved" value="${f.id}"></td>
+                            <td><strong>${f.question}</strong></td>
+                            <td>
+                                <textarea id="update-ans-${f.id}" rows="1">${f.approved_answer}</textarea>
+                            </td>
+                            <td class="action-cell">
+                                <button onclick="updateFaq('${f.id}')" class="btn btn-primary" style="padding: 4px 8px; font-size: 0.8rem;">Save</button>
+                            </td>
+                        </tr>
+                    `;
+                });
             } else {
-                approvedListEl.innerHTML = '<p style="color: #7F8C8D; text-align: center; padding: 2rem;">No approved FAQs yet. Approve some from the list above!</p>';
+                appBody.innerHTML = '<tr><td colspan="4" style="text-align:center;">No approved FAQs yet.</td></tr>';
+            }
+
+            // 4. Load Pending FAQs (Tab 3)
+            const { data: pendingFaqs } = await supabase.from('faq_improvements').select('*').eq('is_approved', false);
+            const penBody = document.getElementById('pendingListBody');
+            penBody.innerHTML = '';
+
+            if (pendingFaqs && pendingFaqs.length > 0) {
+                pendingFaqs.forEach(f => {
+                    penBody.innerHTML += `
+                        <tr>
+                            <td><input type="checkbox" class="cb-pending" value="${f.id}"></td>
+                            <td><strong>${f.question}</strong></td>
+                            <td>${f.suggested_answer}</td>
+                            <td class="action-cell">
+                                <button onclick="approveFaq('${f.id}')" class="btn btn-success" style="padding: 4px 8px; font-size: 0.8rem;">Approve</button>
+                            </td>
+                        </tr>
+                    `;
+                });
+            } else {
+                penBody.innerHTML = '<tr><td colspan="4" style="text-align:center;">No pending suggestions.</td></tr>';
             }
 
         }, 500);
 
-        // --- Helper Functions ---
+        // --- Actions ---
 
-        function toggleCorrection(id) {
-            const box = document.getElementById(`correction-box-${id}`);
-            box.style.display = box.style.display === 'none' ? 'block' : 'none';
-        }
-
-        async function saveCorrection(convId, userQuestion) {
-            const textArea = document.getElementById(`correction-${convId}`);
-            const newAnswer = textArea.value;
-            if (!newAnswer) return alert('Please type a correction first.');
-
+        async function updateFaq(id) {
+            const newAns = document.getElementById(`update-ans-${id}`).value;
             const supabase = window.supabaseClient;
-            const { error } = await supabase.from('faq_improvements').insert([{
-                question: userQuestion, suggested_answer: newAnswer, is_approved: false
-            }]);
-
-            if (error) alert('Error saving correction.');
-            else { alert('Correction saved! Check the "Pending FAQ Updates" section.'); location.reload(); }
+            await supabase.from('faq_improvements').update({ approved_answer: newAns }).eq('id', id);
+            alert('Updated!');
         }
 
         async function approveFaq(id) {
-            const answerInput = document.getElementById(`final-answer-${id}`);
-            const finalAnswer = answerInput.value;
             const supabase = window.supabaseClient;
-            await supabase.from('faq_improvements').update({ is_approved: true, approved_answer: finalAnswer }).eq('id', id);
-            alert('FAQ Approved!');
+            // Move from pending to approved
+            await supabase.from('faq_improvements').update({ is_approved: true }).eq('id', id);
+            alert('Approved! AI will now use this answer.');
             location.reload();
         }
 
-        async function updateApprovedFaq(id) {
-            const textArea = document.getElementById(`update-answer-${id}`);
-            const newAnswer = textArea.value;
+        // Batch Delete Logic
+        async function batchDelete(type) {
+            const checkboxes = document.querySelectorAll('.cb-' + type + ':checked');
+            if (checkboxes.length === 0) return alert('Please select items to delete.');
             
-            if (!newAnswer) return alert('Please enter an answer first.');
+            if (!confirm(`Are you sure you want to delete ${checkboxes.length} items?`)) return;
 
+            const ids = Array.from(checkboxes).map(cb => cb.value);
             const supabase = window.supabaseClient;
-            const { error } = await supabase.from('faq_improvements').update({ approved_answer: newAnswer }).eq('id', id);
+            
+            let table = type === 'conv' ? 'ai_conversations' : 'faq_improvements';
+            
+            const { error } = await supabase.from(table).delete().in('id', ids);
 
             if (error) {
                 console.error(error);
-                alert('Error updating FAQ.');
+                alert('Error deleting items.');
             } else {
-                alert('✅ Answer Updated! The AI will now use this new response.');
-                location.reload();
-            }
-        }
-
-        // NEW: Delete Conversation Function
-        async function deleteConversation(id) {
-            if (!confirm('Are you sure you want to permanently delete this conversation record?')) return;
-            
-            const supabase = window.supabaseClient;
-            const { error } = await supabase.from('ai_conversations').delete().eq('id', id);
-
-            if (error) {
-                console.error(error);
-                alert('Error deleting conversation.');
-            } else {
-                alert('Conversation deleted.');
-                location.reload();
-            }
-        }
-
-        // NEW: Delete FAQ Function
-        async function deleteFaq(id) {
-            if (!confirm('Are you sure you want to permanently delete this FAQ? The AI will forget this answer.')) return;
-            
-            const supabase = window.supabaseClient;
-            const { error } = await supabase.from('faq_improvements').delete().eq('id', id);
-
-            if (error) {
-                console.error(error);
-                alert('Error deleting FAQ.');
-            } else {
-                alert('FAQ deleted.');
+                alert('Deleted successfully!');
                 location.reload();
             }
         }
