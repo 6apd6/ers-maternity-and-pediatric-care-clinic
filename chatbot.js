@@ -360,18 +360,68 @@ class MultilingualChatbot {
         if (indicator) indicator.classList.remove('active');
     }
 
-    getAIResponse(input) {
+      getAIResponse(input) {
         const lower = input.toLowerCase();
         const lang = this.detectLanguage(input);
-        
+
+        // First, check local knowledge base
         for (const [category, keywords] of Object.entries(this.knowledgeBase)) {
             const allKeywords = Object.values(keywords).flat();
             if (allKeywords.some(kw => lower.includes(kw))) {
                 return { text: this.responses[category][lang], lang };
             }
         }
-        
+
+        // If no local match, check the database for approved FAQs
+        if (window.supabaseClient) {
+            this.checkDatabaseForAnswer(input, lang);
+        }
+
+        // Return fallback for now (database check will update if found)
         return { text: this.responses.fallback[lang], lang };
+    }
+
+    async checkDatabaseForAnswer(input, lang) {
+        try {
+            const supabase = window.supabaseClient;
+            
+            // Get all approved FAQs
+            const { data: approvedFaqs } = await supabase
+                .from('faq_improvements')
+                .select('*')
+                .eq('is_approved', true);
+            
+            if (approvedFaqs && approvedFaqs.length > 0) {
+                // Check if any approved FAQ matches the user's question
+                const lowerInput = input.toLowerCase();
+                const match = approvedFaqs.find(faq => 
+                    lowerInput.includes(faq.question.toLowerCase()) || 
+                    faq.question.toLowerCase().includes(lowerInput)
+                );
+                
+                if (match && match.approved_answer) {
+                    // Display the approved answer in the chat
+                    const messagesDiv = document.getElementById('chatbotMessages');
+                    const lastMessage = messagesDiv.lastElementChild;
+                    
+                    // Replace the fallback message with the correct answer
+                    if (lastMessage && lastMessage.classList.contains('message-bot')) {
+                        lastMessage.innerHTML = match.approved_answer.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>').replace(/\n/g, '<br>');
+                        
+                        // Update the conversation log with the correct answer
+                        const convId = lastMessage.dataset.conversationId;
+                        if (convId) {
+                            await supabase
+                                .from('ai_conversations')
+                                .update({ ai_response: match.approved_answer })
+                                .eq('id', convId);
+                        }
+                    }
+                }
+            }
+        } catch (error) {
+            console.error('Error checking database for answer:', error);
+        }
     }
 
     processUserMessage(text) {
