@@ -110,7 +110,7 @@
             </div>
         </div>
         <div class="nav-links">
-            <a href="ai-learning.html">🤖 AI Learning Dashboard</a>
+            <a href="ai-learning.html"> AI Learning Dashboard</a>
             <button onclick="staffLogout()" class="btn btn-danger">Logout</button>
         </div>
     </div>
@@ -145,8 +145,8 @@
 
         <!-- Tab Navigation -->
         <div class="tab-nav">
-            <button class="tab-btn active" onclick="switchTab('overview')"> Overview</button>
-            <button class="tab-btn" onclick="switchTab('pending')"> Pending <span class="badge" id="pendingBadge">0</span></button>
+            <button class="tab-btn active" onclick="switchTab('overview')">📊 Overview</button>
+            <button class="tab-btn" onclick="switchTab('pending')">⏳ Pending <span class="badge" id="pendingBadge">0</span></button>
             <button class="tab-btn" onclick="switchTab('confirmed')">✅ Confirmed <span class="badge" id="confirmedBadge" style="background: #3498db;">0</span></button>
             <button class="tab-btn" onclick="switchTab('completed')">🏁 Completed <span class="badge" id="completedBadge" style="background: #27ae60;">0</span></button>
             <button class="tab-btn" onclick="switchTab('cancelled')">❌ Cancelled <span class="badge" id="cancelledBadge" style="background: #95a5a6;">0</span></button>
@@ -163,7 +163,7 @@
                     </div>
                 </div>
                 <div class="stat-card">
-                    <div class="stat-icon"></div>
+                    <div class="stat-icon">⏳</div>
                     <div class="stat-info">
                         <h3>Pending</h3>
                         <p id="pendingCount" style="color: #f39c12;">0</p>
@@ -205,7 +205,7 @@
                     <div class="toolbar-right">
                         <button onclick="batchUpdateStatus('pending', 'confirmed')" class="btn btn-success">✓ Confirm Selected</button>
                         <button onclick="batchUpdateStatus('pending', 'cancelled')" class="btn btn-danger">✕ Cancel Selected</button>
-                        <button onclick="batchDelete('pending')" class="btn btn-secondary">️ Delete Selected</button>
+                        <button onclick="batchDelete('pending')" class="btn btn-secondary">🗑️ Delete Selected</button>
                     </div>
                 </div>
                 <table class="data-table">
@@ -262,7 +262,7 @@
         <!-- Completed Tab -->
         <div id="tab-completed" class="tab-content">
             <div class="section-card">
-                <h2>🏁 Completed Appointments</h2>
+                <h2> Completed Appointments</h2>
                 <div class="toolbar">
                     <div class="toolbar-left">
                         <input type="checkbox" id="selectAllCompleted" onchange="toggleSelectAll('completed')"> 
@@ -293,14 +293,14 @@
         <!-- Cancelled Tab -->
         <div id="tab-cancelled" class="tab-content">
             <div class="section-card">
-                <h2>❌ Cancelled Appointments</h2>
+                <h2> Cancelled Appointments</h2>
                 <div class="toolbar">
                     <div class="toolbar-left">
                         <input type="checkbox" id="selectAllCancelled" onchange="toggleSelectAll('cancelled')"> 
                         <label for="selectAllCancelled">Select All</label>
                     </div>
                     <div class="toolbar-right">
-                        <button onclick="batchDelete('cancelled')" class="btn btn-danger">️ Delete Selected Permanently</button>
+                        <button onclick="batchDelete('cancelled')" class="btn btn-danger">🗑️ Delete Selected Permanently</button>
                     </div>
                 </div>
                 <table class="data-table">
@@ -390,11 +390,8 @@
         }
 
         function switchTab(tabName) {
-            // Hide all tabs
             document.querySelectorAll('.tab-content').forEach(tab => tab.classList.remove('active'));
             document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
-            
-            // Show selected tab
             document.getElementById('tab-' + tabName).classList.add('active');
             event.target.classList.add('active');
         }
@@ -423,26 +420,22 @@
 
             console.log('✅ Loaded', appointments.length, 'appointments');
 
-            // Separate by status
             const pending = appointments.filter(a => (a.status || 'pending') === 'pending');
             const confirmed = appointments.filter(a => a.status === 'confirmed');
             const completed = appointments.filter(a => a.status === 'completed');
             const cancelled = appointments.filter(a => a.status === 'cancelled');
 
-            // Update Stats
             document.getElementById('totalAppointments').textContent = appointments.length || 0;
             document.getElementById('pendingCount').textContent = pending.length || 0;
             document.getElementById('confirmedCount').textContent = confirmed.length || 0;
             document.getElementById('completedCount').textContent = completed.length || 0;
             document.getElementById('cancelledCount').textContent = cancelled.length || 0;
 
-            // Update Badges
             document.getElementById('pendingBadge').textContent = pending.length || 0;
             document.getElementById('confirmedBadge').textContent = confirmed.length || 0;
             document.getElementById('completedBadge').textContent = completed.length || 0;
             document.getElementById('cancelledBadge').textContent = cancelled.length || 0;
 
-            // Render Tables
             renderAppointmentsTable('pendingListBody', pending, 'pending');
             renderAppointmentsTable('confirmedListBody', confirmed, 'confirmed');
             renderAppointmentsTable('completedListBody', completed, 'completed');
@@ -496,10 +489,21 @@
                 const modalBody = document.getElementById('modalBody');
                 const date = data.appointment_date ? new Date(data.appointment_date).toLocaleString() : new Date(data.created_at).toLocaleString();
                 
+                // Check for doctor name in different possible column names
+                const doctorName = data.doctor_name || data.doctor || data.preferred_doctor || 'No preference';
+                
+                // Check for DOB in different possible column names
+                const dob = data.date_of_birth || data.dob || data.birthdate || data.patient_dob;
+                const dobDisplay = dob ? new Date(dob).toLocaleDateString() : 'Not provided';
+                
                 modalBody.innerHTML = `
                     <div class="detail-row">
                         <label>Patient Name</label>
                         <p><strong>${data.patient_name || 'N/A'}</strong></p>
+                    </div>
+                    <div class="detail-row">
+                        <label>Date of Birth</label>
+                        <p>${dobDisplay}</p>
                     </div>
                     <div class="detail-row">
                         <label>Service Type</label>
@@ -511,7 +515,7 @@
                     </div>
                     <div class="detail-row">
                         <label>Contact Number</label>
-                        <p>${data.phone || 'N/A'}</p>
+                        <p>${data.phone || data.phone_number || data.contact || 'N/A'}</p>
                     </div>
                     <div class="detail-row">
                         <label>Email</label>
@@ -519,16 +523,16 @@
                     </div>
                     <div class="detail-row">
                         <label>Preferred Doctor</label>
-                        <p>${data.doctor_name || 'No preference'}</p>
+                        <p>${doctorName}</p>
                     </div>
                     <div class="detail-row">
                         <label>Status</label>
                         <p><span style="background: ${getStatusColor(data.status)}; color: white; padding: 4px 12px; border-radius: 12px; font-size: 0.85rem; font-weight: 600;">${(data.status || 'pending').toUpperCase()}</span></p>
                     </div>
-                    ${data.message || data.notes ? `
+                    ${data.message || data.notes || data.patient_message ? `
                     <div class="detail-row">
                         <label>Patient Message / Notes</label>
-                        <div class="detail-message">${data.message || data.notes || 'No message provided'}</div>
+                        <div class="detail-message">${data.message || data.notes || data.patient_message || 'No message provided'}</div>
                     </div>
                     ` : ''}
                     <div class="detail-row">
@@ -555,7 +559,6 @@
             document.getElementById('detailModal').classList.remove('active');
         }
 
-        // Close modal when clicking outside
         document.getElementById('detailModal').addEventListener('click', function(e) {
             if (e.target === this) {
                 closeModal();
@@ -617,7 +620,7 @@
             if (error) {
                 alert('Error deleting appointments: ' + error.message);
             } else {
-                alert('🗑️ Appointments deleted successfully');
+                alert('️ Appointments deleted successfully');
                 loadAllData();
             }
         };
