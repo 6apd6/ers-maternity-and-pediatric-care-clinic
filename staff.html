@@ -21,12 +21,24 @@
         /* Main Layout */
         .main-content { padding: 100px 2rem 2rem 2rem; max-width: 1400px; margin: 0 auto; }
         
+        /* Tab Navigation */
+        .tab-nav { display: flex; gap: 0.5rem; margin-bottom: 2rem; border-bottom: 2px solid #e0e0e0; flex-wrap: wrap; }
+        .tab-btn { padding: 12px 24px; background: none; border: none; border-bottom: 3px solid transparent; cursor: pointer; font-size: 1rem; font-weight: 600; color: #7F8C8D; transition: 0.3s; }
+        .tab-btn:hover { color: #2C3E50; }
+        .tab-btn.active { color: #9b59b6; border-bottom-color: #9b59b6; }
+        .tab-btn .badge { background: #e74c3c; color: white; padding: 2px 8px; border-radius: 10px; font-size: 0.75rem; margin-left: 5px; }
+        
+        /* Tab Content */
+        .tab-content { display: none; }
+        .tab-content.active { display: block; animation: fadeIn 0.3s; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        
         /* Welcome Header */
         .welcome-header { margin-bottom: 2rem; }
         .welcome-header h1 { margin: 0; color: #2C3E50; font-size: 2rem; }
         
         /* Stats Grid */
-        .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 1.5rem; margin-bottom: 2rem; }
+        .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1.5rem; margin-bottom: 2rem; }
         .stat-card { background: white; padding: 1.5rem; border-radius: 12px; box-shadow: 0 2px 10px rgba(0,0,0,0.05); display: flex; align-items: center; gap: 1rem; }
         .stat-icon { font-size: 2.5rem; }
         .stat-info h3 { margin: 0; color: #7F8C8D; font-size: 0.85rem; text-transform: uppercase; letter-spacing: 0.5px; }
@@ -49,16 +61,31 @@
         .btn-success { background: #27ae60; }
         .btn-warning { background: #f39c12; }
         .btn-secondary { background: #95a5a6; }
+        .btn-info { background: #1abc9c; }
         
         /* Tables */
         .data-table { width: 100%; border-collapse: collapse; }
         .data-table th, .data-table td { padding: 12px; text-align: left; border-bottom: 1px solid #eee; }
         .data-table th { background: #f8f9fa; color: #7F8C8D; font-weight: 600; font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.5px; }
-        .data-table tr:hover { background: #fafafa; }
+        .data-table tr { cursor: pointer; }
+        .data-table tr:hover { background: #f0f8ff; }
         .data-table input[type="checkbox"] { transform: scale(1.2); cursor: pointer; }
         
         /* Status Dropdown */
         .status-select { padding: 6px 12px; border: 1px solid #ddd; border-radius: 4px; background: white; cursor: pointer; font-size: 0.9rem; width: 100%; }
+        
+        /* Modal */
+        .modal { display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.5); z-index: 2000; align-items: center; justify-content: center; }
+        .modal.active { display: flex; }
+        .modal-content { background: white; border-radius: 12px; padding: 2rem; max-width: 600px; width: 90%; max-height: 80vh; overflow-y: auto; }
+        .modal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem; padding-bottom: 1rem; border-bottom: 2px solid #f0f0f0; }
+        .modal-header h2 { margin: 0; color: #2C3E50; }
+        .modal-close { background: none; border: none; font-size: 1.5rem; cursor: pointer; color: #7F8C8D; }
+        .modal-close:hover { color: #e74c3c; }
+        .detail-row { margin-bottom: 1rem; }
+        .detail-row label { display: block; font-weight: 600; color: #7F8C8D; font-size: 0.85rem; margin-bottom: 0.25rem; }
+        .detail-row p, .detail-row div { margin: 0; color: #2C3E50; font-size: 1rem; }
+        .detail-message { background: #f8f9fa; padding: 1rem; border-radius: 8px; border-left: 4px solid #9b59b6; white-space: pre-wrap; }
         
         /* Login Styles */
         .login-container { max-width: 400px; margin: 120px auto; padding: 2rem; background: white; border-radius: 12px; box-shadow: 0 4px 20px rgba(0,0,0,0.1); }
@@ -116,129 +143,197 @@
             <p id="staffEmailDisplay" style="color: #7F8C8D; margin: 0.5rem 0 0 0;">Loading...</p>
         </div>
 
-        <!-- Stats Cards -->
-        <div class="stats-grid">
-            <div class="stat-card">
-                <div class="stat-icon"></div>
-                <div class="stat-info">
-                    <h3>Total Appointments</h3>
-                    <p id="totalAppointments">0</p>
+        <!-- Tab Navigation -->
+        <div class="tab-nav">
+            <button class="tab-btn active" onclick="switchTab('overview')"> Overview</button>
+            <button class="tab-btn" onclick="switchTab('pending')"> Pending <span class="badge" id="pendingBadge">0</span></button>
+            <button class="tab-btn" onclick="switchTab('confirmed')">✅ Confirmed <span class="badge" id="confirmedBadge" style="background: #3498db;">0</span></button>
+            <button class="tab-btn" onclick="switchTab('completed')">🏁 Completed <span class="badge" id="completedBadge" style="background: #27ae60;">0</span></button>
+            <button class="tab-btn" onclick="switchTab('cancelled')">❌ Cancelled <span class="badge" id="cancelledBadge" style="background: #95a5a6;">0</span></button>
+        </div>
+
+        <!-- Overview Tab -->
+        <div id="tab-overview" class="tab-content active">
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-icon">📅</div>
+                    <div class="stat-info">
+                        <h3>Total Appointments</h3>
+                        <p id="totalAppointments">0</p>
+                    </div>
                 </div>
-            </div>
-            <div class="stat-card">
-                <div class="stat-icon">⏳</div>
-                <div class="stat-info">
-                    <h3>Pending</h3>
-                    <p id="pendingCount" style="color: #f39c12;">0</p>
+                <div class="stat-card">
+                    <div class="stat-icon"></div>
+                    <div class="stat-info">
+                        <h3>Pending</h3>
+                        <p id="pendingCount" style="color: #f39c12;">0</p>
+                    </div>
                 </div>
-            </div>
-            <div class="stat-card">
-                <div class="stat-icon">✅</div>
-                <div class="stat-info">
-                    <h3>Confirmed</h3>
-                    <p id="confirmedCount" style="color: #3498db;">0</p>
+                <div class="stat-card">
+                    <div class="stat-icon">✅</div>
+                    <div class="stat-info">
+                        <h3>Confirmed</h3>
+                        <p id="confirmedCount" style="color: #3498db;">0</p>
+                    </div>
                 </div>
-            </div>
-            <div class="stat-card">
-                <div class="stat-icon">📞</div>
-                <div class="stat-info">
-                    <h3>Missed Calls</h3>
-                    <p id="missedCallsCount" style="color: #e74c3c;">0</p>
+                <div class="stat-card">
+                    <div class="stat-icon">🏁</div>
+                    <div class="stat-info">
+                        <h3>Completed</h3>
+                        <p id="completedCount" style="color: #27ae60;">0</p>
+                    </div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon">❌</div>
+                    <div class="stat-info">
+                        <h3>Cancelled</h3>
+                        <p id="cancelledCount" style="color: #95a5a6;">0</p>
+                    </div>
                 </div>
             </div>
         </div>
 
-        <!-- Pending Appointments -->
-        <div class="section-card">
-            <h2>⏳ Pending Appointments</h2>
-            <div class="toolbar">
-                <div class="toolbar-left">
-                    <input type="checkbox" id="selectAllPending" onchange="toggleSelectAll('pending')"> 
-                    <label for="selectAllPending">Select All</label>
+        <!-- Pending Tab -->
+        <div id="tab-pending" class="tab-content">
+            <div class="section-card">
+                <h2>⏳ Pending Appointments</h2>
+                <div class="toolbar">
+                    <div class="toolbar-left">
+                        <input type="checkbox" id="selectAllPending" onchange="toggleSelectAll('pending')"> 
+                        <label for="selectAllPending">Select All</label>
+                    </div>
+                    <div class="toolbar-right">
+                        <button onclick="batchUpdateStatus('pending', 'confirmed')" class="btn btn-success">✓ Confirm Selected</button>
+                        <button onclick="batchUpdateStatus('pending', 'cancelled')" class="btn btn-danger">✕ Cancel Selected</button>
+                        <button onclick="batchDelete('pending')" class="btn btn-secondary">️ Delete Selected</button>
+                    </div>
                 </div>
-                <div class="toolbar-right">
-                    <button onclick="batchUpdateStatus('pending', 'confirmed')" class="btn btn-success">✓ Confirm Selected</button>
-                    <button onclick="batchUpdateStatus('pending', 'cancelled')" class="btn btn-danger">✕ Cancel Selected</button>
-                    <button onclick="batchDelete('pending')" class="btn btn-secondary">🗑️ Delete Selected</button>
-                </div>
+                <table class="data-table">
+                    <thead>
+                        <tr>
+                            <th style="width: 40px;"></th>
+                            <th>Patient</th>
+                            <th>Service</th>
+                            <th>Date</th>
+                            <th>Contact</th>
+                            <th style="width: 100px;">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="pendingListBody">
+                        <tr><td colspan="6" style="text-align:center; color:#7F8C8D; padding: 2rem;">Loading...</td></tr>
+                    </tbody>
+                </table>
             </div>
-            <table class="data-table">
-                <thead>
-                    <tr>
-                        <th style="width: 40px;"></th>
-                        <th>Patient</th>
-                        <th>Service</th>
-                        <th>Date</th>
-                        <th>Contact</th>
-                        <th style="width: 150px;">Actions</th>
-                    </tr>
-                </thead>
-                <tbody id="pendingListBody">
-                    <tr><td colspan="6" style="text-align:center; color:#7F8C8D; padding: 2rem;">Loading...</td></tr>
-                </tbody>
-            </table>
         </div>
 
-        <!-- Confirmed Appointments -->
-        <div class="section-card">
-            <h2>✅ Confirmed Appointments</h2>
-            <div class="toolbar">
-                <div class="toolbar-left">
-                    <input type="checkbox" id="selectAllConfirmed" onchange="toggleSelectAll('confirmed')"> 
-                    <label for="selectAllConfirmed">Select All</label>
+        <!-- Confirmed Tab -->
+        <div id="tab-confirmed" class="tab-content">
+            <div class="section-card">
+                <h2>✅ Confirmed Appointments</h2>
+                <div class="toolbar">
+                    <div class="toolbar-left">
+                        <input type="checkbox" id="selectAllConfirmed" onchange="toggleSelectAll('confirmed')"> 
+                        <label for="selectAllConfirmed">Select All</label>
+                    </div>
+                    <div class="toolbar-right">
+                        <button onclick="batchUpdateStatus('confirmed', 'completed')" class="btn btn-success">✓ Mark Completed</button>
+                        <button onclick="batchUpdateStatus('confirmed', 'cancelled')" class="btn btn-danger">✕ Cancel Selected</button>
+                        <button onclick="batchDelete('confirmed')" class="btn btn-secondary">🗑️ Delete Selected</button>
+                    </div>
                 </div>
-                <div class="toolbar-right">
-                    <button onclick="batchUpdateStatus('confirmed', 'completed')" class="btn btn-success">✓ Mark Completed</button>
-                    <button onclick="batchUpdateStatus('confirmed', 'cancelled')" class="btn btn-danger">✕ Cancel Selected</button>
-                    <button onclick="batchDelete('confirmed')" class="btn btn-secondary">🗑️ Delete Selected</button>
-                </div>
+                <table class="data-table">
+                    <thead>
+                        <tr>
+                            <th style="width: 40px;"></th>
+                            <th>Patient</th>
+                            <th>Service</th>
+                            <th>Date</th>
+                            <th>Contact</th>
+                            <th style="width: 100px;">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="confirmedListBody">
+                        <tr><td colspan="6" style="text-align:center; color:#7F8C8D; padding: 2rem;">Loading...</td></tr>
+                    </tbody>
+                </table>
             </div>
-            <table class="data-table">
-                <thead>
-                    <tr>
-                        <th style="width: 40px;"></th>
-                        <th>Patient</th>
-                        <th>Service</th>
-                        <th>Date</th>
-                        <th>Contact</th>
-                        <th style="width: 150px;">Actions</th>
-                    </tr>
-                </thead>
-                <tbody id="confirmedListBody">
-                    <tr><td colspan="6" style="text-align:center; color:#7F8C8D; padding: 2rem;">Loading...</td></tr>
-                </tbody>
-            </table>
         </div>
 
-        <!-- Completed Appointments -->
-        <div class="section-card">
-            <h2>🏁 Completed Appointments</h2>
-            <div class="toolbar">
-                <div class="toolbar-left">
-                    <input type="checkbox" id="selectAllCompleted" onchange="toggleSelectAll('completed')"> 
-                    <label for="selectAllCompleted">Select All</label>
+        <!-- Completed Tab -->
+        <div id="tab-completed" class="tab-content">
+            <div class="section-card">
+                <h2>🏁 Completed Appointments</h2>
+                <div class="toolbar">
+                    <div class="toolbar-left">
+                        <input type="checkbox" id="selectAllCompleted" onchange="toggleSelectAll('completed')"> 
+                        <label for="selectAllCompleted">Select All</label>
+                    </div>
+                    <div class="toolbar-right">
+                        <button onclick="batchDelete('completed')" class="btn btn-secondary">🗑️ Delete Selected</button>
+                    </div>
                 </div>
-                <div class="toolbar-right">
-                    <button onclick="batchDelete('completed')" class="btn btn-secondary">️ Delete Selected</button>
-                </div>
+                <table class="data-table">
+                    <thead>
+                        <tr>
+                            <th style="width: 40px;"></th>
+                            <th>Patient</th>
+                            <th>Service</th>
+                            <th>Date</th>
+                            <th>Contact</th>
+                            <th style="width: 100px;">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="completedListBody">
+                        <tr><td colspan="6" style="text-align:center; color:#7F8C8D; padding: 2rem;">Loading...</td></tr>
+                    </tbody>
+                </table>
             </div>
-            <table class="data-table">
-                <thead>
-                    <tr>
-                        <th style="width: 40px;"></th>
-                        <th>Patient</th>
-                        <th>Service</th>
-                        <th>Date</th>
-                        <th>Contact</th>
-                        <th style="width: 100px;">Actions</th>
-                    </tr>
-                </thead>
-                <tbody id="completedListBody">
-                    <tr><td colspan="6" style="text-align:center; color:#7F8C8D; padding: 2rem;">Loading...</td></tr>
-                </tbody>
-            </table>
         </div>
 
+        <!-- Cancelled Tab -->
+        <div id="tab-cancelled" class="tab-content">
+            <div class="section-card">
+                <h2>❌ Cancelled Appointments</h2>
+                <div class="toolbar">
+                    <div class="toolbar-left">
+                        <input type="checkbox" id="selectAllCancelled" onchange="toggleSelectAll('cancelled')"> 
+                        <label for="selectAllCancelled">Select All</label>
+                    </div>
+                    <div class="toolbar-right">
+                        <button onclick="batchDelete('cancelled')" class="btn btn-danger">️ Delete Selected Permanently</button>
+                    </div>
+                </div>
+                <table class="data-table">
+                    <thead>
+                        <tr>
+                            <th style="width: 40px;"></th>
+                            <th>Patient</th>
+                            <th>Service</th>
+                            <th>Date</th>
+                            <th>Contact</th>
+                            <th style="width: 100px;">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="cancelledListBody">
+                        <tr><td colspan="6" style="text-align:center; color:#7F8C8D; padding: 2rem;">Loading...</td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- Appointment Detail Modal -->
+    <div id="detailModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>📋 Appointment Details</h2>
+                <button class="modal-close" onclick="closeModal()">&times;</button>
+            </div>
+            <div id="modalBody">
+                <!-- Content will be inserted here -->
+            </div>
+        </div>
     </div>
 
     <!-- Load Supabase -->
@@ -267,7 +362,6 @@
             const email = document.getElementById('staffEmail').value;
             const password = document.getElementById('staffPassword').value;
             
-            // Simple authentication
             if (email === 'admin@ersmaternity.com' && password === 'admin123') {
                 localStorage.setItem('staffLoggedIn', 'true');
                 localStorage.setItem('staffEmail', email);
@@ -295,6 +389,16 @@
             location.reload();
         }
 
+        function switchTab(tabName) {
+            // Hide all tabs
+            document.querySelectorAll('.tab-content').forEach(tab => tab.classList.remove('active'));
+            document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+            
+            // Show selected tab
+            document.getElementById('tab-' + tabName).classList.add('active');
+            event.target.classList.add('active');
+        }
+
         function toggleSelectAll(type) {
             const checkbox = document.getElementById('selectAll' + type.charAt(0).toUpperCase() + type.slice(1));
             const checkboxes = document.querySelectorAll('.cb-' + type);
@@ -308,9 +412,8 @@
                 return;
             }
 
-            console.log(' Loading appointments...');
+            console.log('📥 Loading appointments...');
 
-            // Load Appointments
             const { data: appointments, error } = await supabase.from('appointments').select('*').order('created_at', { ascending: false });
             
             if (error) {
@@ -320,30 +423,30 @@
 
             console.log('✅ Loaded', appointments.length, 'appointments');
 
-            // Separate by status (default to 'pending' if status column is missing)
+            // Separate by status
             const pending = appointments.filter(a => (a.status || 'pending') === 'pending');
             const confirmed = appointments.filter(a => a.status === 'confirmed');
             const completed = appointments.filter(a => a.status === 'completed');
+            const cancelled = appointments.filter(a => a.status === 'cancelled');
 
             // Update Stats
             document.getElementById('totalAppointments').textContent = appointments.length || 0;
             document.getElementById('pendingCount').textContent = pending.length || 0;
             document.getElementById('confirmedCount').textContent = confirmed.length || 0;
+            document.getElementById('completedCount').textContent = completed.length || 0;
+            document.getElementById('cancelledCount').textContent = cancelled.length || 0;
+
+            // Update Badges
+            document.getElementById('pendingBadge').textContent = pending.length || 0;
+            document.getElementById('confirmedBadge').textContent = confirmed.length || 0;
+            document.getElementById('completedBadge').textContent = completed.length || 0;
+            document.getElementById('cancelledBadge').textContent = cancelled.length || 0;
 
             // Render Tables
             renderAppointmentsTable('pendingListBody', pending, 'pending');
             renderAppointmentsTable('confirmedListBody', confirmed, 'confirmed');
             renderAppointmentsTable('completedListBody', completed, 'completed');
-
-            // Load Callbacks (Optional)
-            try {
-                const { data: callbacks } = await supabase.from('callbacks').select('*').order('created_at', { ascending: false }).limit(5);
-                if (callbacks) {
-                    document.getElementById('missedCallsCount').textContent = callbacks.length;
-                }
-            } catch (e) {
-                console.log('Callbacks table not found or empty');
-            }
+            renderAppointmentsTable('cancelledListBody', cancelled, 'cancelled');
         }
 
         function renderAppointmentsTable(tbodyId, appointments, status) {
@@ -362,14 +465,14 @@
                 const contact = a.phone || a.email || 'N/A';
                 
                 return `
-                    <tr>
-                        <td><input type="checkbox" class="cb-${status}" value="${a.id}"></td>
+                    <tr onclick="showAppointmentDetails('${a.id}')">
+                        <td><input type="checkbox" class="cb-${status}" value="${a.id}" onclick="event.stopPropagation()"></td>
                         <td><strong>${patientName}</strong></td>
                         <td>${service}</td>
                         <td>${date}</td>
                         <td>${contact}</td>
                         <td>
-                            <select onchange="window.updateStatus('${a.id}', this.value)" class="status-select">
+                            <select onchange="window.updateStatus('${a.id}', this.value); event.stopPropagation();" class="status-select" onclick="event.stopPropagation()">
                                 <option value="pending" ${a.status === 'pending' ? 'selected' : ''}>Pending</option>
                                 <option value="confirmed" ${a.status === 'confirmed' ? 'selected' : ''}>Confirmed</option>
                                 <option value="completed" ${a.status === 'completed' ? 'selected' : ''}>Completed</option>
@@ -381,7 +484,84 @@
             }).join('');
         }
 
-        // Attach functions to window so they can be called from inline handlers
+        function showAppointmentDetails(id) {
+            const supabase = window.supabaseClient;
+            
+            supabase.from('appointments').select('*').eq('id', id).single().then(({ data, error }) => {
+                if (error) {
+                    console.error('Error loading details:', error);
+                    return;
+                }
+
+                const modalBody = document.getElementById('modalBody');
+                const date = data.appointment_date ? new Date(data.appointment_date).toLocaleString() : new Date(data.created_at).toLocaleString();
+                
+                modalBody.innerHTML = `
+                    <div class="detail-row">
+                        <label>Patient Name</label>
+                        <p><strong>${data.patient_name || 'N/A'}</strong></p>
+                    </div>
+                    <div class="detail-row">
+                        <label>Service Type</label>
+                        <p>${data.service || data.appointment_type || 'N/A'}</p>
+                    </div>
+                    <div class="detail-row">
+                        <label>Appointment Date & Time</label>
+                        <p>${date}</p>
+                    </div>
+                    <div class="detail-row">
+                        <label>Contact Number</label>
+                        <p>${data.phone || 'N/A'}</p>
+                    </div>
+                    <div class="detail-row">
+                        <label>Email</label>
+                        <p>${data.email || 'N/A'}</p>
+                    </div>
+                    <div class="detail-row">
+                        <label>Preferred Doctor</label>
+                        <p>${data.doctor_name || 'No preference'}</p>
+                    </div>
+                    <div class="detail-row">
+                        <label>Status</label>
+                        <p><span style="background: ${getStatusColor(data.status)}; color: white; padding: 4px 12px; border-radius: 12px; font-size: 0.85rem; font-weight: 600;">${(data.status || 'pending').toUpperCase()}</span></p>
+                    </div>
+                    ${data.message || data.notes ? `
+                    <div class="detail-row">
+                        <label>Patient Message / Notes</label>
+                        <div class="detail-message">${data.message || data.notes || 'No message provided'}</div>
+                    </div>
+                    ` : ''}
+                    <div class="detail-row">
+                        <label>Booked On</label>
+                        <p>${new Date(data.created_at).toLocaleString()}</p>
+                    </div>
+                `;
+                
+                document.getElementById('detailModal').classList.add('active');
+            });
+        }
+
+        function getStatusColor(status) {
+            const colors = {
+                'pending': '#f39c12',
+                'confirmed': '#3498db',
+                'completed': '#27ae60',
+                'cancelled': '#95a5a6'
+            };
+            return colors[status] || '#7F8C8D';
+        }
+
+        function closeModal() {
+            document.getElementById('detailModal').classList.remove('active');
+        }
+
+        // Close modal when clicking outside
+        document.getElementById('detailModal').addEventListener('click', function(e) {
+            if (e.target === this) {
+                closeModal();
+            }
+        });
+
         window.updateStatus = async function(id, newStatus) {
             console.log('🔄 Updating appointment', id, 'to', newStatus);
             
@@ -402,7 +582,7 @@
                 alert('Error updating status: ' + error.message);
             } else {
                 console.log('✅ Status updated successfully:', data);
-                loadAllData(); // Refresh to move item to correct table
+                loadAllData();
             }
         };
 
@@ -427,7 +607,7 @@
             const checkboxes = document.querySelectorAll('.cb-' + type + ':checked');
             if (checkboxes.length === 0) return alert('Please select appointments to delete.');
             
-            if (!confirm(`Are you sure you want to delete ${checkboxes.length} appointments?`)) return;
+            if (!confirm(`⚠️ Are you sure you want to delete ${checkboxes.length} appointments? This cannot be undone!`)) return;
             
             const ids = Array.from(checkboxes).map(cb => cb.value);
             const supabase = window.supabaseClient;
