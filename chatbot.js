@@ -384,10 +384,10 @@ class MultilingualChatbot {
         return { text: this.responses.fallback[lang], lang };
     }
 
-    async getApprovedAnswer(input) {
+       async getApprovedAnswer(input) {
         try {
             const supabase = window.supabaseClient;
-            const lowerInput = input.toLowerCase();
+            const lowerInput = input.toLowerCase().trim();
             
             // Get all approved FAQs
             const { data: approvedFaqs, error } = await supabase
@@ -395,41 +395,55 @@ class MultilingualChatbot {
                 .select('question, approved_answer')
                 .eq('is_approved', true);
             
-            if (error) {
-                console.error('Error fetching FAQs:', error);
-                return null;
-            }
-            
-            if (!approvedFaqs || approvedFaqs.length === 0) {
+            if (error || !approvedFaqs || approvedFaqs.length === 0) {
                 return null;
             }
 
             console.log('Checking', approvedFaqs.length, 'approved FAQs for:', input);
 
-            // Try to find a match - check each approved FAQ
+            // IMPORTANT WORDS TO IGNORE (stop words)
+            const stopWords = ['magkano', 'how', 'much', 'what', 'is', 'ang', 'sa', 'po', 'ba', 'ano', 'the', 'a', 'an'];
+
+            // Extract important words from user's question (ignore stop words)
+            const userInputWords = lowerInput.split(' ').filter(word => 
+                word.length > 2 && !stopWords.includes(word) && !stopWords.includes(word.toLowerCase())
+            );
+
+            console.log('Important words in question:', userInputWords);
+
+            // Try to find a match
             for (const faq of approvedFaqs) {
-                const faqQuestion = faq.question.toLowerCase();
+                const faqQuestion = faq.question.toLowerCase().trim();
                 
-                // Match if:
-                // 1. User's question contains the FAQ question keywords
-                // 2. OR FAQ question contains user's question keywords
-                // 3. OR they share important words (like "nsd", "price", "magkano")
-                
-                const faqWords = faqQuestion.split(' ');
-                const inputWords = lowerInput.split(' ');
-                
-                // Check for keyword overlap
-                const commonWords = faqWords.filter(word => 
-                    inputWords.includes(word) && word.length > 2
+                // Extract important words from FAQ question
+                const faqWords = faqQuestion.split(' ').filter(word => 
+                    word.length > 2 && !stopWords.includes(word) && !stopWords.includes(word.toLowerCase())
                 );
+
+                console.log('Checking FAQ:', faq.question, '-> important words:', faqWords);
+
+                // Count how many important words match
+                const matchingWords = userInputWords.filter(word => faqWords.includes(word));
+                const matchPercentage = matchingWords.length / Math.max(userInputWords.length, faqWords.length);
+
+                console.log('Matching words:', matchingWords, 'Percentage:', matchPercentage);
+
+                // ONLY match if:
+                // 1. At least 50% of important words match
+                // 2. OR exact phrase match
+                // 3. OR one contains the other
                 
-                if (commonWords.length > 0 || lowerInput.includes(faqQuestion) || faqQuestion.includes(lowerInput)) {
-                    console.log('✅ Found match:', faq.question, '->', faq.approved_answer);
+                if (matchPercentage >= 0.5 || 
+                    lowerInput === faqQuestion || 
+                    lowerInput.includes(faqQuestion) || 
+                    faqQuestion.includes(lowerInput)) {
+                    
+                    console.log('✅ Strong match found:', faq.question, '->', faq.approved_answer);
                     return faq.approved_answer;
                 }
             }
             
-            console.log('No approved FAQ match found');
+            console.log('No good match found');
             return null;
         } catch (error) {
             console.error('Error in getApprovedAnswer:', error);
