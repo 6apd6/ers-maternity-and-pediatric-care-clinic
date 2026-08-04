@@ -3,344 +3,309 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Book Appointment | ERS Maternity Clinic</title>
-    <meta name="description" content="Book your appointment online at ERS Maternity & Pediatric Care Clinic.">
-    
-    <!-- Fonts & Stylesheets (FIXED PATH) -->
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&family=Playfair+Display:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <title>Book Appointment | ERS Maternity & Pediatric Care</title>
     <link rel="stylesheet" href="main.css">
-    
-    <!-- Booking Page Specific Styles -->
     <style>
-        .appointment-hero {
-            background: linear-gradient(135deg, #E91E63 0%, #FF6F00 100%);
-            color: white;
-            padding: 8rem 2rem 4rem;
-            text-align: center;
-            margin-top: 80px;
-        }
-        .appointment-hero h1 { font-size: 3rem; margin-bottom: 1rem; color: white; font-family: 'Playfair Display', serif; }
-        .appointment-hero p { font-size: 1.2rem; opacity: 0.95; }
-        
-        .booking-section { padding: 4rem 2rem; background: #FFF5F7; }
-        .booking-container {
-            max-width: 1000px; margin: 0 auto; background: white;
-            padding: 3rem; border-radius: 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.1);
-        }
-        
-        .booking-steps { display: flex; justify-content: space-between; margin-bottom: 3rem; position: relative; }
-        .booking-steps::before { content: ''; position: absolute; top: 20px; left: 10%; right: 10%; height: 2px; background: #e0e0e0; z-index: 0; }
-        
-        .step { display: flex; flex-direction: column; align-items: center; gap: 0.5rem; position: relative; z-index: 1; }
-        .step-number { width: 40px; height: 40px; background: #e0e0e0; color: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: bold; transition: all 0.3s; }
-        .step.active .step-number { background: linear-gradient(135deg, #E91E63 0%, #FF6F00 100%); }
-        .step.completed .step-number { background: #4CD964; }
-        .step-label { font-size: 0.9rem; color: #7F8C8D; }
-        .step.active .step-label { color: #E91E63; font-weight: 600; }
-        
-        .booking-step h2 { margin-bottom: 2rem; font-family: 'Playfair Display', serif; }
-        
-        .service-options { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 1.5rem; margin-bottom: 2rem; }
-        .service-option { cursor: pointer; }
-        .service-option input { display: none; }
-        .service-card-select {
-            background: white; border: 2px solid #e0e0e0; padding: 2rem; border-radius: 15px;
-            text-align: center; transition: all 0.3s;
-        }
-        .service-option input:checked + .service-card-select { border-color: #E91E63; background: #FFF5F7; box-shadow: 0 10px 30px rgba(233, 30, 99, 0.2); }
-        .service-card-select .service-icon { font-size: 3rem; margin-bottom: 1rem; }
-        .service-card-select h3 { margin-bottom: 0.5rem; color: #2C3E50; }
-        .service-card-select p { color: #7F8C8D; margin-bottom: 1rem; font-size: 0.9rem; }
-        .service-card-select .price { color: #E91E63; font-weight: 600; }
-        
-        .booking-nav { display: flex; justify-content: space-between; margin-top: 2rem; }
-        .hidden { display: none !important; }
-        
-        .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; }
-        .form-grid .full-width { grid-column: 1 / -1; }
+        body { font-family: 'Poppins', sans-serif; background: linear-gradient(135deg, #ffeaa7 0%, #fab1a0 100%); min-height: 100vh; margin: 0; padding: 0; }
+        .container { max-width: 800px; margin: 0 auto; padding: 2rem 1rem; }
+        .form-container { background: white; border-radius: 20px; box-shadow: 0 10px 40px rgba(0,0,0,0.1); padding: 3rem; margin-top: 2rem; }
+        .form-header { text-align: center; margin-bottom: 2rem; }
+        .form-header h1 { color: #2d3436; margin: 0 0 0.5rem 0; font-size: 2rem; }
+        .form-header p { color: #636e72; margin: 0; }
         .form-group { margin-bottom: 1.5rem; }
-        .form-group label { display: block; margin-bottom: 0.5rem; font-weight: 500; color: #2C3E50; }
-        .form-group input, .form-group textarea, .form-group select {
-            width: 100%; padding: 1rem; border: 2px solid #e0e0e0; border-radius: 10px; font-family: 'Poppins', sans-serif;
-        }
-        .form-group input:focus, .form-group textarea:focus, .form-group select:focus { outline: none; border-color: #E91E63; }
-        
-        .booking-summary { background: #FFF5F7; padding: 2rem; border-radius: 15px; margin-bottom: 2rem; }
-        .summary-item { display: flex; justify-content: space-between; padding: 1rem 0; border-bottom: 1px solid #e0e0e0; }
-        .summary-item:last-child { border-bottom: none; }
-        .summary-item strong { color: #2C3E50; }
-        .summary-item span { color: #7F8C8D; }
-
-        @media (max-width: 768px) {
-            .form-grid { grid-template-columns: 1fr; }
-            .booking-container { padding: 1.5rem; }
-            .appointment-hero h1 { font-size: 2rem; }
-        }
+        .form-group label { display: block; margin-bottom: 0.5rem; font-weight: 600; color: #2d3436; }
+        .form-group input, .form-group select, .form-group textarea { width: 100%; padding: 0.75rem; border: 2px solid #dfe6e9; border-radius: 8px; font-size: 1rem; font-family: inherit; box-sizing: border-box; transition: border-color 0.3s; }
+        .form-group input:focus, .form-group select:focus, .form-group textarea:focus { outline: none; border-color: #e84393; }
+        .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
+        .btn { padding: 1rem 2rem; border: none; border-radius: 50px; font-size: 1rem; font-weight: 600; cursor: pointer; transition: all 0.3s; }
+        .btn-primary { background: linear-gradient(135deg, #e84393 0%, #fd79a8 100%); color: white; }
+        .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 5px 20px rgba(232, 67, 147, 0.4); }
+        .btn-secondary { background: #dfe6e9; color: #2d3436; }
+        .btn-secondary:hover { background: #b2bec3; }
+        .review-section { display: none; }
+        .review-section.active { display: block; }
+        .review-item { display: flex; justify-content: space-between; padding: 1rem; border-bottom: 1px solid #f0f0f0; }
+        .review-item:last-child { border-bottom: none; }
+        .review-label { font-weight: 600; color: #636e72; }
+        .review-value { color: #2d3436; }
+        .success-message { text-align: center; padding: 2rem; }
+        .success-message h2 { color: #00b894; font-size: 2rem; margin: 0 0 1rem 0; }
+        .success-message p { color: #636e72; font-size: 1.1rem; }
+        .error-message { background: #ffe6e6; color: #d63031; padding: 1rem; border-radius: 8px; margin-bottom: 1rem; display: none; }
+        .error-message.show { display: block; }
+        @media (max-width: 600px) { .form-row { grid-template-columns: 1fr; } .form-container { padding: 2rem 1rem; } }
     </style>
 </head>
 <body>
+
     <!-- Navigation -->
-    <nav class="navbar">
-        <div class="nav-container">
-            <div class="logo">
-                <div class="logo-icon">ERS</div>
-                <div class="logo-text">
-                    <h1>ERS Maternity</h1>
-                    <p>& PEDIATRIC CARE</p>
+    <nav class="navbar" style="background: white; padding: 1rem 2rem; box-shadow: 0 2px 10px rgba(0,0,0,0.05);">
+        <div style="max-width: 1200px; margin: 0 auto; display: flex; justify-content: space-between; align-items: center;">
+            <div style="display: flex; align-items: center; gap: 1rem;">
+                <div style="background: linear-gradient(135deg, #fd79a8 0%, #e84393 100%); width: 50px; height: 50px; border-radius: 50%; display: flex; align-items: center; justify-content: center; color: white; font-weight: bold; font-size: 1.5rem;">ERS</div>
+                <div>
+                    <h2 style="margin: 0; color: #2d3436; font-size: 1.5rem;">ERS Maternity</h2>
+                    <p style="margin: 0; color: #636e72; font-size: 0.85rem;">& PEDIATRIC CARE</p>
                 </div>
             </div>
-            <ul class="nav-links">
-                <li><a href="index.html">Home</a></li>
-                <li><a href="about.html">About</a></li>
-                <li><a href="services.html">Services</a></li>
-                <li><a href="blog.html">Blog</a></li>
-                <li><a href="appointment.html" class="active">Book Appointment</a></li>
-                <li><a href="portal.html">Patient Portal</a></li>
-                <li><a href="index.html#contact">Contact</a></li>
-            </ul>
-            <div class="mobile-menu">
-                <span></span><span></span><span></span>
+            <div style="display: flex; gap: 2rem;">
+                <a href="index.html" style="color: #636e72; text-decoration: none; font-weight: 500;">Home</a>
+                <a href="about.html" style="color: #636e72; text-decoration: none; font-weight: 500;">About</a>
+                <a href="services.html" style="color: #636e72; text-decoration: none; font-weight: 500;">Services</a>
+                <a href="blog.html" style="color: #636e72; text-decoration: none; font-weight: 500;">Blog</a>
+                <a href="appointment.html" style="color: #e84393; text-decoration: none; font-weight: 600; border-bottom: 2px solid #e84393;">Book Appointment</a>
+                <a href="portal.html" style="color: #636e72; text-decoration: none; font-weight: 500;">Patient Portal</a>
+                <a href="contact.html" style="color: #636e72; text-decoration: none; font-weight: 500;">Contact</a>
             </div>
         </div>
     </nav>
 
-    <!-- Hero Section -->
-    <section class="appointment-hero">
-        <div class="container">
-            <h1>Book Your Appointment</h1>
-            <p>Schedule your visit in just a few clicks. We'll confirm within 24 hours.</p>
-        </div>
-    </section>
-
-    <!-- Booking Form Section -->
-    <section class="booking-section">
-        <div class="booking-container">
-            <!-- Step Indicator -->
-            <div class="booking-steps">
-                <div class="step active" data-step="1">
-                    <div class="step-number">1</div>
-                    <div class="step-label">Service</div>
-                </div>
-                <div class="step" data-step="2">
-                    <div class="step-number">2</div>
-                    <div class="step-label">Date & Time</div>
-                </div>
-                <div class="step" data-step="3">
-                    <div class="step-number">3</div>
-                    <div class="step-label">Your Info</div>
-                </div>
-                <div class="step" data-step="4">
-                    <div class="step-number">4</div>
-                    <div class="step-label">Confirm</div>
-                </div>
-            </div>
-
+    <div class="container">
+        <div class="form-container">
+            
             <!-- Booking Form -->
-            <form id="bookingForm" class="booking-form">
-                <!-- Step 1: Service Selection -->
-                <div class="booking-step" id="step1">
-                    <h2>Select a Service</h2>
-                    <div class="service-options">
-                        <label class="service-option">
-                            <input type="radio" name="service" value="prenatal" required>
-                            <div class="service-card-select">
-                                <div class="service-icon">🤰</div>
-                                <h3>Prenatal Checkup</h3>
-                                <p>Regular pregnancy checkup</p>
-                                <span class="price">₱500 - ₱1,500</span>
-                            </div>
-                        </label>
-                        <label class="service-option">
-                            <input type="radio" name="service" value="normal-delivery">
-                            <div class="service-card-select">
-                                <div class="service-icon">👶</div>
-                                <h3>Normal Delivery</h3>
-                                <p>Complete delivery package</p>
-                                <span class="price">Contact for pricing</span>
-                            </div>
-                        </label>
-                        <label class="service-option">
-                            <input type="radio" name="service" value="cesarean">
-                            <div class="service-card-select">
-                                <div class="service-icon">🏥</div>
-                                <h3>Cesarean Section</h3>
-                                <p>C-section delivery</p>
-                                <span class="price">Contact for pricing</span>
-                            </div>
-                        </label>
-                        <label class="service-option">
-                            <input type="radio" name="service" value="pediatric">
-                            <div class="service-card-select">
-                                <div class="service-icon">🍼</div>
-                                <h3>Pediatric Care</h3>
-                                <p>Child checkup & vaccination</p>
-                                <span class="price">₱400 - ₱1,200</span>
-                            </div>
-                        </label>
-                        <label class="service-option">
-                            <input type="radio" name="service" value="obgyn">
-                            <div class="service-card-select">
-                                <div class="service-icon">🩺</div>
-                                <h3>OB-GYN Consultation</h3>
-                                <p>Women's health consultation</p>
-                                <span class="price">₱500 - ₱1,000</span>
-                            </div>
-                        </label>
-                        <label class="service-option">
-                            <input type="radio" name="service" value="postpartum">
-                            <div class="service-card-select">
-                                <div class="service-icon">💊</div>
-                                <h3>Postpartum Care</h3>
-                                <p>After delivery care</p>
-                                <span class="price">₱600 - ₱1,500</span>
-                            </div>
-                        </label>
-                    </div>
-                    <button type="button" class="btn btn-primary next-step" data-next="2">Continue →</button>
+            <div id="bookingForm">
+                <div class="form-header">
+                    <h1>Book an Appointment</h1>
+                    <p>Schedule your visit with our expert doctors</p>
                 </div>
 
-                <!-- Step 2: Date & Time -->
-                <div class="booking-step hidden" id="step2">
-                    <h2>Choose Date & Time</h2>
-                    <div class="calendar-container" style="background: #f9f9f9; padding: 1.5rem; border-radius: 15px; margin-bottom: 2rem; text-align: center;">
-                        <h3 id="currentMonth">July 2026</h3>
-                        <p style="color: #7F8C8D; margin-top: 1rem;">Please select your preferred date and time below.</p>
-                        <div class="form-grid" style="margin-top: 1.5rem;">
-                            <div class="form-group">
-                                <label>Preferred Date</label>
-                                <input type="date" name="appointmentDate" required>
-                            </div>
-                            <div class="form-group">
-                                <label>Preferred Time</label>
-                                <select name="appointmentTime" required>
-                                    <option value="">Select a time</option>
-                                    <option value="08:00">8:00 AM</option>
-                                    <option value="09:00">9:00 AM</option>
-                                    <option value="10:00">10:00 AM</option>
-                                    <option value="11:00">11:00 AM</option>
-                                    <option value="13:00">1:00 PM</option>
-                                    <option value="14:00">2:00 PM</option>
-                                    <option value="15:00">3:00 PM</option>
-                                    <option value="16:00">4:00 PM</option>
-                                </select>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="booking-nav">
-                        <button type="button" class="btn btn-secondary prev-step" data-prev="1">← Back</button>
-                        <button type="button" class="btn btn-primary next-step" data-next="3">Continue →</button>
-                    </div>
-                </div>
+                <div id="errorMessage" class="error-message"></div>
 
-                <!-- Step 3: Patient Info -->
-                <div class="booking-step hidden" id="step3">
-                    <h2>Your Information</h2>
-                    <div class="form-grid">
+                <form id="appointmentForm" onsubmit="event.preventDefault(); showReview();">
+                    <div class="form-row">
                         <div class="form-group">
-                            <label>Full Name *</label>
-                            <input type="text" name="fullName" required>
+                            <label for="patientName">Full Name *</label>
+                            <input type="text" id="patientName" name="patientName" required placeholder="Juan Dela Cruz">
                         </div>
                         <div class="form-group">
-                            <label>Phone Number *</label>
-                            <input type="tel" name="phone" placeholder="09XX-XXX-XXXX" required>
+                            <label for="phone">Phone Number *</label>
+                            <input type="tel" id="phone" name="phone" required placeholder="09XX-XXX-XXXX" pattern="09[0-9]{9}">
+                        </div>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="email">Email Address *</label>
+                            <input type="email" id="email" name="email" required placeholder="juan@example.com">
                         </div>
                         <div class="form-group">
-                            <label>Email</label>
-                            <input type="email" name="email">
+                            <label for="dateOfBirth">Date of Birth</label>
+                            <input type="date" id="dateOfBirth" name="dateOfBirth">
                         </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="address">Address</label>
+                        <input type="text" id="address" name="address" placeholder="Your complete address">
+                    </div>
+
+                    <div class="form-row">
                         <div class="form-group">
-                            <label>Date of Birth</label>
-                            <input type="date" name="dob">
-                        </div>
-                        <div class="form-group full-width">
-                            <label>Address</label>
-                            <input type="text" name="address">
-                        </div>
-                        <div class="form-group full-width">
-                            <label>Preferred Doctor</label>
-                            <select name="doctor">
-                                <option value="any">Any Available Doctor</option>
-                                <option value="castillo">Dr. Evalyn Rivera-Castillo</option>
-                                <option value="sinsay">Dr. Elli Sinsay</option>
+                            <label for="service">Service Type *</label>
+                            <select id="service" name="service" required>
+                                <option value="">Select a service</option>
+                                <option value="prenatal">Prenatal Care</option>
+                                <option value="postpartum">Postpartum Care</option>
+                                <option value="pediatric">Pediatric Care</option>
+                                <option value="newborn">Newborn Care</option>
+                                <option value="vaccination">Vaccination</option>
+                                <option value="ultrasound">Ultrasound</option>
+                                <option value="checkup">General Check-up</option>
                             </select>
                         </div>
-                        <div class="form-group full-width">
-                            <label>Additional Notes</label>
-                            <textarea name="notes" placeholder="Any special concerns or requests..."></textarea>
-                        </div>
-                        <div class="form-group full-width">
-                            <label style="display: flex; align-items: center; gap: 0.5rem; font-weight: normal;">
-                                <input type="checkbox" name="consent" required style="width: auto;">
-                                I consent to the collection of my personal data for appointment scheduling purposes.
-                            </label>
+                        <div class="form-group">
+                            <label for="doctor">Preferred Doctor</label>
+                            <select id="doctor" name="doctor">
+                                <option value="">Any Available Doctor</option>
+                                <option value="Dr. Evalyn Rivera-Castillo">Dr. Evalyn Rivera-Castillo</option>
+                                <option value="Dr. Elli Sinsay">Dr. Elli Sinsay</option>
+                                <option value="Dr. Maria Santos">Dr. Maria Santos</option>
+                                <option value="Dr. Jose Reyes">Dr. Jose Reyes</option>
+                            </select>
                         </div>
                     </div>
-                    <div class="booking-nav">
-                        <button type="button" class="btn btn-secondary prev-step" data-prev="2">← Back</button>
-                        <button type="button" class="btn btn-primary next-step" data-next="4">Review Booking →</button>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="appointmentDate">Preferred Date *</label>
+                            <input type="date" id="appointmentDate" name="appointmentDate" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="appointmentTime">Preferred Time *</label>
+                            <input type="time" id="appointmentTime" name="appointmentTime" required>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="notes">Special Concerns or Requests</label>
+                        <textarea id="notes" name="notes" rows="4" placeholder="Any special concerns or requests..."></textarea>
+                    </div>
+
+                    <button type="submit" class="btn btn-primary" style="width: 100%;">Continue to Review →</button>
+                </form>
+            </div>
+
+            <!-- Review Section -->
+            <div id="reviewSection" class="review-section">
+                <div class="form-header">
+                    <h1>Review & Confirm</h1>
+                    <p>Please review your appointment details</p>
+                </div>
+
+                <div style="background: #fff5f5; border-radius: 12px; padding: 2rem; margin: 2rem 0;">
+                    <div class="review-item">
+                        <span class="review-label">Service:</span>
+                        <span class="review-value" id="reviewService">-</span>
+                    </div>
+                    <div class="review-item">
+                        <span class="review-label">Date:</span>
+                        <span class="review-value" id="reviewDate">-</span>
+                    </div>
+                    <div class="review-item">
+                        <span class="review-label">Time:</span>
+                        <span class="review-value" id="reviewTime">-</span>
+                    </div>
+                    <div class="review-item">
+                        <span class="review-label">Patient:</span>
+                        <span class="review-value" id="reviewPatient">-</span>
+                    </div>
+                    <div class="review-item">
+                        <span class="review-label">Date of Birth:</span>
+                        <span class="review-value" id="reviewDOB">-</span>
+                    </div>
+                    <div class="review-item">
+                        <span class="review-label">Phone:</span>
+                        <span class="review-value" id="reviewPhone">-</span>
+                    </div>
+                    <div class="review-item">
+                        <span class="review-label">Email:</span>
+                        <span class="review-value" id="reviewEmail">-</span>
+                    </div>
+                    <div class="review-item">
+                        <span class="review-label">Doctor:</span>
+                        <span class="review-value" id="reviewDoctor">-</span>
+                    </div>
+                    <div class="review-item">
+                        <span class="review-label">Notes:</span>
+                        <span class="review-value" id="reviewNotes">-</span>
                     </div>
                 </div>
 
-                <!-- Step 4: Confirmation -->
-                <div class="booking-step hidden" id="step4">
-                    <h2>Review & Confirm</h2>
-                    <div class="booking-summary" id="bookingSummary">
-                        <!-- Populated by JS -->
-                        <p style="text-align: center; color: #7F8C8D;">Please fill out the previous steps to see your summary.</p>
-                    </div>
-                    <div class="booking-nav">
-                        <button type="button" class="btn btn-secondary prev-step" data-prev="3">← Back</button>
-                        <button type="submit" class="btn btn-primary">✓ Confirm Booking</button>
-                    </div>
+                <div style="display: flex; gap: 1rem;">
+                    <button onclick="backToForm()" class="btn btn-secondary" style="flex: 1;">← Back</button>
+                    <button onclick="confirmBooking()" class="btn btn-primary" style="flex: 1;">✓ Confirm Booking</button>
                 </div>
-            </form>
-        </div>
-    </section>
-
-    <!-- Footer -->
-    <footer style="background: #2C3E50; color: white; padding: 4rem 2rem 2rem;">
-        <div class="footer-container" style="max-width: 1200px; margin: 0 auto; display: grid; grid-template-columns: 2fr 1fr 1fr 1fr; gap: 3rem; margin-bottom: 3rem;">
-            <div class="footer-brand">
-                <h3 style="font-family: 'Playfair Display', serif; font-size: 1.8rem; margin-bottom: 1rem;">ERS Maternity & Pediatric Care</h3>
-                <p style="color: rgba(255, 255, 255, 0.7); line-height: 1.8; margin-bottom: 1.5rem;">Providing safe, gentle, and compassionate maternity care in Trece Martires, Cavite.</p>
             </div>
-            <div class="footer-section">
-                <h4 style="margin-bottom: 1.5rem;">Quick Links</h4>
-                <ul style="list-style: none;">
-                    <li style="margin-bottom: 0.8rem;"><a href="index.html" style="color: rgba(255, 255, 255, 0.7); text-decoration: none;">Home</a></li>
-                    <li style="margin-bottom: 0.8rem;"><a href="services.html" style="color: rgba(255, 255, 255, 0.7); text-decoration: none;">Services</a></li>
-                    <li style="margin-bottom: 0.8rem;"><a href="appointment.html" style="color: rgba(255, 255, 255, 0.7); text-decoration: none;">Book Appointment</a></li>
-                </ul>
-            </div>
-            <div class="footer-section">
-                <h4 style="margin-bottom: 1.5rem;">Contact</h4>
-                <ul style="list-style: none;">
-                    <li style="margin-bottom: 0.8rem;"><a href="tel:+639704716507" style="color: rgba(255, 255, 255, 0.7); text-decoration: none;">+63 970 471 6507</a></li>
-                    <li style="margin-bottom: 0.8rem;"><a href="mailto:ersmaternityclinic@gmail.com" style="color: rgba(255, 255, 255, 0.7); text-decoration: none;">ersmaternityclinic@gmail.com</a></li>
-                </ul>
-            </div>
-        </div>
-        <div class="footer-bottom" style="max-width: 1200px; margin: 0 auto; padding-top: 2rem; border-top: 1px solid rgba(255, 255, 255, 0.1); text-align: center; color: rgba(255, 255, 255, 0.7);">
-            <p>&copy; 2026 ERS Maternity & Pediatric Care Clinic. All rights reserved.</p>
-        </div>
-    </footer>
 
-    <!-- AI Widgets -->
-    <div id="aiPhoneWidget"></div>
-    <div id="chatbotWidget"></div>
+            <!-- Success Message -->
+            <div id="successSection" class="review-section">
+                <div class="success-message">
+                    <h2>✓ Booking Confirmed!</h2>
+                    <p>Your appointment has been successfully scheduled.</p>
+                    <p style="margin-top: 1rem; color: #636e72;">We'll send a confirmation to your email and contact you soon.</p>
+                    <button onclick="location.href='index.html'" class="btn btn-primary" style="margin-top: 2rem;">Back to Home</button>
+                </div>
+            </div>
 
-    <!-- Scripts (FIXED PATHS) -->
+        </div>
+    </div>
+
+    <!-- Load Supabase -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="config.js"></script>
-    <script src="main.js"></script>
-    <script src="chatbot.js"></script>
-    <script src="phone-agent.js"></script>
-    <script src="appointment.js"></script>
-     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    
     <script>
-        window.supabaseClient = window.supabase.createClient(
-            window.API_CONFIG.SUPABASE_URL, 
-            window.API_CONFIG.SUPABASE_KEY
-        );
+        // Initialize Supabase
+        if (window.API_CONFIG && window.supabase) {
+            window.supabaseClient = window.supabase.createClient(
+                window.API_CONFIG.SUPABASE_URL,
+                window.API_CONFIG.SUPABASE_KEY
+            );
+            console.log('✅ Supabase connected');
+        }
+
+        // Set minimum date to today
+        document.getElementById('appointmentDate').min = new Date().toISOString().split('T')[0];
+
+        function showReview() {
+            // Get form values
+            const service = document.getElementById('service');
+            const doctor = document.getElementById('doctor');
+            
+            // Update review section
+            document.getElementById('reviewService').textContent = service.options[service.selectedIndex].text;
+            document.getElementById('reviewDate').textContent = new Date(document.getElementById('appointmentDate').value).toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
+            document.getElementById('reviewTime').textContent = document.getElementById('appointmentTime').value;
+            document.getElementById('reviewPatient').textContent = document.getElementById('patientName').value;
+            
+            const dob = document.getElementById('dateOfBirth').value;
+            document.getElementById('reviewDOB').textContent = dob ? new Date(dob).toLocaleDateString() : 'Not provided';
+            
+            document.getElementById('reviewPhone').textContent = document.getElementById('phone').value;
+            document.getElementById('reviewEmail').textContent = document.getElementById('email').value;
+            document.getElementById('reviewDoctor').textContent = doctor.value || 'Any Available Doctor';
+            document.getElementById('reviewNotes').textContent = document.getElementById('notes').value || 'None';
+
+            // Show review section
+            document.getElementById('bookingForm').style.display = 'none';
+            document.getElementById('reviewSection').classList.add('active');
+            window.scrollTo(0, 0);
+        }
+
+        function backToForm() {
+            document.getElementById('bookingForm').style.display = 'block';
+            document.getElementById('reviewSection').classList.remove('active');
+            window.scrollTo(0, 0);
+        }
+
+        async function confirmBooking() {
+            const submitBtn = event.target;
+            submitBtn.disabled = true;
+            submitBtn.textContent = 'Processing...';
+
+            try {
+                const appointmentData = {
+                    patient_name: document.getElementById('patientName').value,
+                    phone: document.getElementById('phone').value,
+                    email: document.getElementById('email').value,
+                    date_of_birth: document.getElementById('dateOfBirth').value || null,
+                    address: document.getElementById('address').value,
+                    service: document.getElementById('service').value,
+                    preferred_doctor: document.getElementById('doctor').value || null,
+                    appointment_date: document.getElementById('appointmentDate').value + ' ' + document.getElementById('appointmentTime').value,
+                    patient_message: document.getElementById('notes').value,
+                    status: 'pending',
+                    created_at: new Date().toISOString()
+                };
+
+                console.log('Saving appointment:', appointmentData);
+
+                const supabase = window.supabaseClient;
+                const { data, error } = await supabase
+                    .from('appointments')
+                    .insert([appointmentData])
+                    .select();
+
+                if (error) {
+                    throw error;
+                }
+
+                console.log('✅ Appointment saved:', data);
+
+                // Show success
+                document.getElementById('reviewSection').classList.remove('active');
+                document.getElementById('successSection').classList.add('active');
+                window.scrollTo(0, 0);
+
+            } catch (error) {
+                console.error('Error saving appointment:', error);
+                document.getElementById('errorMessage').textContent = 'Error: ' + error.message;
+                document.getElementById('errorMessage').classList.add('show');
+                submitBtn.disabled = false;
+                submitBtn.textContent = '✓ Confirm Booking';
+            }
+        }
     </script>
 </body>
 </html>
