@@ -20,6 +20,7 @@
         .btn { padding: 1rem 2rem; border: none; border-radius: 50px; font-size: 1rem; font-weight: 600; cursor: pointer; transition: all 0.3s; }
         .btn-primary { background: linear-gradient(135deg, #e84393 0%, #fd79a8 100%); color: white; }
         .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 5px 20px rgba(232, 67, 147, 0.4); }
+        .btn-primary:disabled { opacity: 0.7; cursor: not-allowed; transform: none; }
         .btn-secondary { background: #dfe6e9; color: #2d3436; }
         .btn-secondary:hover { background: #b2bec3; }
         .review-section { display: none; }
@@ -27,11 +28,11 @@
         .review-item { display: flex; justify-content: space-between; padding: 1rem; border-bottom: 1px solid #f0f0f0; }
         .review-item:last-child { border-bottom: none; }
         .review-label { font-weight: 600; color: #636e72; }
-        .review-value { color: #2d3436; }
+        .review-value { color: #2d3436; text-align: right; }
         .success-message { text-align: center; padding: 2rem; }
         .success-message h2 { color: #00b894; font-size: 2rem; margin: 0 0 1rem 0; }
         .success-message p { color: #636e72; font-size: 1.1rem; }
-        .error-message { background: #ffe6e6; color: #d63031; padding: 1rem; border-radius: 8px; margin-bottom: 1rem; display: none; }
+        .error-message { background: #ffe6e6; color: #d63031; padding: 1rem; border-radius: 8px; margin-bottom: 1rem; display: none; text-align: center; }
         .error-message.show { display: block; }
         @media (max-width: 600px) { .form-row { grid-template-columns: 1fr; } .form-container { padding: 2rem 1rem; } }
     </style>
@@ -40,7 +41,7 @@
 
     <!-- Navigation -->
     <nav class="navbar" style="background: white; padding: 1rem 2rem; box-shadow: 0 2px 10px rgba(0,0,0,0.05);">
-        <div style="max-width: 1200px; margin: 0 auto; display: flex; justify-content: space-between; align-items: center;">
+        <div style="max-width: 1200px; margin: 0 auto; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem;">
             <div style="display: flex; align-items: center; gap: 1rem;">
                 <div style="background: linear-gradient(135deg, #fd79a8 0%, #e84393 100%); width: 50px; height: 50px; border-radius: 50%; display: flex; align-items: center; justify-content: center; color: white; font-weight: bold; font-size: 1.5rem;">ERS</div>
                 <div>
@@ -48,7 +49,7 @@
                     <p style="margin: 0; color: #636e72; font-size: 0.85rem;">& PEDIATRIC CARE</p>
                 </div>
             </div>
-            <div style="display: flex; gap: 2rem;">
+            <div style="display: flex; gap: 1.5rem; flex-wrap: wrap;">
                 <a href="index.html" style="color: #636e72; text-decoration: none; font-weight: 500;">Home</a>
                 <a href="about.html" style="color: #636e72; text-decoration: none; font-weight: 500;">About</a>
                 <a href="services.html" style="color: #636e72; text-decoration: none; font-weight: 500;">Services</a>
@@ -80,7 +81,7 @@
                         </div>
                         <div class="form-group">
                             <label for="phone">Phone Number *</label>
-                            <input type="tel" id="phone" name="phone" required placeholder="09XX-XXX-XXXX" pattern="09[0-9]{9}">
+                            <input type="tel" id="phone" name="phone" required placeholder="09XX-XXX-XXXX">
                         </div>
                     </div>
 
@@ -120,8 +121,6 @@
                                 <option value="">Any Available Doctor</option>
                                 <option value="Dr. Evalyn Rivera-Castillo">Dr. Evalyn Rivera-Castillo</option>
                                 <option value="Dr. Elli Sinsay">Dr. Elli Sinsay</option>
-                                <option value="Dr. Maria Santos">Dr. Maria Santos</option>
-                                <option value="Dr. Jose Reyes">Dr. Jose Reyes</option>
                             </select>
                         </div>
                     </div>
@@ -194,7 +193,7 @@
 
                 <div style="display: flex; gap: 1rem;">
                     <button onclick="backToForm()" class="btn btn-secondary" style="flex: 1;">← Back</button>
-                    <button onclick="confirmBooking()" class="btn btn-primary" style="flex: 1;">✓ Confirm Booking</button>
+                    <button onclick="confirmBooking(event)" class="btn btn-primary" style="flex: 1;">✓ Confirm Booking</button>
                 </div>
             </div>
 
@@ -226,7 +225,10 @@
         }
 
         // Set minimum date to today
-        document.getElementById('appointmentDate').min = new Date().toISOString().split('T')[0];
+        const dateInput = document.getElementById('appointmentDate');
+        if(dateInput) {
+            dateInput.min = new Date().toISOString().split('T')[0];
+        }
 
         function showReview() {
             // Get form values
@@ -235,7 +237,13 @@
             
             // Update review section
             document.getElementById('reviewService').textContent = service.options[service.selectedIndex].text;
-            document.getElementById('reviewDate').textContent = new Date(document.getElementById('appointmentDate').value).toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
+            
+            const dateVal = document.getElementById('appointmentDate').value;
+            if(dateVal) {
+                const dateObj = new Date(dateVal);
+                document.getElementById('reviewDate').textContent = dateObj.toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
+            }
+            
             document.getElementById('reviewTime').textContent = document.getElementById('appointmentTime').value;
             document.getElementById('reviewPatient').textContent = document.getElementById('patientName').value;
             
@@ -259,7 +267,8 @@
             window.scrollTo(0, 0);
         }
 
-        async function confirmBooking() {
+        // FIXED: Added 'event' parameter here
+        async function confirmBooking(event) {
             const submitBtn = event.target;
             submitBtn.disabled = true;
             submitBtn.textContent = 'Processing...';
