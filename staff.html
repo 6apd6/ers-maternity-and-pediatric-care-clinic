@@ -119,7 +119,7 @@
         <!-- Stats Cards -->
         <div class="stats-grid">
             <div class="stat-card">
-                <div class="stat-icon">📅</div>
+                <div class="stat-icon"></div>
                 <div class="stat-info">
                     <h3>Total Appointments</h3>
                     <p id="totalAppointments">0</p>
@@ -189,8 +189,8 @@
                 </div>
                 <div class="toolbar-right">
                     <button onclick="batchUpdateStatus('confirmed', 'completed')" class="btn btn-success">✓ Mark Completed</button>
-                    <button onclick="batchUpdateStatus('confirmed', 'cancelled')" class="btn btn-danger"> Cancel Selected</button>
-                    <button onclick="batchDelete('confirmed')" class="btn btn-secondary">️ Delete Selected</button>
+                    <button onclick="batchUpdateStatus('confirmed', 'cancelled')" class="btn btn-danger">✕ Cancel Selected</button>
+                    <button onclick="batchDelete('confirmed')" class="btn btn-secondary">🗑️ Delete Selected</button>
                 </div>
             </div>
             <table class="data-table">
@@ -219,7 +219,7 @@
                     <label for="selectAllCompleted">Select All</label>
                 </div>
                 <div class="toolbar-right">
-                    <button onclick="batchDelete('completed')" class="btn btn-secondary">🗑️ Delete Selected</button>
+                    <button onclick="batchDelete('completed')" class="btn btn-secondary">️ Delete Selected</button>
                 </div>
             </div>
             <table class="data-table">
@@ -252,6 +252,7 @@
                 window.API_CONFIG.SUPABASE_URL,
                 window.API_CONFIG.SUPABASE_KEY
             );
+            console.log('✅ Supabase client initialized');
         }
 
         // Check if already logged in
@@ -280,7 +281,6 @@
             document.getElementById('loginSection').classList.add('hidden');
             document.getElementById('dashboardSection').classList.remove('hidden');
             
-            // Fix for the null error: safely update the email display
             const emailDisplay = document.getElementById('staffEmailDisplay');
             if (emailDisplay) {
                 emailDisplay.textContent = localStorage.getItem('staffEmail') || 'admin@ersmaternity.com';
@@ -304,17 +304,21 @@
         async function loadAllData() {
             const supabase = window.supabaseClient;
             if (!supabase) {
-                console.error('Supabase client not initialized');
+                console.error('❌ Supabase client not initialized');
                 return;
             }
+
+            console.log(' Loading appointments...');
 
             // Load Appointments
             const { data: appointments, error } = await supabase.from('appointments').select('*').order('created_at', { ascending: false });
             
             if (error) {
-                console.error('Error loading appointments:', error);
+                console.error('❌ Error loading appointments:', error);
                 return;
             }
+
+            console.log('✅ Loaded', appointments.length, 'appointments');
 
             // Separate by status (default to 'pending' if status column is missing)
             const pending = appointments.filter(a => (a.status || 'pending') === 'pending');
@@ -331,7 +335,7 @@
             renderAppointmentsTable('confirmedListBody', confirmed, 'confirmed');
             renderAppointmentsTable('completedListBody', completed, 'completed');
 
-            // Load Callbacks (Optional - if you have a callbacks table)
+            // Load Callbacks (Optional)
             try {
                 const { data: callbacks } = await supabase.from('callbacks').select('*').order('created_at', { ascending: false }).limit(5);
                 if (callbacks) {
@@ -352,7 +356,6 @@
             }
 
             tbody.innerHTML = appointments.map(a => {
-                // Safe data mapping based on your database columns
                 const patientName = a.patient_name || 'Unknown Patient';
                 const service = a.service || a.appointment_type || 'General Checkup';
                 const date = a.appointment_date ? new Date(a.appointment_date).toLocaleDateString() : (a.created_at ? new Date(a.created_at).toLocaleDateString() : 'N/A');
@@ -366,7 +369,7 @@
                         <td>${date}</td>
                         <td>${contact}</td>
                         <td>
-                            <select onchange="updateStatus('${a.id}', this.value)" class="status-select">
+                            <select onchange="window.updateStatus('${a.id}', this.value)" class="status-select">
                                 <option value="pending" ${a.status === 'pending' ? 'selected' : ''}>Pending</option>
                                 <option value="confirmed" ${a.status === 'confirmed' ? 'selected' : ''}>Confirmed</option>
                                 <option value="completed" ${a.status === 'completed' ? 'selected' : ''}>Completed</option>
@@ -378,19 +381,32 @@
             }).join('');
         }
 
-        async function updateStatus(id, newStatus) {
+        // Attach functions to window so they can be called from inline handlers
+        window.updateStatus = async function(id, newStatus) {
+            console.log('🔄 Updating appointment', id, 'to', newStatus);
+            
             const supabase = window.supabaseClient;
-            const { error } = await supabase.from('appointments').update({ status: newStatus }).eq('id', id);
+            if (!supabase) {
+                alert('❌ Database not connected');
+                return;
+            }
+
+            const { data, error } = await supabase
+                .from('appointments')
+                .update({ status: newStatus })
+                .eq('id', id)
+                .select();
             
             if (error) {
+                console.error('❌ Error updating status:', error);
                 alert('Error updating status: ' + error.message);
-                console.error(error);
             } else {
+                console.log('✅ Status updated successfully:', data);
                 loadAllData(); // Refresh to move item to correct table
             }
-        }
+        };
 
-        async function batchUpdateStatus(type, newStatus) {
+        window.batchUpdateStatus = async function(type, newStatus) {
             const checkboxes = document.querySelectorAll('.cb-' + type + ':checked');
             if (checkboxes.length === 0) return alert('Please select appointments to update.');
             
@@ -400,14 +416,14 @@
             const { error } = await supabase.from('appointments').update({ status: newStatus }).in('id', ids);
             
             if (error) {
-                alert('Error updating appointments');
+                alert('Error updating appointments: ' + error.message);
             } else {
-                alert(`Successfully updated ${ids.length} appointments to ${newStatus}`);
+                alert(`✅ Successfully updated ${ids.length} appointments to ${newStatus}`);
                 loadAllData();
             }
-        }
+        };
 
-        async function batchDelete(type) {
+        window.batchDelete = async function(type) {
             const checkboxes = document.querySelectorAll('.cb-' + type + ':checked');
             if (checkboxes.length === 0) return alert('Please select appointments to delete.');
             
@@ -419,12 +435,12 @@
             const { error } = await supabase.from('appointments').delete().in('id', ids);
             
             if (error) {
-                alert('Error deleting appointments');
+                alert('Error deleting appointments: ' + error.message);
             } else {
-                alert('Appointments deleted successfully');
+                alert('🗑️ Appointments deleted successfully');
                 loadAllData();
             }
-        }
+        };
     </script>
 </body>
 </html>
