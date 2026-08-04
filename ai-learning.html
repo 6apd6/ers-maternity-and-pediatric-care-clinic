@@ -5,44 +5,62 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>AI Learning Dashboard | ERS Staff</title>
     <link rel="stylesheet" href="main.css">
+    <style>
+        body { font-family: 'Poppins', sans-serif; background: #f8f9fa; margin: 0; }
+        .container { max-width: 1200px; margin: 0 auto; padding: 2rem; }
+        .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 1.5rem; margin-bottom: 2rem; }
+        .stat-card { background: white; padding: 1.5rem; border-radius: 12px; box-shadow: 0 2px 10px rgba(0,0,0,0.05); }
+        .stat-card h3 { margin: 0; color: #7F8C8D; font-size: 1rem; }
+        .stat-card p { font-size: 2rem; font-weight: bold; margin: 0.5rem 0 0; }
+        .section-card { background: white; padding: 2rem; border-radius: 12px; box-shadow: 0 2px 10px rgba(0,0,0,0.05); margin-bottom: 2rem; }
+        .section-card h2 { margin-top: 0; color: #2C3E50; }
+        .conversation-item { border-bottom: 1px solid #eee; padding: 1rem 0; }
+        .conversation-item:last-child { border-bottom: none; }
+        .faq-item { border: 1px solid #eee; padding: 1rem; border-radius: 8px; margin-bottom: 1rem; }
+        .btn { border: none; padding: 6px 12px; border-radius: 4px; cursor: pointer; font-size: 0.9rem; color: white; }
+        .btn-save { background: #3498db; }
+        .btn-approve { background: #27ae60; }
+        .btn-toggle { background: #f39c12; font-size: 0.8rem; padding: 4px 8px; }
+        .correction-box { display: none; background: #f8f9fa; padding: 10px; border-radius: 5px; border-left: 3px solid #f39c12; margin-top: 5px; }
+        textarea { width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px; box-sizing: border-box; font-family: inherit; }
+    </style>
 </head>
-<body style="background: #f8f9fa;">
-    <nav class="navbar" style="background: #2C3E50; color: white;">
-        <div class="container">
-            <h2> AI Learning Dashboard</h2>
-            <a href="staff.html" style="color: white;">← Back to Staff Dashboard</a>
-        </div>
+<body>
+
+    <nav class="navbar" style="background: #2C3E50; color: white; padding: 1rem 2rem; display: flex; justify-content: space-between; align-items: center;">
+        <h2 style="margin: 0;">🤖 AI Learning Dashboard</h2>
+        <a href="staff.html" style="color: white; text-decoration: none;">← Back to Staff Dashboard</a>
     </nav>
 
-    <div class="container" style="max-width: 1200px; margin: 2rem auto; padding: 0 2rem;">
+    <div class="container">
         
         <!-- Stats Cards -->
-        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 1.5rem; margin-bottom: 2rem;">
-            <div style="background: white; padding: 1.5rem; border-radius: 12px; box-shadow: 0 2px 10px rgba(0,0,0,0.05);">
-                <h3 style="margin: 0; color: #7F8C8D;">Total Conversations</h3>
-                <p id="totalConv" style="font-size: 2rem; font-weight: bold; margin: 0.5rem 0 0;">Loading...</p>
+        <div class="stats-grid">
+            <div class="stat-card">
+                <h3>Total Conversations</h3>
+                <p id="totalConv" style="color: #2C3E50;">Loading...</p>
             </div>
-            <div style="background: white; padding: 1.5rem; border-radius: 12px; box-shadow: 0 2px 10px rgba(0,0,0,0.05);">
-                <h3 style="margin: 0; color: #7F8C8D;">Needs Improvement</h3>
-                <p id="needsImp" style="font-size: 2rem; font-weight: bold; margin: 0.5rem 0 0; color: #e74c3c;">Loading...</p>
+            <div class="stat-card">
+                <h3>Needs Improvement</h3>
+                <p id="needsImp" style="color: #e74c3c;">Loading...</p>
             </div>
-            <div style="background: white; padding: 1.5rem; border-radius: 12px; box-shadow: 0 2px 10px rgba(0,0,0,0.05);">
-                <h3 style="margin: 0; color: #7F8C8D;">Pending FAQ Updates</h3>
-                <p id="pendingFaq" style="font-size: 2rem; font-weight: bold; margin: 0.5rem 0 0; color: #f39c12;">Loading...</p>
+            <div class="stat-card">
+                <h3>Pending FAQ Updates</h3>
+                <p id="pendingFaq" style="color: #f39c12;">Loading...</p>
             </div>
         </div>
 
         <!-- Recent Conversations -->
-        <div style="background: white; padding: 2rem; border-radius: 12px; box-shadow: 0 2px 10px rgba(0,0,0,0.05); margin-bottom: 2rem;">
-            <h2 style="margin-top: 0;">📝 Recent AI Conversations</h2>
+        <div class="section-card">
+            <h2>📝 Recent AI Conversations</h2>
             <div id="conversationList">
                 <p style="color: #7F8C8D;">Loading conversations...</p>
             </div>
         </div>
 
         <!-- FAQ Improvements -->
-        <div style="background: white; padding: 2rem; border-radius: 12px; box-shadow: 0 2px 10px rgba(0,0,0,0.05);">
-            <h2 style="margin-top: 0;"> Suggested FAQ Improvements</h2>
+        <div class="section-card">
+            <h2>💡 Suggested FAQ Improvements</h2>
             <div id="faqList">
                 <p style="color: #7F8C8D;">Loading suggestions...</p>
             </div>
@@ -50,13 +68,12 @@
 
     </div>
 
-    <!-- 1. Load Supabase library -->
+    <!-- Load Supabase library -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    
-    <!-- 2. Load config.js (contains your API keys) -->
+    <!-- Load config.js (contains your API keys) -->
     <script src="config.js"></script>
     
-    <!-- 3. Create the Supabase client so the dashboard can talk to the database -->
+    <!-- Create the Supabase client -->
     <script>
         if (window.API_CONFIG && window.supabase) {
             window.supabaseClient = window.supabase.createClient(
@@ -66,8 +83,8 @@
             console.log('Supabase client created for dashboard!');
         }
     </script>
-    
-    <!-- 4. The main dashboard loading logic -->
+
+    <!-- Main Dashboard Logic -->
     <script>
         setTimeout(async function() {
             const supabase = window.supabaseClient;
@@ -80,7 +97,7 @@
 
             console.log('Loading AI Dashboard...');
 
-            // Load stats
+            // 1. Load Stats
             const { count: convCount } = await supabase.from('ai_conversations').select('*', { count: 'exact', head: true });
             const { count: impCount } = await supabase.from('ai_conversations').select('*', { count: 'exact', head: true }).eq('needs_improvement', true);
             const { count: faqCount } = await supabase.from('faq_improvements').select('*', { count: 'exact', head: true }).eq('is_approved', false);
@@ -89,38 +106,60 @@
             document.getElementById('needsImp').textContent = impCount || 0;
             document.getElementById('pendingFaq').textContent = faqCount || 0;
 
-            // Load recent conversations
-            const { data: conversations, error: convError } = await supabase.from('ai_conversations').select('*').order('created_at', { ascending: false }).limit(20);
-            
+            // 2. Load Recent Conversations
+            const { data: conversations } = await supabase.from('ai_conversations').select('*').order('created_at', { ascending: false }).limit(20);
             const convList = document.getElementById('conversationList');
+            
             if (conversations && conversations.length > 0) {
-                convList.innerHTML = conversations.map(c => `
-                    <div style="border-bottom: 1px solid #eee; padding: 1rem 0;">
-                        <div style="display: flex; justify-content: space-between; margin-bottom: 0.5rem;">
-                            <strong style="color: #2C3E50;">Patient:</strong>
-                            <span style="font-size: 0.85rem; color: #7F8C8D;">${new Date(c.created_at).toLocaleString()} • ${c.language || 'EN'}</span>
+                convList.innerHTML = ''; 
+                
+                conversations.forEach(c => {
+                    const isBad = c.needs_improvement === true || c.was_helpful === false;
+                    const statusHtml = isBad 
+                        ? '<span style="background: #ffebee; color: #c62828; padding: 2px 8px; border-radius: 4px; font-size: 0.8rem;">❌ Needs Improvement</span>' 
+                        : '<span style="background: #e8f5e9; color: #2e7d32; padding: 2px 8px; border-radius: 4px; font-size: 0.8rem;">✅ Helpful</span>';
+                    
+                    const safeQuestion = c.user_message.replace(/'/g, "\\'").replace(/"/g, '&quot;');
+                    const correctionHtml = `
+                        <div style="margin-top: 10px;">
+                            <button onclick="toggleCorrection('${c.id}')" class="btn btn-toggle">✏️ Add/Update Correction</button>
+                            <div id="correction-box-${c.id}" class="correction-box">
+                                <label style="font-size: 0.9rem; font-weight: bold; display:block; margin-bottom:5px;">✏️ Staff Correction:</label>
+                                <textarea id="correction-${c.id}" rows="2" placeholder="Type the correct answer the AI should have given..."></textarea>
+                                <button onclick="saveCorrection('${c.id}', '${safeQuestion}')" class="btn btn-save" style="margin-top: 5px;">💾 Save to FAQ Database</button>
+                            </div>
                         </div>
-                        <p style="margin: 0.5rem 0;"><strong>Q:</strong> ${c.user_message}</p>
-                        <p style="margin: 0.5rem 0; color: #2980b9;"><strong>A:</strong> ${c.ai_response}</p>
-                        ${c.was_helpful === false ? '<span style="background: #ffebee; color: #c62828; padding: 2px 8px; border-radius: 4px; font-size: 0.8rem;">❌ Needs Improvement</span>' : '<span style="background: #e8f5e9; color: #2e7d32; padding: 2px 8px; border-radius: 4px; font-size: 0.8rem;">✅ Helpful</span>'}
-                    </div>
-                `).join('');
+                    `;
+
+                    convList.innerHTML += `
+                        <div class="conversation-item">
+                            <div style="display: flex; justify-content: space-between; margin-bottom: 0.5rem;">
+                                <strong style="color: #2C3E50;">Patient:</strong>
+                                <span style="font-size: 0.85rem; color: #7F8C8D;">${new Date(c.created_at).toLocaleString()} • ${c.language || 'EN'}</span>
+                            </div>
+                            <p style="margin: 0.5rem 0;"><strong>Q:</strong> ${c.user_message}</p>
+                            <p style="margin: 0.5rem 0; color: #2980b9;"><strong>A:</strong> ${c.ai_response}</p>
+                            ${statusHtml}
+                            ${correctionHtml}
+                        </div>
+                    `;
+                });
             } else {
                 convList.innerHTML = '<p style="color: #7F8C8D; text-align: center; padding: 2rem;">No conversations yet</p>';
             }
 
-            // Load FAQ suggestions
-            const { data: faqs, error: faqError } = await supabase.from('faq_improvements').select('*').order('created_at', { ascending: false });
+            // 3. Load FAQ Suggestions
+            const { data: faqs } = await supabase.from('faq_improvements').select('*').order('created_at', { ascending: false });
             const faqListEl = document.getElementById('faqList');
             
             if (faqs && faqs.length > 0) {
                 faqListEl.innerHTML = faqs.map(f => `
-                    <div style="border: 1px solid #eee; padding: 1rem; border-radius: 8px; margin-bottom: 1rem;">
+                    <div class="faq-item">
                         <h4 style="margin: 0 0 0.5rem;">❓ Q: ${f.question}</h4>
-                        <p style="margin: 0 0 1rem; color: #7F8C8D;">Suggested: ${f.suggested_answer || 'Pending review'}</p>
+                        <p style="margin: 0 0 1rem; color: #7F8C8D;">Suggested Answer: ${f.suggested_answer || 'Pending review'}</p>
                         <div style="display: flex; gap: 0.5rem;">
-                            <input type="text" id="answer-${f.id}" placeholder="Enter approved answer..." style="flex: 1; padding: 0.5rem; border: 1px solid #ddd; border-radius: 4px;">
-                            <button onclick="approveFaq('${f.id}')" style="background: #27ae60; color: white; border: none; padding: 0.5rem 1rem; border-radius: 4px; cursor: pointer;">✅ Approve</button>
+                            <input type="text" id="final-answer-${f.id}" value="${f.suggested_answer || ''}" placeholder="Final approved answer..." style="flex: 1; padding: 0.5rem; border: 1px solid #ddd; border-radius: 4px;">
+                            <button onclick="approveFaq('${f.id}')" class="btn btn-approve">✅ Approve</button>
                         </div>
                     </div>
                 `).join('');
@@ -128,18 +167,43 @@
                 faqListEl.innerHTML = '<p style="color: #7F8C8D; text-align: center; padding: 2rem;">No pending suggestions</p>';
             }
 
-            console.log('Dashboard loaded successfully!');
         }, 500);
 
-        // Approve FAQ function
+        function toggleCorrection(id) {
+            const box = document.getElementById(`correction-box-${id}`);
+            box.style.display = box.style.display === 'none' ? 'block' : 'none';
+        }
+
+        async function saveCorrection(convId, userQuestion) {
+            const textArea = document.getElementById(`correction-${convId}`);
+            const newAnswer = textArea.value;
+            
+            if (!newAnswer) return alert('Please type a correction first.');
+
+            const supabase = window.supabaseClient;
+            const { error } = await supabase.from('faq_improvements').insert([{
+                question: userQuestion,
+                suggested_answer: newAnswer,
+                is_approved: false
+            }]);
+
+            if (error) {
+                console.error(error);
+                alert('Error saving correction.');
+            } else {
+                alert('Correction saved! It is now in the "Pending FAQ Updates" list below.');
+                location.reload();
+            }
+        }
+
         async function approveFaq(id) {
-            const answer = document.getElementById(`answer-${id}`).value;
-            if (!answer) return alert('Please enter an answer first');
+            const answerInput = document.getElementById(`final-answer-${id}`);
+            const finalAnswer = answerInput.value;
             
             const supabase = window.supabaseClient;
-            await supabase.from('faq_improvements').update({ is_approved: true, approved_answer: answer }).eq('id', id);
-            alert('FAQ Approved! The AI will now use this answer.');
-            location.reload(); // Refresh page
+            await supabase.from('faq_improvements').update({ is_approved: true, approved_answer: finalAnswer }).eq('id', id);
+            alert('FAQ Approved!');
+            location.reload();
         }
     </script>
 </body>
