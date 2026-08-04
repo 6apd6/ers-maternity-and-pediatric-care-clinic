@@ -14,16 +14,18 @@
         .stat-card p { font-size: 2rem; font-weight: bold; margin: 0.5rem 0 0; }
         .section-card { background: white; padding: 2rem; border-radius: 12px; box-shadow: 0 2px 10px rgba(0,0,0,0.05); margin-bottom: 2rem; }
         .section-card h2 { margin-top: 0; color: #2C3E50; }
-        .conversation-item { border-bottom: 1px solid #eee; padding: 1rem 0; }
+        .conversation-item { border-bottom: 1px solid #eee; padding: 1rem 0; position: relative; }
         .faq-item { border: 1px solid #eee; padding: 1rem; border-radius: 8px; margin-bottom: 1rem; background: #fafafa; }
-        .btn { border: none; padding: 6px 12px; border-radius: 4px; cursor: pointer; font-size: 0.9rem; color: white; }
+        .btn { border: none; padding: 6px 12px; border-radius: 4px; cursor: pointer; font-size: 0.9rem; color: white; margin-right: 5px; }
         .btn-save { background: #3498db; }
         .btn-approve { background: #27ae60; }
         .btn-update { background: #9b59b6; }
+        .btn-delete { background: #e74c3c; }
         .btn-toggle { background: #f39c12; font-size: 0.8rem; padding: 4px 8px; }
         .correction-box { display: none; background: #f8f9fa; padding: 10px; border-radius: 5px; border-left: 3px solid #f39c12; margin-top: 5px; }
         textarea { width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px; box-sizing: border-box; font-family: inherit; margin-top: 5px; }
         .current-answer { font-weight: bold; color: #27ae60; margin-bottom: 5px; }
+        .delete-btn-container { margin-top: 10px; text-align: right; }
     </style>
 </head>
 <body>
@@ -67,10 +69,10 @@
             </div>
         </div>
 
-        <!-- NEW SECTION: Manage Approved FAQs -->
+        <!-- Manage Approved FAQs -->
         <div class="section-card">
             <h2>📚 Manage Approved FAQs (Update Prices/Info)</h2>
-            <p style="color: #7F8C8D; margin-bottom: 1rem;">These are the answers the AI is currently using. You can edit them here to update prices or information.</p>
+            <p style="color: #7F8C8D; margin-bottom: 1rem;">These are the answers the AI is currently using. You can edit or delete them here.</p>
             <div id="approvedFaqList">
                 <p style="color: #7F8C8D;">Loading approved FAQs...</p>
             </div>
@@ -150,6 +152,9 @@
                             <p style="margin: 0.5rem 0; color: #2980b9;"><strong>A:</strong> ${c.ai_response}</p>
                             ${statusHtml}
                             ${correctionHtml}
+                            <div class="delete-btn-container">
+                                <button onclick="deleteConversation('${c.id}')" class="btn btn-delete">️ Delete Conversation</button>
+                            </div>
                         </div>
                     `;
                 });
@@ -166,9 +171,10 @@
                     <div class="faq-item">
                         <h4 style="margin: 0 0 0.5rem;">❓ Q: ${f.question}</h4>
                         <p style="margin: 0 0 1rem; color: #7F8C8D;">Suggested Answer: ${f.suggested_answer || 'Pending review'}</p>
-                        <div style="display: flex; gap: 0.5rem;">
+                        <div style="display: flex; gap: 0.5rem; align-items: center;">
                             <input type="text" id="final-answer-${f.id}" value="${f.suggested_answer || ''}" placeholder="Final approved answer..." style="flex: 1; padding: 0.5rem; border: 1px solid #ddd; border-radius: 4px;">
                             <button onclick="approveFaq('${f.id}')" class="btn btn-approve">✅ Approve</button>
+                            <button onclick="deleteFaq('${f.id}')" class="btn btn-delete">️ Delete</button>
                         </div>
                     </div>
                 `).join('');
@@ -183,10 +189,13 @@
             if (approvedFaqs && approvedFaqs.length > 0) {
                 approvedListEl.innerHTML = approvedFaqs.map(f => `
                     <div class="faq-item" style="border-left: 4px solid #27ae60;">
-                        <h4 style="margin: 0 0 0.5rem;">❓ Q: ${f.question}</h4>
+                        <h4 style="margin: 0 0 0.5rem;"> Q: ${f.question}</h4>
                         <p class="current-answer">Current Answer: ${f.approved_answer}</p>
                         <textarea id="update-answer-${f.id}" rows="2">${f.approved_answer}</textarea>
-                        <button onclick="updateApprovedFaq('${f.id}')" class="btn btn-update" style="margin-top: 5px;">💾 Update Answer</button>
+                        <div style="margin-top: 5px;">
+                            <button onclick="updateApprovedFaq('${f.id}')" class="btn btn-update">💾 Update Answer</button>
+                            <button onclick="deleteFaq('${f.id}')" class="btn btn-delete">🗑️ Delete FAQ</button>
+                        </div>
                     </div>
                 `).join('');
             } else {
@@ -225,7 +234,6 @@
             location.reload();
         }
 
-        // NEW FUNCTION: Update an already approved FAQ
         async function updateApprovedFaq(id) {
             const textArea = document.getElementById(`update-answer-${id}`);
             const newAnswer = textArea.value;
@@ -240,6 +248,38 @@
                 alert('Error updating FAQ.');
             } else {
                 alert('✅ Answer Updated! The AI will now use this new response.');
+                location.reload();
+            }
+        }
+
+        // NEW: Delete Conversation Function
+        async function deleteConversation(id) {
+            if (!confirm('Are you sure you want to permanently delete this conversation record?')) return;
+            
+            const supabase = window.supabaseClient;
+            const { error } = await supabase.from('ai_conversations').delete().eq('id', id);
+
+            if (error) {
+                console.error(error);
+                alert('Error deleting conversation.');
+            } else {
+                alert('Conversation deleted.');
+                location.reload();
+            }
+        }
+
+        // NEW: Delete FAQ Function
+        async function deleteFaq(id) {
+            if (!confirm('Are you sure you want to permanently delete this FAQ? The AI will forget this answer.')) return;
+            
+            const supabase = window.supabaseClient;
+            const { error } = await supabase.from('faq_improvements').delete().eq('id', id);
+
+            if (error) {
+                console.error(error);
+                alert('Error deleting FAQ.');
+            } else {
+                alert('FAQ deleted.');
                 location.reload();
             }
         }
