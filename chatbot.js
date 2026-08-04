@@ -336,14 +336,14 @@ class MultilingualChatbot {
         div.className = `message ${sender}`;
         div.innerHTML = text.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>').replace(/\n/g, '<br>');
         messages.appendChild(div);
-           // Add feedback buttons for bot messages
+          // Add feedback buttons for bot messages
     if (sender === 'bot' && window.supabaseClient) {
         const feedbackDiv = document.createElement('div');
         feedbackDiv.className = 'feedback-buttons';
         feedbackDiv.style.marginTop = '5px';
         feedbackDiv.innerHTML = `
-            <button onclick="this.parentElement.parentElement.querySelector('.feedback-buttons').remove(); window.supabaseClient.from('ai_conversations').insert([{user_message: '${text.replace(/'/g, "\\'")}', ai_response: '${text.replace(/'/g, "\\'")}', was_helpful: true, source: 'chatbot'}]);" style="background: none; border: none; cursor: pointer; font-size: 16px; padding: 2px;">👍</button>
-            <button onclick="this.parentElement.parentElement.querySelector('.feedback-buttons').remove(); window.supabaseClient.from('ai_conversations').insert([{user_message: '${text.replace(/'/g, "\\'")}', ai_response: '${text.replace(/'/g, "\\'")}', was_helpful: false, needs_improvement: true, source: 'chatbot'}]);" style="background: none; border: none; cursor: pointer; font-size: 16px; padding: 2px;">👎</button>
+            <button onclick="submitFeedback(this, true)" style="background: none; border: none; cursor: pointer; font-size: 16px; padding: 2px;">👍</button>
+            <button onclick="submitFeedback(this, false)" style="background: none; border: none; cursor: pointer; font-size: 16px; padding: 2px;">👎</button>
         `;
         div.appendChild(feedbackDiv);
     }
@@ -387,8 +387,16 @@ class MultilingualChatbot {
             const result = this.getAIResponse(text);
             this.addMessage(result.text, 'bot');
            // Log the conversation
+// Log the conversation and store the ID
 if (window.supabaseClient) {
-    logAIInteraction(text, result.text, null, this.detectLanguage(text));
+    const conversationId = await logAIInteraction(text, result.text, null, this.detectLanguage(text));
+    // Store the ID on the message element for feedback
+    if (conversationId) {
+        const lastMessage = document.getElementById('chatbotMessages').lastElementChild;
+        if (lastMessage) {
+            lastMessage.dataset.conversationId = conversationId;
+        }
+    }
 }
             
             if (!this.hasGreeted || 
@@ -430,7 +438,7 @@ document.addEventListener('DOMContentLoaded', () => {
 // Function to save conversations to Supabase
 async function logAIInteraction(userMsg, aiMsg, helpful, lang) {
     try {
-        await window.supabaseClient
+        const { data, error } = await window.supabaseClient
             .from('ai_conversations')
             .insert([
                 {
@@ -440,9 +448,52 @@ async function logAIInteraction(userMsg, aiMsg, helpful, lang) {
                     was_helpful: helpful,
                     source: 'chatbot'
                 }
-            ]);
-        console.log('Conversation logged successfully');
+            ])
+            .select(); // This returns the created record with its ID
+        
+        if (error) {
+            console.error('Failed to log conversation:', error);
+            return null;
+        }
+        
+        console.log('Conversation logged successfully with ID:', data[0].id);
+        return data[0].id; // Return the ID so we can update it later
     } catch (error) {
         console.error('Failed to log conversation:', error);
+        return null;
+    }
+}
+
+
+// Function to handle feedback button clicks
+async function submitFeedback(button, isHelpful) {
+    const messageDiv = button.closest('.message');
+    const conversationId = messageDiv.dataset.conversationId;
+    
+    if (!conversationId) {
+        console.error('No conversation ID found');
+        return;
+    }
+    
+    try {
+        const { error } = await window.supabaseClient
+            .from('ai_conversations')
+            .update({
+                was_helpful: isHelpful,
+                needs_improvement: !isHelpful
+            })
+            .eq('id', conversationId);
+        
+        if (error) {
+            console.error('Failed to update feedback:', error);
+            return;
+        }
+        
+        // Remove feedback buttons after clicking
+        const feedbackDiv = button.parentElement;
+        feedbackDiv.innerHTML = isHelpful ? '✅ Helpful' : '❌ Needs Improvement';
+        console.log('Feedback submitted successfully');
+    } catch (error) {
+        console.error('Failed to submit feedback:', error);
     }
 }
