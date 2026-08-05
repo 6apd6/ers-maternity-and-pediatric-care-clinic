@@ -1,4 +1,4 @@
-// chatbot.js - Fixed with Proper Scoring
+// chatbot.js - Smart AI that understands instructions
 window.chatBot = {
     approvedFAQs: [],
     
@@ -39,7 +39,7 @@ window.chatBot = {
         box.innerHTML = `
             <div class="chat-header"><strong>ERS Assistant</strong><button onclick="document.getElementById('chatBox').classList.remove('active')" style="background:none;border:none;color:white;font-size:20px;">&times;</button></div>
             <div class="chat-messages" id="chatMsgs"><div class="msg bot"><div class="bubble">Hello! How can I help you?</div></div></div>
-            <div class="chat-input"><input type="text" id="chatIn" placeholder="Ask me anything..." onkeypress="if(event.key==='Enter')window.chatBot.send()"><button onclick="window.chatBot.send()">➤</button></div>
+            <div class="chat-input"><input type="text" id="chatIn" placeholder="Ask me anything..." onkeypress="if(event.key==='Enter')window.chatBot.send()"><button onclick="window.chatBot.send()"></button></div>
         `;
 
         document.body.appendChild(toggle);
@@ -80,6 +80,34 @@ window.chatBot = {
         div.scrollTop = div.scrollHeight;
     },
 
+    // Convert staff instructions to natural responses
+    convertInstructionToResponse: function(text) {
+        const lower = text.toLowerCase();
+        
+        // If staff wrote "tell the customer to call" → convert to direct response
+        if (lower.includes('tell the customer to call') || lower.includes('tell them to call')) {
+            return "For more information, please call us at +63 970 471 6507.";
+        }
+        
+        // If staff wrote "tell the patient" → convert to direct response
+        if (lower.includes('tell the patient')) {
+            return text.replace(/tell the patient/gi, 'please').replace(/to call/gi, 'call');
+        }
+        
+        // If it's an instruction about pricing
+        if (lower.includes('price') && lower.includes('call')) {
+            return "For pricing information, please call our clinic at +63 970 471 6507.";
+        }
+        
+        // If it's an instruction about appointments
+        if (lower.includes('appointment') && lower.includes('call')) {
+            return "To book an appointment, please call us at +63 970 471 6507.";
+        }
+        
+        // Default: return as-is if no instruction detected
+        return text;
+    },
+
     findBestAnswer: function(question) {
         const lower = question.toLowerCase();
         const qWords = lower.split(/\s+/);
@@ -116,7 +144,8 @@ window.chatBot = {
         }
 
         if (bestMatch && bestScore > 0) {
-            return bestMatch.approved_answer;
+            // Convert any staff instructions to natural responses
+            return this.convertInstructionToResponse(bestMatch.approved_answer);
         }
         
         return "I'm not sure about that. Please call us at +63 970 471 6507 for more information.";
