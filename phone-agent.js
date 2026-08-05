@@ -1,4 +1,4 @@
-// phone-agent.js - Smart Voice Agent with Proper Matching
+// phone-agent.js - Smart Voice Agent with Proper Matching and Phone Icon
 (function() {
     let supabase = null;
     let FAQs = [];
@@ -7,7 +7,7 @@
     let recorder = null;
     let audioData = [];
 
-    // Initialize
+    // 1. Initialize
     function init() {
         if (window.supabaseClient) {
             supabase = window.supabaseClient;
@@ -25,7 +25,7 @@
         console.log('📞 Phone FAQs loaded:', FAQs.length);
     }
 
-    // Convert staff instructions to natural responses
+    // 2. Convert staff instructions to natural responses
     function convertInstruction(text) {
         const lower = text.toLowerCase();
         
@@ -45,7 +45,7 @@
         return text;
     }
 
-    // Smart matching with scoring
+    // 3. Smart matching with scoring (Same as chatbot)
     function getBestAnswer(question) {
         const lower = question.toLowerCase();
         const qWords = lower.split(/\s+/);
@@ -66,13 +66,13 @@
                 }
             }
 
-            // Boost for medical terms
+            // Boost for medical terms so "CS" matches "CS"
             if (lower.includes('cs') && faqLower.includes('cs')) score += 10;
             if (lower.includes('nsd') && faqLower.includes('nsd')) score += 10;
             if (lower.includes('check') && faqLower.includes('check')) score += 5;
             if (lower.includes('checkup') && faqLower.includes('checkup')) score += 5;
 
-            // Exact phrase match
+            // Exact phrase match gets highest score
             if (lower.includes(faqLower) || faqLower.includes(lower)) score += 20;
 
             if (score > bestScore) {
@@ -88,13 +88,29 @@
         return "I'm not sure about that. Please call our clinic at +63 970 471 6507 for more information.";
     }
 
+    // 4. Create UI (With the Phone Icon restored)
     function createUI() {
         const style = document.createElement('style');
         style.innerHTML = `
-            .phone-icon { position: fixed; bottom: 100px; right: 30px; width: 60px; height: 60px; background: #9b59b6; border-radius: 50%; border: none; color: white; font-size: 24px; cursor: pointer; z-index: 9998; display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 10px rgba(0,0,0,0.2); }
-            .phone-box { display: none; position: fixed; bottom: 170px; right: 30px; width: 300px; background: white; border-radius: 15px; padding: 20px; box-shadow: 0 5px 20px rgba(0,0,0,0.2); z-index: 9999; text-align: center; font-family: sans-serif; }
-            .phone-box.show { display: block; }
-            .start-btn { background: #27ae60; color: white; border: none; padding: 10px 20px; border-radius: 20px; cursor: pointer; margin-top: 10px; }
+            .phone-icon { 
+                position: fixed; bottom: 100px; right: 30px; 
+                width: 60px; height: 60px; 
+                background: #9b59b6; border-radius: 50%; 
+                border: none; color: white; font-size: 24px; 
+                cursor: pointer; z-index: 9998; 
+                display: flex; align-items: center; justify-content: center; 
+                box-shadow: 0 4px 10px rgba(0,0,0,0.2); 
+            }
+            .phone-icon:hover { transform: scale(1.1); }
+            .phone-box { 
+                display: none; position: fixed; bottom: 170px; right: 30px; 
+                width: 300px; background: white; border-radius: 15px; 
+                padding: 20px; box-shadow: 0 5px 20px rgba(0,0,0,0.2); 
+                z-index: 9999; text-align: center; font-family: sans-serif; 
+            }
+            .phone-box.show { display: block; animation: fadeIn 0.3s; }
+            @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+            .start-btn { background: #27ae60; color: white; border: none; padding: 10px 20px; border-radius: 20px; cursor: pointer; margin-top: 10px; font-weight: 600; }
             .start-btn.end { background: #e74c3c; }
             .ring { width: 50px; height: 50px; background: #e74c3c; border-radius: 50%; margin: 10px auto; display: none; animation: ring 1s infinite; }
             .ring.on { display: block; }
@@ -102,19 +118,21 @@
         `;
         document.head.appendChild(style);
 
+        // CREATE THE BUTTON WITH THE PHONE EMOJI ICON
         const btn = document.createElement('button');
         btn.className = 'phone-icon';
-        btn.innerHTML = '';
+        btn.innerHTML = '📞'; // <-- The phone icon you requested
+        btn.title = 'Voice Assistant';
         btn.onclick = () => document.getElementById('phoneBox').classList.toggle('show');
 
         const box = document.createElement('div');
         box.id = 'phoneBox';
         box.className = 'phone-box';
         box.innerHTML = `
-            <h3 style="margin-top:0;">Voice Assistant</h3>
+            <h3 style="margin-top:0; color: #333;">Voice Assistant</h3>
             <div class="ring" id="ring"></div>
-            <p id="phStatus">Ready</p>
-            <p id="phText" style="font-style:italic;color:#666;min-height:20px;"></p>
+            <p id="phStatus" style="color: #666;">Ready to assist</p>
+            <p id="phText" style="font-style:italic; color:#888; min-height:20px; font-size: 14px;"></p>
             <button id="phBtn" class="start-btn" onclick="window.toggleCall()">Start Call</button>
         `;
 
@@ -122,6 +140,7 @@
         document.body.appendChild(box);
     }
 
+    // 5. Call Logic
     window.toggleCall = async function() {
         const btn = document.getElementById('phBtn');
         const ring = document.getElementById('ring');
@@ -139,7 +158,15 @@
                 recorder = new MediaRecorder(stream);
                 recorder.ondataavailable = e => audioData.push(e.data);
                 recorder.start();
-            } catch(e) { console.error(e); }
+            } catch(e) { 
+                console.error(e); 
+                alert('Please allow microphone access to use the voice assistant.');
+                isCalling = false;
+                btn.textContent = 'Start Call';
+                btn.classList.remove('end');
+                ring.classList.remove('on');
+                return;
+            }
 
             startListen();
             speak("Hello! Welcome to ERS Maternity. How can I help you?");
@@ -148,7 +175,7 @@
             btn.textContent = 'Start Call';
             btn.classList.remove('end');
             ring.classList.remove('on');
-            status.textContent = 'Ended';
+            status.textContent = 'Call Ended';
             if (recognition) recognition.stop();
             window.speechSynthesis.cancel();
             if (recorder) {
@@ -159,32 +186,50 @@
     };
 
     function startListen() {
-        if (!('webkitSpeechRecognition' in window)) return alert('Use Chrome');
+        if (!('webkitSpeechRecognition' in window)) {
+            alert('Please use Google Chrome for voice features.');
+            return;
+        }
         recognition = new webkitSpeechRecognition();
         recognition.continuous = false;
+        recognition.lang = 'en-US';
 
         recognition.onresult = async (e) => {
             const text = e.results[0][0].transcript;
-            document.getElementById('phText').textContent = `You: "${text}"`;
+            document.getElementById('phText').textContent = `You said: "${text}"`;
             const ans = getBestAnswer(text);
             speak(ans);
             logCall(text, ans);
         };
 
-        recognition.onend = () => { if (isCalling) setTimeout(() => recognition.start(), 1000); };
-        recognition.start();
+        recognition.onend = () => { 
+            if (isCalling) {
+                setTimeout(() => {
+                    if (isCalling) recognition.start();
+                }, 1000);
+            }
+        };
+        
+        try { recognition.start(); } catch(err) {}
     }
 
     function speak(text) {
         const u = new SpeechSynthesisUtterance(text);
+        u.rate = 0.95;
         window.speechSynthesis.speak(u);
         document.getElementById('phStatus').textContent = 'Speaking...';
-        u.onend = () => { if(isCalling) document.getElementById('phStatus').textContent = 'Listening...'; };
+        u.onend = () => { 
+            if(isCalling) document.getElementById('phStatus').textContent = 'Listening...'; 
+        };
     }
 
     async function logCall(q, a) {
         if (!supabase) return;
-        await supabase.from('ai_conversations').insert([{ user_message: q, ai_response: a, source: 'phone_agent' }]);
+        await supabase.from('ai_conversations').insert([{ 
+            user_message: q, 
+            ai_response: a, 
+            source: 'phone_agent' 
+        }]);
     }
 
     async function saveAudio() {
@@ -195,5 +240,6 @@
         audioData = [];
     }
 
+    // Start the agent
     init();
 })();
