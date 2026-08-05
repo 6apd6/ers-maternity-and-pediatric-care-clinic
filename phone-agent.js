@@ -1,4 +1,4 @@
-// phone-agent.js - Smart Voice Agent with Proper Matching and Phone Icon
+// phone-agent.js - Smart Voice Agent with Basic Manners and FAQ Matching
 (function() {
     let supabase = null;
     let FAQs = [];
@@ -25,6 +25,26 @@
         console.log('📞 Phone FAQs loaded:', FAQs.length);
     }
 
+    // NEW: Handle basic manners and greetings for Voice Agent
+    function getBasicResponse(text) {
+        const lower = text.toLowerCase();
+        
+        if (lower.includes('thank') || lower.includes('salamat') || lower.includes('thanks')) {
+            return "You're very welcome! Is there anything else I can help you with?";
+        }
+        if (lower.includes('hello') || lower.includes('hi') || lower.includes('good morning') || lower.includes('good afternoon')) {
+            return "Hello! Welcome to ERS Maternity. How can I assist you today?";
+        }
+        if (lower.includes('bye') || lower.includes('goodbye')) {
+            return "Thank you for calling ERS Maternity. Have a wonderful day!";
+        }
+        if (lower.includes('who are you') || lower.includes('assistant')) {
+            return "I am the ERS virtual voice assistant. I can answer questions about our services.";
+        }
+
+        return null;
+    }
+
     // 2. Convert staff instructions to natural responses
     function convertInstruction(text) {
         const lower = text.toLowerCase();
@@ -45,11 +65,16 @@
         return text;
     }
 
-    // 3. Smart matching with scoring (Same as chatbot)
+    // 3. Smart matching with scoring
     function getBestAnswer(question) {
         const lower = question.toLowerCase();
-        const qWords = lower.split(/\s+/);
         
+        // 1. Check for basic manners first
+        const basicResponse = getBasicResponse(question);
+        if (basicResponse) return basicResponse;
+
+        // 2. Look for FAQ match
+        const qWords = lower.split(/\s+/);
         let bestMatch = null;
         let bestScore = 0;
 
@@ -58,7 +83,6 @@
             const fWords = faqLower.split(/\s+/);
             let score = 0;
 
-            // Count matching words
             for (let qw of qWords) {
                 for (let fw of fWords) {
                     if (qw === fw) score += 2;
@@ -66,13 +90,12 @@
                 }
             }
 
-            // Boost for medical terms so "CS" matches "CS"
+            // Boost for medical terms
             if (lower.includes('cs') && faqLower.includes('cs')) score += 10;
             if (lower.includes('nsd') && faqLower.includes('nsd')) score += 10;
             if (lower.includes('check') && faqLower.includes('check')) score += 5;
             if (lower.includes('checkup') && faqLower.includes('checkup')) score += 5;
 
-            // Exact phrase match gets highest score
             if (lower.includes(faqLower) || faqLower.includes(lower)) score += 20;
 
             if (score > bestScore) {
@@ -118,10 +141,9 @@
         `;
         document.head.appendChild(style);
 
-        // CREATE THE BUTTON WITH THE PHONE EMOJI ICON
         const btn = document.createElement('button');
         btn.className = 'phone-icon';
-        btn.innerHTML = '📞'; // <-- The phone icon you requested
+        btn.innerHTML = '📞'; // <-- The phone icon
         btn.title = 'Voice Assistant';
         btn.onclick = () => document.getElementById('phoneBox').classList.toggle('show');
 
