@@ -1,4 +1,4 @@
-// chatbot.js - Smart AI with Basic Manners, FAQ Matching, and Correct Icons
+// chatbot.js - Smart AI with Intent Detection (Price vs Availability)
 window.chatBot = {
     approvedFAQs: [],
     
@@ -28,10 +28,10 @@ window.chatBot = {
         `;
         document.head.appendChild(style);
 
-        // Create the pink toggle button
+        // Create the pink toggle button with the chat bubble icon
         const toggle = document.createElement('button');
         toggle.className = 'chatbot-toggle';
-        toggle.innerHTML = '💬'; // <-- I restored the chat bubble icon here
+        toggle.innerHTML = '💬'; 
         toggle.onclick = () => document.getElementById('chatBox').classList.toggle('active');
 
         const box = document.createElement('div');
@@ -81,37 +81,41 @@ window.chatBot = {
         div.scrollTop = div.scrollHeight;
     },
 
-    // Handle basic manners and greetings
+    // 1. Handle basic manners and greetings
     getBasicResponse: function(text) {
         const lower = text.toLowerCase();
-        
-        // Thank you
         if (lower.includes('thank') || lower.includes('salamat') || lower.includes('thanks')) {
             return "You're very welcome! Is there anything else I can help you with today?";
         }
-        
-        // Greetings
         if (lower.includes('hello') || lower.includes('hi') || lower.includes('good morning') || lower.includes('good afternoon') || lower.includes('kumusta')) {
             return "Hello! Welcome to ERS Maternity and Pediatric Care. How can I assist you today?";
         }
-        
-        // Goodbye
         if (lower.includes('bye') || lower.includes('goodbye') || lower.includes('salamat ulit')) {
             return "Thank you for contacting us. Have a wonderful day!";
         }
-        
-        // Who are you
         if (lower.includes('who are you') || lower.includes('ano ka') || lower.includes('assistant')) {
             return "I am the ERS virtual assistant. I can answer questions about our services, pricing, and appointments.";
         }
-
-        return null; // Return null if no basic match found
+        return null;
     },
 
-    // Convert staff instructions to natural responses
+    // 2. NEW: Detect the intent of the question (Price vs Availability)
+    detectIntent: function(text) {
+        const lower = text.toLowerCase();
+        // Check for Price intent
+        if (lower.includes('magkano') || lower.includes('price') || lower.includes('cost') || lower.includes('how much') || lower.includes('bayad')) {
+            return 'price';
+        }
+        // Check for Availability intent
+        if (lower.includes('mayroon') || lower.includes('meron') || lower.includes('may ') || lower.includes('do you have') || lower.includes('available') || lower.includes('offer')) {
+            return 'availability';
+        }
+        return 'general';
+    },
+
+    // 3. Convert staff instructions to natural responses
     convertInstructionToResponse: function(text) {
         const lower = text.toLowerCase();
-        
         if (lower.includes('tell the customer to call') || lower.includes('tell them to call')) {
             return "For more information, please call us at +63 970 471 6507.";
         }
@@ -124,27 +128,31 @@ window.chatBot = {
         if (lower.includes('appointment') && lower.includes('call')) {
             return "To book an appointment, please call us at +63 970 471 6507.";
         }
-        
         return text;
     },
 
+    // 4. Find the best answer using Intent + Keywords
     findBestAnswer: function(question) {
         const lower = question.toLowerCase();
         
-        // 1. Check for basic manners first
+        // First, check for basic manners
         const basicResponse = this.getBasicResponse(question);
         if (basicResponse) return basicResponse;
 
-        // 2. If not a basic greeting, look for FAQ match
+        // Detect what the user is asking for (Price or Availability)
+        const intent = this.detectIntent(question);
+        
         const qWords = lower.split(/\s+/);
         let bestMatch = null;
         let bestScore = 0;
 
+        // Search through approved FAQs
         for (let faq of this.approvedFAQs) {
             const faqLower = faq.question.toLowerCase();
             const fWords = faqLower.split(/\s+/);
             let score = 0;
 
+            // Count matching words
             for (let qw of qWords) {
                 for (let fw of fWords) {
                     if (qw === fw) score += 2;
@@ -166,8 +174,16 @@ window.chatBot = {
             }
         }
 
+        // If we found a matching FAQ
         if (bestMatch && bestScore > 0) {
-            return this.convertInstructionToResponse(bestMatch.approved_answer);
+            let finalAnswer = this.convertInstructionToResponse(bestMatch.approved_answer);
+            
+            // SMART ADJUSTMENT: If they asked "Do you have it?" but the answer is a price, add "Yes"
+            if (intent === 'availability' && (finalAnswer.toLowerCase().includes('price') || finalAnswer.match(/\d+/))) {
+                return "Yes, we offer that service. " + finalAnswer;
+            }
+            
+            return finalAnswer;
         }
         
         return "I'm not sure about that. Please call us at +63 970 471 6507 for more information.";
