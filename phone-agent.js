@@ -1,100 +1,174 @@
-// phone-agent.js - ERS Maternity Voice Agent with Recording
+// phone-agent.js - Smart Voice Agent with Intent Detection
 
 (function() {
     let supabaseClient = null;
     let mediaRecorder = null;
     let audioChunks = [];
+    let approvedFAQs = [];
     
-    // Initialize Supabase
-    function initSupabase() {
+    // Medical keywords
+    const medicalKeywords = {
+        'cs': ['cs', 'c-section', 'caesarean', 'cesarean', 'operation', 'surgery'],
+        'nsd': ['nsd', 'normal delivery', 'natural birth', 'vaginal', 'panganak'],
+        'checkup': ['checkup', 'check-up', 'examination', 'consultation', 'konsulta'],
+        'ultrasound': ['ultrasound', 'sono', 'scan'],
+        'vaccine': ['vaccine', 'vaccination', 'bakuna'],
+        'prenatal': ['prenatal', 'pregnancy', 'buntis', 'pregnant'],
+        'pediatric': ['pediatric', 'child', 'baby', 'infant', 'peds']
+    };
+    
+    // Initialize
+    function init() {
         if (window.supabaseClient) {
             supabaseClient = window.supabaseClient;
+            loadFAQs();
             console.log('✅ Phone agent ready');
         } else {
-            setTimeout(initSupabase, 500);
+            setTimeout(init, 500);
         }
     }
-    initSupabase();
-
-    // Log interaction with audio
-    async function logInteraction(userMsg, aiMsg, audioBlob) {
+    init();
+    
+    async function loadFAQs() {
         if (!supabaseClient) return;
+        const { data } = await supabaseClient
+            .from('faq_improvements')
+            .select('*')
+            .eq('is_approved', true);
+        approvedFAQs = data || [];
+        console.log('📚 Loaded', approvedFAQs.length, 'FAQs for phone agent');
+    }
+    
+    // Extract keywords and intent
+    function extractKeywords(text) {
+        const lower = text.toLowerCase();
+        const keywords = [];
         
-        let audioUrl = null;
-        
-        // Upload audio if exists
-        if (audioBlob && audioBlob.size > 0) {
-            const fileName = `phone-${Date.now()}-${Math.random().toString(36).substr(2, 9)}.webm`;
-            const { data: uploadData, error: uploadError } = await supabaseClient
-                .storage
-                .from('call-recordings')
-                .upload(fileName, audioBlob);
-            
-            if (uploadError) {
-                console.error('Upload error:', uploadError);
-            } else {
-                const { data: urlData } = supabaseClient
-                    .storage
-                    .from('call-recordings')
-                    .getPublicUrl(fileName);
-                audioUrl = urlData.publicUrl;
-                console.log('✅ Audio uploaded:', audioUrl);
+        // Medical services
+        for (const [service, words] of Object.entries(medicalKeywords)) {
+            if (words.some(w => lower.includes(w))) {
+                keywords.push(service);
             }
         }
         
-        // Save to database
-        const { error } = await supabaseClient
-            .from('ai_conversations')
-            .insert([{
-                user_message: userMsg,
-                ai_response: aiMsg,
-                language: 'en',
-                source: 'phone_agent',
-                audio_url: audioUrl,
-                staff_notes: null
-            }]);
+        // Intent detection
+        if (lower.match(/mayroon|meron|have|available|offer|do you/)) keywords.push('intent:availability');
+        if (lower.match(/magkano|price|cost|how much|fee|bayad/)) keywords.push('intent:price');
+        if (lower.match(/how|what|process|procedure|paano/)) keywords.push('intent:procedure');
+        if (lower.match(/when|time|schedule|kailan/)) keywords.push('intent:schedule');
         
-        if (error) console.error('Log error:', error);
+        return keywords;
     }
-
-    // Find answer from FAQs
-    async function findAnswer(question) {
-        if (!supabaseClient) return null;
+    
+    // Generate natural response
+    function generateResponse(faq, keywords) {
+        const intent = keywords.find(k => k.startsWith('intent:'))?.replace('intent:', '') || 'general';
+        const service = keywords.find(k => !k.startsWith('intent:')) || 'service';
+        const answer = faq.approved_answer;
         
-        const lowerQ = question.toLowerCase().trim();
+        // Price questions
+        if (intent === 'price') {
+            if (answer.match(/price|php|₱|\d+/)) {
+                return `For ${service.toUpperCase()}, ${answer}`;
+            }
+            return `About ${service.toUpperCase()}, ${answer}. Would you like to know more?`;
+        }
         
-        try {
-            const { data: faqs } = await supabaseClient
-                .from('faq_improvements')
-                .select('*')
-                .eq('is_approved', true);
+        // Availability questions
+        if (intent === 'availability') {
+            if (answer.match(/no|don't|not available|none/)) {
+                return `I'm sorry, but ${answer.toLowerCase()}. Can I help you with something else?`;
+            }
+            return `Yes! ${answer}`;
+        }
+        
+        // Default
+        return answer;
+    }
+    
+    // Find best FAQ match
+    function findFAQ(question) {
+        const keywords = extractKeywords(question);
+        const lowerQ = question.toLowerCase();
+        
+        let bestMatch = null;
+        let bestScore = 0;
+        
+        for (const faq of approvedFAQs) {
+            const faqKeywords = extractKeywords(faq.question.toLowerCase());
+            const matches = keywords.filter(k => faqKeywords.includes(k));
+            const score = matches.length;
             
-            if (!faqs || faqs.length === 0) return null;
-            
-            // Better matching logic
-            for (let faq of faqs) {
-                const faqLower = faq.question.toLowerCase();
-                const qWords = lowerQ.split(' ').filter(w => w.length > 2);
-                const fWords = faqLower.split(' ').filter(w => w.length > 2);
-                
-                // Count matching words
-                const matches = qWords.filter(w => fWords.includes(w));
-                
-                // If 2+ words match OR exact phrase match
-                if (matches.length >= 2 || lowerQ.includes(faqLower) || faqLower.includes(lowerQ)) {
-                    console.log('✅ Matched FAQ:', faq.question);
-                    return faq.approved_answer;
-                }
+            if (lowerQ.includes(faq.question.toLowerCase()) || faq.question.toLowerCase().includes(lowerQ)) {
+                return { faq, keywords, score: 10 };
             }
             
-            return null;
-        } catch (e) {
-            console.error('FAQ error:', e);
-            return null;
+            if (score > bestScore && score >= 2) {
+                bestScore = score;
+                bestMatch = { faq, keywords, score };
+            }
         }
+        
+        return bestMatch;
     }
-
-    // Create UI
+    
+    async function handleVoice(text) {
+        const status = document.getElementById('status');
+        status.textContent = 'Thinking...';
+        
+        const match = findFAQ(text);
+        
+        if (match) {
+            console.log('✅ Matched:', match.faq.question, 'Score:', match.score);
+            const response = generateResponse(match.faq, match.keywords);
+            console.log('Response:', response);
+            speak(response);
+            logInteraction(text, response);
+            return;
+        }
+        
+        // Fallback responses
+        const lower = text.toLowerCase();
+        let response = "I'm not sure about that. Please call us at 0912 345 6789 for more information.";
+        
+        if (lower.includes('cs') || lower.includes('c-section')) {
+            response = "For Cesarean Section services, please call our clinic directly. Our doctors can provide detailed consultation about CS procedures and availability.";
+        } else if (lower.includes('hour') || lower.includes('open') || lower.includes('time')) {
+            response = "We are open Monday to Saturday, 8 AM to 5 PM. Closed on Sundays.";
+        } else if (lower.includes('book') || lower.includes('appointment')) {
+            response = "You can book an appointment on our website or call us directly.";
+        } else if (lower.includes('price') || lower.includes('magkano')) {
+            response = "For pricing information, please call our clinic or visit our services page.";
+        } else if (lower.includes('hello') || lower.includes('hi')) {
+            response = "Hello! How can I help you today?";
+        }
+        
+        speak(response);
+        logInteraction(text, response);
+    }
+    
+    function speak(text) {
+        if (window.speechSynthesis.speaking) window.speechSynthesis.cancel();
+        const utter = new SpeechSynthesisUtterance(text);
+        utter.rate = 0.95;
+        window.speechSynthesis.speak(utter);
+        document.getElementById('status').textContent = 'Speaking...';
+        utter.onend = () => {
+            if (window.isCalling) document.getElementById('status').textContent = 'Listening...';
+        };
+    }
+    
+    async function logInteraction(userMsg, aiMsg) {
+        if (!supabaseClient) return;
+        await supabaseClient.from('ai_conversations').insert([{
+            user_message: userMsg,
+            ai_response: aiMsg,
+            language: 'en',
+            source: 'phone_agent'
+        }]);
+    }
+    
+    // UI Creation (same as before, just adding the phone icon)
     function createUI() {
         const style = document.createElement('style');
         style.textContent = `
@@ -117,11 +191,7 @@
                 box-shadow: 0 5px 25px rgba(0,0,0,0.15);
                 z-index: 9999; font-family: 'Poppins', sans-serif;
             }
-            .phone-modal.active { display: block; animation: slideUp 0.3s; }
-            @keyframes slideUp {
-                from { opacity: 0; transform: translateY(20px); }
-                to { opacity: 1; transform: translateY(0); }
-            }
+            .phone-modal.active { display: block; }
             .phone-header {
                 background: linear-gradient(135deg, #9b59b6, #8e44ad);
                 color: white; padding: 15px; text-align: center;
@@ -151,18 +221,12 @@
                 font-size: 14px; color: #555; min-height: 20px;
             }
             .status { color: #7F8C8D; font-size: 14px; margin: 10px 0; }
-            .recording-indicator {
-                display: none; color: #e74c3c; font-weight: 600;
-                animation: blink 1s infinite;
-            }
-            .recording-indicator.active { display: block; }
-            @keyframes blink { 50% { opacity: 0.5; } }
         `;
         document.head.appendChild(style);
 
         const fab = document.createElement('button');
         fab.className = 'phone-fab';
-        fab.innerHTML = '📞'; // Phone icon
+        fab.innerHTML = '📞';
         fab.onclick = () => document.getElementById('phoneModal').classList.toggle('active');
 
         const modal = document.createElement('div');
@@ -171,37 +235,31 @@
         modal.innerHTML = `
             <div class="phone-header">
                 <h3>📞 ERS Voice Assistant</h3>
-                <small style="opacity:0.9">Click "Start Call" to speak</small>
+                <small>Click "Start Call" to speak</small>
             </div>
             <div class="phone-body">
                 <div class="pulse" id="pulse"></div>
-                <div class="recording-indicator" id="recIndicator">🔴 Recording...</div>
                 <p class="status" id="status">Ready to assist</p>
                 <div class="transcript" id="transcript"></div>
-                <div>
-                    <button class="phone-btn" id="callBtn" onclick="toggleCall()">Start Call</button>
-                </div>
+                <button class="phone-btn" id="callBtn" onclick="window.toggleCall()">Start Call</button>
             </div>
         `;
 
         document.body.appendChild(fab);
         document.body.appendChild(modal);
     }
-
+    
     // Voice logic
-    let isCalling = false;
+    window.isCalling = false;
     let recognition = null;
-    const synth = window.speechSynthesis;
-
+    
     window.toggleCall = async function() {
         const btn = document.getElementById('callBtn');
         const pulse = document.getElementById('pulse');
         const status = document.getElementById('status');
-        const recIndicator = document.getElementById('recIndicator');
         
-        if (!isCalling) {
-            // Start call
-            isCalling = true;
+        if (!window.isCalling) {
+            window.isCalling = true;
             btn.textContent = 'End Call';
             btn.classList.add('end');
             pulse.classList.add('active');
@@ -209,61 +267,47 @@
             document.getElementById('transcript').textContent = '';
             audioChunks = [];
             
-            // Request microphone and start recording
             try {
                 const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
                 mediaRecorder = new MediaRecorder(stream);
-                
-                mediaRecorder.ondataavailable = (e) => {
-                    if (e.data.size > 0) audioChunks.push(e.data);
-                };
-                
+                mediaRecorder.ondataavailable = (e) => { if (e.data.size > 0) audioChunks.push(e.data); };
                 mediaRecorder.start();
-                recIndicator.classList.add('active');
-                console.log('🎤 Recording started');
                 
                 startListening();
                 speak("Hello! Welcome to ERS Maternity and Pediatric Care. How can I help you today?");
                 
             } catch (err) {
-                console.error('Mic error:', err);
-                alert('Please allow microphone access to use voice features');
-                isCalling = false;
+                alert('Please allow microphone access');
+                window.isCalling = false;
                 btn.textContent = 'Start Call';
                 btn.classList.remove('end');
             }
             
         } else {
-            // End call
-            isCalling = false;
+            window.isCalling = false;
             btn.textContent = 'Start Call';
             btn.classList.remove('end');
             pulse.classList.remove('active');
-            recIndicator.classList.remove('active');
             status.textContent = 'Call ended';
             
-            // Stop recording
             if (mediaRecorder && mediaRecorder.state === 'recording') {
                 mediaRecorder.stop();
                 mediaRecorder.stream.getTracks().forEach(track => track.stop());
-                
-                // Wait for recording to finish
                 setTimeout(async () => {
                     const audioBlob = new Blob(audioChunks, { type: 'audio/webm' });
-                    const lastTranscript = document.getElementById('transcript').textContent.replace('You said: "', '').replace('"', '') || 'Call';
-                    await logInteraction(lastTranscript, 'Call ended', audioBlob);
-                    console.log('📁 Recording saved');
+                    const transcript = document.getElementById('transcript').textContent.replace('You said: "', '').replace('"', '') || 'Call';
+                    await logInteraction(transcript, 'Call ended');
                 }, 100);
             }
             
             if (recognition) recognition.stop();
-            synth.cancel();
+            window.speechSynthesis.cancel();
         }
     };
-
+    
     function startListening() {
         if (!('webkitSpeechRecognition' in window)) {
-            alert('Please use Chrome for voice features');
+            alert('Please use Chrome');
             return;
         }
         recognition = new webkitSpeechRecognition();
@@ -277,63 +321,14 @@
         };
         
         recognition.onend = () => {
-            if (isCalling) {
-                setTimeout(() => {
-                    if (isCalling) recognition.start();
-                }, 1000);
+            if (window.isCalling) {
+                setTimeout(() => { if (window.isCalling) recognition.start(); }, 1000);
             }
         };
         
         try { recognition.start(); } catch(err) {}
     }
-
-    async function handleVoice(text) {
-        const status = document.getElementById('status');
-        status.textContent = 'Thinking...';
-        
-        // Try database answer
-        const answer = await findAnswer(text);
-        
-        if (answer) {
-            console.log('Using FAQ:', answer);
-            speak(answer);
-            logInteraction(text, answer, null);
-            return;
-        }
-        
-        // Fallback responses
-        const lower = text.toLowerCase();
-        let response = "I'm not sure about that. Please call us at 0912 345 6789 for more information.";
-        
-        if (lower.includes('cs') || lower.includes('c-section') || lower.includes('caesarean') || lower.includes('operation')) {
-            response = "For information about Cesarean Section services, please call our clinic directly. Our doctors can provide detailed consultation about CS procedures and availability.";
-        } else if (lower.includes('hour') || lower.includes('open') || lower.includes('time')) {
-            response = "We are open Monday to Saturday, 8 AM to 5 PM. Closed on Sundays.";
-        } else if (lower.includes('book') || lower.includes('appointment')) {
-            response = "You can book an appointment on our website or call us directly.";
-        } else if (lower.includes('price') || lower.includes('magkano') || lower.includes('cost')) {
-            response = "For pricing information, please call our clinic or visit our services page.";
-        } else if (lower.includes('hello') || lower.includes('hi')) {
-            response = "Hello! How can I help you today?";
-        }
-        
-        console.log('Fallback:', response);
-        speak(response);
-        logInteraction(text, response, null);
-    }
-
-    function speak(text) {
-        if (synth.speaking) synth.cancel();
-        const utter = new SpeechSynthesisUtterance(text);
-        utter.rate = 0.95;
-        synth.speak(utter);
-        document.getElementById('status').textContent = 'Speaking...';
-        utter.onend = () => {
-            if (isCalling) document.getElementById('status').textContent = 'Listening...';
-        };
-    }
-
-    // Initialize
+    
     if (document.readyState === 'loading') {
         document.addEventListener('DOMContentLoaded', createUI);
     } else {
