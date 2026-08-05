@@ -1,4 +1,4 @@
-// chatbot.js - Smart AI with Intent Detection (Price vs Availability)
+// chatbot.js - Complete AI with Website Knowledge, Manners, and Smart Matching
 window.chatBot = {
     approvedFAQs: [],
     
@@ -28,10 +28,9 @@ window.chatBot = {
         `;
         document.head.appendChild(style);
 
-        // Create the pink toggle button with the chat bubble icon
         const toggle = document.createElement('button');
         toggle.className = 'chatbot-toggle';
-        toggle.innerHTML = '💬'; 
+        toggle.innerHTML = '💬'; // Chat bubble icon kept
         toggle.onclick = () => document.getElementById('chatBox').classList.toggle('active');
 
         const box = document.createElement('div');
@@ -81,7 +80,7 @@ window.chatBot = {
         div.scrollTop = div.scrollHeight;
     },
 
-    // 1. Handle basic manners and greetings
+    // 1. Basic Manners
     getBasicResponse: function(text) {
         const lower = text.toLowerCase();
         if (lower.includes('thank') || lower.includes('salamat') || lower.includes('thanks')) {
@@ -94,26 +93,66 @@ window.chatBot = {
             return "Thank you for contacting us. Have a wonderful day!";
         }
         if (lower.includes('who are you') || lower.includes('ano ka') || lower.includes('assistant')) {
-            return "I am the ERS virtual assistant. I can answer questions about our services, pricing, and appointments.";
+            return "I am the ERS virtual assistant. I can answer questions about our clinic, services, doctors, and appointments.";
         }
         return null;
     },
 
-    // 2. NEW: Detect the intent of the question (Price vs Availability)
+    // 2. NEW: Website Knowledge Base
+    getWebsiteInfo: function(text) {
+        const lower = text.toLowerCase();
+        
+        // Location / Address
+        if (lower.includes('where') || lower.includes('location') || lower.includes('address') || lower.includes('saan') || lower.includes('nasaan') || lower.includes('map')) {
+            return "We are located at Trece Martires - Indang Road, Trece Martires City, Cavite 4109.";
+        }
+        
+        // Contact Info (Phone/Email)
+        if (lower.includes('contact') || lower.includes('number') || lower.includes('call') || lower.includes('phone') || lower.includes('email') || lower.includes('tawag')) {
+            return "You can reach us at Mobile: +63 970 471 6507, Landline: +63 (46) 419-0201, or Email: ersmaternityclinic@gmail.com.";
+        }
+        
+        // Hours / Time
+        if (lower.includes('hour') || lower.includes('time') || lower.includes('open') || lower.includes('close') || lower.includes('schedule') || lower.includes('oras') || lower.includes('bukas')) {
+            return "We are open Monday to Saturday from 8:00 AM to 5:00 PM. We are closed on Sundays.";
+        }
+        
+        // Doctors
+        if (lower.includes('doctor') || lower.includes('physician') || lower.includes('sino') || lower.includes('dr.')) {
+            return "Our attending physicians are Dr. Evalyn Rivera-Castillo and Dr. Elli Sinsay.";
+        }
+        
+        // Services
+        if (lower.includes('service') || lower.includes('offer') || lower.includes('do you have') || lower.includes('meron') || lower.includes('treatment')) {
+            return "We offer Prenatal Care, Postpartum Care, Pediatric Care, Newborn Care, Vaccinations, Ultrasound, and General Check-ups.";
+        }
+        
+        // Portal / Records
+        if (lower.includes('portal') || lower.includes('record') || lower.includes('result') || lower.includes('login')) {
+            return "You can access your medical records and results through our Patient Portal on the website.";
+        }
+        
+        // Blog / Articles
+        if (lower.includes('blog') || lower.includes('article') || lower.includes('read') || lower.includes('tips')) {
+            return "We have a Blog section on our website with helpful articles about maternity and pediatric care.";
+        }
+
+        return null;
+    },
+
+    // 3. Detect Intent (Price vs Availability)
     detectIntent: function(text) {
         const lower = text.toLowerCase();
-        // Check for Price intent
         if (lower.includes('magkano') || lower.includes('price') || lower.includes('cost') || lower.includes('how much') || lower.includes('bayad')) {
             return 'price';
         }
-        // Check for Availability intent
         if (lower.includes('mayroon') || lower.includes('meron') || lower.includes('may ') || lower.includes('do you have') || lower.includes('available') || lower.includes('offer')) {
             return 'availability';
         }
         return 'general';
     },
 
-    // 3. Convert staff instructions to natural responses
+    // 4. Convert staff instructions
     convertInstructionToResponse: function(text) {
         const lower = text.toLowerCase();
         if (lower.includes('tell the customer to call') || lower.includes('tell them to call')) {
@@ -122,51 +161,46 @@ window.chatBot = {
         if (lower.includes('tell the patient')) {
             return text.replace(/tell the patient/gi, 'please').replace(/to call/gi, 'call');
         }
-        if (lower.includes('price') && lower.includes('call')) {
-            return "For pricing information, please call our clinic at +63 970 471 6507.";
-        }
-        if (lower.includes('appointment') && lower.includes('call')) {
-            return "To book an appointment, please call us at +63 970 471 6507.";
-        }
         return text;
     },
 
-    // 4. Find the best answer using Intent + Keywords
+    // 5. Find Best Answer
     findBestAnswer: function(question) {
         const lower = question.toLowerCase();
         
-        // First, check for basic manners
+        // First, check basic manners
         const basicResponse = this.getBasicResponse(question);
         if (basicResponse) return basicResponse;
 
-        // Detect what the user is asking for (Price or Availability)
+        // Second, check website knowledge
+        const websiteInfo = this.getWebsiteInfo(question);
+        if (websiteInfo) return websiteInfo;
+
+        // Third, check database FAQs (for pricing and specific medical info)
         const intent = this.detectIntent(question);
+        const qWords = lower.split(/\s+/).filter(w => w.length > 2);
         
-        const qWords = lower.split(/\s+/);
         let bestMatch = null;
         let bestScore = 0;
 
-        // Search through approved FAQs
         for (let faq of this.approvedFAQs) {
             const faqLower = faq.question.toLowerCase();
-            const fWords = faqLower.split(/\s+/);
+            const fWords = faqLower.split(/\s+/).filter(w => w.length > 2);
             let score = 0;
 
-            // Count matching words
+            if (lower.includes(faqLower) || faqLower.includes(lower)) score += 100;
+
             for (let qw of qWords) {
                 for (let fw of fWords) {
-                    if (qw === fw) score += 2;
-                    else if (qw.includes(fw) || fw.includes(qw)) score += 1;
+                    if (qw === fw) score += 10;
+                    else if (qw.includes(fw) || fw.includes(qw)) score += 5;
                 }
             }
 
-            // Boost for medical terms
-            if (lower.includes('cs') && faqLower.includes('cs')) score += 10;
-            if (lower.includes('nsd') && faqLower.includes('nsd')) score += 10;
-            if (lower.includes('check') && faqLower.includes('check')) score += 5;
-            if (lower.includes('checkup') && faqLower.includes('checkup')) score += 5;
-
-            if (lower.includes(faqLower) || faqLower.includes(lower)) score += 20;
+            if (lower.includes('cs') && faqLower.includes('cs')) score += 50;
+            if (lower.includes('nsd') && faqLower.includes('nsd')) score += 50;
+            if (lower.includes('check') && faqLower.includes('check')) score += 50;
+            if (lower.includes('checkup') && faqLower.includes('checkup')) score += 50;
 
             if (score > bestScore) {
                 bestScore = score;
@@ -174,15 +208,11 @@ window.chatBot = {
             }
         }
 
-        // If we found a matching FAQ
         if (bestMatch && bestScore > 0) {
             let finalAnswer = this.convertInstructionToResponse(bestMatch.approved_answer);
-            
-            // SMART ADJUSTMENT: If they asked "Do you have it?" but the answer is a price, add "Yes"
             if (intent === 'availability' && (finalAnswer.toLowerCase().includes('price') || finalAnswer.match(/\d+/))) {
                 return "Yes, we offer that service. " + finalAnswer;
             }
-            
             return finalAnswer;
         }
         
