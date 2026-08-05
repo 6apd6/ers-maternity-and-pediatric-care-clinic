@@ -1,4 +1,4 @@
-// phone-agent.js - Complete Voice Agent with Website Knowledge
+// phone-agent.js - Complete Voice Agent with Booking Info
 (function() {
     let supabase = null;
     let FAQs = [];
@@ -21,10 +21,9 @@
         if (!supabase) return;
         const { data } = await supabase.from('faq_improvements').select('*').eq('is_approved', true);
         FAQs = data || [];
-        console.log('📞 Phone FAQs loaded:', FAQs.length);
+        console.log(' Phone FAQs loaded:', FAQs.length);
     }
 
-    // 1. Basic Manners
     function getBasicResponse(text) {
         const lower = text.toLowerCase();
         if (lower.includes('thank') || lower.includes('salamat')) return "You're very welcome! Is there anything else I can help you with?";
@@ -33,9 +32,14 @@
         return null;
     }
 
-    // 2. NEW: Website Knowledge Base for Voice
     function getWebsiteInfo(text) {
         const lower = text.toLowerCase();
+        
+        // NEW: Booking/Appointment Info
+        if (lower.includes('book') || lower.includes('appointment') || lower.includes('schedule') || lower.includes('reserve') || lower.includes('pa book') || lower.includes('how to book')) {
+            return "To book an appointment, you can click the Book Appointment button on our website, or call us at 0917 471 6507. We're open Monday to Saturday, 8 AM to 5 PM.";
+        }
+        
         if (lower.includes('where') || lower.includes('location') || lower.includes('address') || lower.includes('saan')) {
             return "We are located at Trece Martires - Indang Road, Trece Martires City, Cavite 4109.";
         }
@@ -57,7 +61,6 @@
         return null;
     }
 
-    // 3. Convert staff instructions
     function convertInstruction(text) {
         const lower = text.toLowerCase();
         if (lower.includes('tell the customer to call') || lower.includes('tell them to call')) {
@@ -69,7 +72,6 @@
         return text;
     }
 
-    // 4. Smart Matching
     function getBestAnswer(question) {
         const lower = question.toLowerCase();
         
@@ -114,7 +116,6 @@
         return "I'm not sure about that. Please call our clinic at 0917 471 6507 for more information.";
     }
 
-    // 5. Create UI
     function createUI() {
         const style = document.createElement('style');
         style.innerHTML = `
@@ -133,7 +134,7 @@
 
         const btn = document.createElement('button');
         btn.className = 'phone-icon';
-        btn.innerHTML = '📞'; // Phone icon kept
+        btn.innerHTML = '📞';
         btn.title = 'Voice Assistant';
         btn.onclick = () => document.getElementById('phoneBox').classList.toggle('show');
 
@@ -152,7 +153,6 @@
         document.body.appendChild(box);
     }
 
-    // 6. Call Logic
     window.toggleCall = async function() {
         const btn = document.getElementById('phBtn');
         const ring = document.getElementById('ring');
