@@ -1,215 +1,206 @@
-/* =========================================
-   AI PHONE AGENT - Multilingual
-   ========================================= */
+// phone-agent.js - ERS Maternity Voice Agent with Logging
 
-class AIPhoneAgent {
-    constructor() {
-        this.isOpen = false;
-        this.missedCalls = [];
-        this.init();
+(function() {
+    // Wait for Supabase to be ready
+    function waitForSupabase(callback) {
+        if (window.supabaseClient) {
+            callback();
+        } else {
+            setTimeout(() => waitForSupabase(callback), 500);
+        }
     }
 
-    init() {
-        this.createWidget();
-        this.loadMissedCalls();
+    // --- Logging Function ---
+    async function logPhoneInteraction(userMsg, aiMsg) {
+        if (!window.supabaseClient) return;
+        try {
+            const { error } = await window.supabaseClient
+                .from('ai_conversations')
+                .insert([{
+                    user_message: userMsg,
+                    ai_response: aiMsg,
+                    language: 'en',
+                    was_helpful: null,
+                    source: 'phone_agent' // This tags it as a phone call
+                }]);
+            
+            if (error) console.error('Phone log error:', error);
+            else console.log('Phone interaction logged successfully');
+        } catch (e) {
+            console.error('Failed to log phone interaction:', e);
+        }
     }
 
-    createWidget() {
-        const container = document.getElementById('aiPhoneWidget');
-        if (!container) return;
-
-        container.innerHTML = `
-            <div class="ai-phone-widget">
-                <div class="ai-phone-window" id="aiPhoneWindow">
-                    <div class="ai-phone-header">
-                        <h4>📞 AI Phone Assistant</h4>
-                        <p>🇬🇧 🇵🇭 EN / TL / CEB / ILO</p>
-                    </div>
-                    <div class="ai-phone-content">
-                        <div class="ai-phone-status">
-                            <h5>🤖 AI Agent Status</h5>
-                            <p>Speaks 4 Philippine languages</p>
-                            <p style="color: #4CD964;">● Online 24/7</p>
-                        </div>
-                        <div class="ai-phone-features">
-                            <div class="ai-phone-feature" onclick="alert('AI can answer calls in English, Tagalog, Bisaya, and Ilocano!')">
-                                <div class="ai-phone-feature-icon">📞</div>
-                                <h6>Answer Calls</h6>
-                                <p>4 languages</p>
-                            </div>
-                            <div class="ai-phone-feature" onclick="alert('AI takes voicemails and categorizes them by urgency')">
-                                <div class="ai-phone-feature-icon">🎙️</div>
-                                <h6>Voicemail</h6>
-                                <p>Smart categorization</p>
-                            </div>
-                            <div class="ai-phone-feature" onclick="window.location.href='appointment.html'">
-                                <div class="ai-phone-feature-icon">📅</div>
-                                <h6>Book Online</h6>
-                                <p>Schedule via phone</p>
-                            </div>
-                            <div class="ai-phone-feature" onclick="alert('AI answers FAQs in your preferred language')">
-                                <div class="ai-phone-feature-icon">❓</div>
-                                <h6>FAQs</h6>
-                                <p>Hours, prices, etc.</p>
-                            </div>
-                        </div>
-                        <div class="callback-form" id="callbackForm">
-                            <h5>📲 Request Callback</h5>
-                            <p style="color: #7F8C8D; font-size: 0.9rem; margin-bottom: 1rem;">
-                                Missed our call? We'll call you back!
-                            </p>
-                            <input type="tel" id="callbackPhone" placeholder="Phone number (09XX-XXX-XXXX)" required>
-                            <select id="callbackReason">
-                                <option value="general">General Inquiry</option>
-                                <option value="appointment">Appointment Booking</option>
-                                <option value="prenatal">Prenatal Checkup</option>
-                                <option value="delivery">Delivery Inquiry</option>
-                                <option value="emergency">Emergency Concern</option>
-                            </select>
-                            <select id="callbackTime">
-                                <option value="asap">ASAP</option>
-                                <option value="1hour">Within 1 hour</option>
-                                <option value="24hours">Within 24 hours</option>
-                            </select>
-                            <select id="callbackLanguage">
-                                <option value="en">🇬🇧 English</option>
-                                <option value="tl">🇵🇭 Tagalog</option>
-                                <option value="ceb">🇵🇭 Bisaya</option>
-                                <option value="ilo">🇵🇭 Ilocano</option>
-                            </select>
-                            <button onclick="window.phoneAgent.requestCallback()">📞 Request Callback</button>
-                            <div class="callback-success" id="callbackSuccess" style="display:none;">
-                                ✓ Callback scheduled! We'll call you in your preferred language.
-                            </div>
-                        </div>
-                        <div class="missed-calls-log">
-                            <h5>📋 Recent Missed Calls</h5>
-                            <div id="missedCallsList"></div>
-                        </div>
-                    </div>
-                </div>
-                <button class="ai-phone-toggle" id="aiPhoneToggle">
-                    <svg class="icon-open" viewBox="0 0 24 24"><path d="M20.01 15.38c-1.23 0-2.42-.2-3.53-.56-.35-.12-.74-.03-1.01.24l-1.57 1.97c-2.83-1.35-5.48-3.9-6.89-6.83l1.95-1.66c.27-.28.35-.67.24-1.02-.37-1.11-.56-2.3-.56-3.53 0-.54-.45-.99-.99-.99H4.19C3.65 3 3 3.24 3 3.99 3 13.28 10.73 21 20.01 21c.71 0 .99-.63.99-1.18v-3.45c0-.54-.45-.99-.99-.99z"/></svg>
-                    <svg class="icon-close" viewBox="0 0 24 24"><path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
-                </button>
-            </div>
-        `;
-
-        this.injectStyles();
-        this.attachEvents();
-    }
-
-    injectStyles() {
+    // --- UI Creation ---
+    function createPhoneAgentUI() {
+        // Add CSS
         const style = document.createElement('style');
-        style.textContent = `
-            .ai-phone-widget { position: fixed; bottom: 110px; right: 30px; z-index: 9998; font-family: 'Poppins', sans-serif; }
-            .ai-phone-toggle { width: 65px; height: 65px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); border-radius: 50%; border: none; cursor: pointer; box-shadow: 0 10px 30px rgba(102, 126, 234, 0.4); display: flex; align-items: center; justify-content: center; transition: all 0.3s; position: relative; }
-            .ai-phone-toggle:hover { transform: scale(1.1); }
-            .ai-phone-toggle svg { width: 30px; height: 30px; fill: white; }
-            .ai-phone-toggle.active svg.icon-open { display: none; }
-            .ai-phone-toggle:not(.active) svg.icon-close { display: none; }
-            .ai-phone-window { position: absolute; bottom: 80px; right: 0; width: 400px; height: 620px; background: white; border-radius: 20px; box-shadow: 0 20px 60px rgba(0, 0, 0, 0.15); display: flex; flex-direction: column; overflow: hidden; opacity: 0; visibility: hidden; transform: translateY(20px) scale(0.95); transition: all 0.3s cubic-bezier(0.68, -0.55, 0.265, 1.55); }
-            .ai-phone-window.active { opacity: 1; visibility: visible; transform: translateY(0) scale(1); }
-            .ai-phone-header { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 1.5rem; text-align: center; }
-            .ai-phone-header h4 { font-size: 1.3rem; margin-bottom: 0.3rem; }
-            .ai-phone-header p { font-size: 0.9rem; opacity: 0.9; }
-            .ai-phone-content { flex: 1; padding: 1.5rem; overflow-y: auto; display: flex; flex-direction: column; gap: 1.2rem; }
-            .ai-phone-status { background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%); padding: 1.2rem; border-radius: 15px; text-align: center; }
-            .ai-phone-status h5 { color: #2C3E50; margin-bottom: 0.5rem; }
-            .ai-phone-status p { color: #7F8C8D; font-size: 0.9rem; }
-            .ai-phone-features { display: grid; grid-template-columns: 1fr 1fr; gap: 0.8rem; }
-            .ai-phone-feature { background: #FFF5F7; padding: 1.2rem; border-radius: 12px; text-align: center; cursor: pointer; transition: all 0.3s; }
-            .ai-phone-feature:hover { transform: translateY(-5px); box-shadow: 0 10px 20px rgba(0,0,0,0.1); }
-            .ai-phone-feature-icon { font-size: 2rem; margin-bottom: 0.5rem; }
-            .ai-phone-feature h6 { color: #2C3E50; font-size: 0.9rem; margin-bottom: 0.3rem; }
-            .ai-phone-feature p { color: #7F8C8D; font-size: 0.75rem; }
-            .callback-form { background: white; padding: 1.2rem; border-radius: 15px; border: 2px solid #e0e0e0; }
-            .callback-form h5 { color: #2C3E50; margin-bottom: 0.8rem; }
-            .callback-form input, .callback-form select { width: 100%; padding: 0.8rem; border: 2px solid #e0e0e0; border-radius: 10px; margin-bottom: 0.8rem; font-family: 'Poppins', sans-serif; }
-            .callback-form button { width: 100%; padding: 0.9rem; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; border: none; border-radius: 10px; font-weight: 600; cursor: pointer; font-family: 'Poppins', sans-serif; }
-            .callback-success { background: #4CD964; color: white; padding: 1rem; border-radius: 10px; text-align: center; margin-top: 1rem; }
-            .missed-calls-log { background: white; padding: 1.2rem; border-radius: 15px; border: 2px solid #e0e0e0; }
-            .missed-calls-log h5 { color: #2C3E50; margin-bottom: 1rem; }
-            .missed-call-item { background: #FFF5F7; padding: 1rem; border-radius: 10px; margin-bottom: 0.6rem; display: flex; justify-content: space-between; align-items: center; }
-            .missed-call-info h6 { color: #2C3E50; font-size: 0.9rem; margin-bottom: 0.2rem; }
-            .missed-call-info p { color: #7F8C8D; font-size: 0.8rem; }
-            .missed-call-action { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; border: none; padding: 0.4rem 0.8rem; border-radius: 20px; font-size: 0.8rem; cursor: pointer; }
-            @media (max-width: 480px) { .ai-phone-window { width: calc(100vw - 40px); height: 70vh; right: -10px; } }
+        style.innerHTML = `
+            .phone-fab {
+                position: fixed; bottom: 100px; right: 30px; width: 60px; height: 60px;
+                background: #9b59b6; border-radius: 50%; display: flex; align-items: center; justify-content: center;
+                color: white; font-size: 24px; cursor: pointer; box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+                z-index: 9998; transition: transform 0.2s;
+            }
+            .phone-fab:hover { transform: scale(1.1); }
+            .phone-modal {
+                display: none; position: fixed; bottom: 170px; right: 30px; width: 320px;
+                background: white; border-radius: 15px; box-shadow: 0 5px 25px rgba(0,0,0,0.15);
+                z-index: 9999; overflow: hidden; font-family: 'Poppins', sans-serif;
+            }
+            .phone-modal.active { display: block; }
+            .phone-header {
+                background: linear-gradient(135deg, #9b59b6, #8e44ad); color: white;
+                padding: 15px; text-align: center;
+            }
+            .phone-body { padding: 20px; text-align: center; min-height: 150px; display: flex; flex-direction: column; justify-content: center; }
+            .phone-btn {
+                background: #27ae60; color: white; border: none; padding: 12px 24px; border-radius: 25px;
+                font-size: 16px; cursor: pointer; margin-top: 10px;
+            }
+            .phone-btn.end { background: #e74c3c; }
+            .pulse-ring {
+                width: 80px; height: 80px; border-radius: 50%; background: #9b59b6;
+                margin: 0 auto; position: relative; display: none;
+            }
+            .pulse-ring.active { display: block; animation: pulse 1.5s infinite; }
+            @keyframes pulse {
+                0% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(155, 89, 182, 0.7); }
+                70% { transform: scale(1); box-shadow: 0 0 0 20px rgba(155, 89, 182, 0); }
+                100% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(155, 89, 182, 0); }
+            }
+            .transcript { font-size: 14px; color: #555; margin-top: 10px; font-style: italic; min-height: 20px;}
         `;
         document.head.appendChild(style);
-    }
 
-    attachEvents() {
-        setTimeout(() => {
-            const toggle = document.getElementById('aiPhoneToggle');
-            if (toggle) {
-                toggle.addEventListener('click', () => {
-                    this.isOpen = !this.isOpen;
-                    document.getElementById('aiPhoneWindow').classList.toggle('active', this.isOpen);
-                    toggle.classList.toggle('active', this.isOpen);
-                });
-            }
-        }, 100);
-    }
+        // Add HTML
+        const fab = document.createElement('div');
+        fab.className = 'phone-fab';
+        fab.innerHTML = '';
+        fab.onclick = togglePhoneModal;
 
-    loadMissedCalls() {
-        // Demo missed calls data
-        this.missedCalls = [
-            { phone: '0917-XXX-1234', time: 'Today, 2:30 PM', message: '"Magkano prenatal?"', lang: 'tl' },
-            { phone: '0920-XXX-5678', time: 'Yesterday, 4:15 PM', message: '"Pila ang checkup?"', lang: 'ceb' },
-            { phone: '0915-XXX-9012', time: 'Yesterday, 11:00 AM', message: '"Mano ti prenatal?"', lang: 'ilo' }
-        ];
-        this.renderMissedCalls();
-    }
-
-    renderMissedCalls() {
-        const list = document.getElementById('missedCallsList');
-        if (!list) return;
-        
-        const langFlags = { en: '🇬🇧', tl: '🇵🇭 TL', ceb: '🇵🇭 CB', ilo: '🇵🇭 IL' };
-        
-        list.innerHTML = this.missedCalls.map(call => `
-            <div class="missed-call-item">
-                <div class="missed-call-info">
-                    <h6>${call.phone} ${langFlags[call.lang]}</h6>
-                    <p>${call.time} - ${call.message}</p>
-                </div>
-                <button class="missed-call-action" onclick="window.phoneAgent.followUp('${call.phone}')">Follow Up</button>
+        const modal = document.createElement('div');
+        modal.className = 'phone-modal';
+        modal.id = 'phoneModal';
+        modal.innerHTML = `
+            <div class="phone-header">
+                <h3 style="margin:0;">ERS Voice Assistant</h3>
+                <small>Click to start a call</small>
             </div>
-        `).join('');
+            <div class="phone-body">
+                <div class="pulse-ring" id="pulseRing"></div>
+                <p id="phoneStatus">Ready to assist you.</p>
+                <div class="transcript" id="phoneTranscript"></div>
+                <button class="phone-btn" id="callBtn" onclick="window.toggleCall()">Start Call</button>
+            </div>
+        `;
+
+        document.body.appendChild(fab);
+        document.body.appendChild(modal);
     }
 
-    async requestCallback() {
-        const phone = document.getElementById('callbackPhone').value;
-        const reason = document.getElementById('callbackReason').value;
-        const time = document.getElementById('callbackTime').value;
-        const language = document.getElementById('callbackLanguage').value;
+    // --- Logic ---
+    let isCalling = false;
+    let recognition = null;
+    let synthesis = window.speechSynthesis;
 
-        if (!phone) {
-            alert('Please enter your phone number');
+    window.togglePhoneModal = function() {
+        document.getElementById('phoneModal').classList.toggle('active');
+    };
+
+    window.toggleCall = function() {
+        const btn = document.getElementById('callBtn');
+        const ring = document.getElementById('pulseRing');
+        const status = document.getElementById('phoneStatus');
+
+        if (!isCalling) {
+            // Start Call
+            isCalling = true;
+            btn.textContent = 'End Call';
+            btn.classList.add('end');
+            ring.classList.add('active');
+            status.textContent = 'Listening...';
+            startListening();
+            speak("Hello! Welcome to ERS Maternity and Pediatric Care. How can I help you today?");
+        } else {
+            // End Call
+            isCalling = false;
+            btn.textContent = 'Start Call';
+            btn.classList.remove('end');
+            ring.classList.remove('active');
+            status.textContent = 'Call ended. Thank you!';
+            stopListening();
+            synthesis.cancel();
+        }
+    };
+
+    function startListening() {
+        if (!('webkitSpeechRecognition' in window)) {
+            alert("Your browser doesn't support voice recognition. Please use Chrome.");
             return;
         }
+        recognition = new webkitSpeechRecognition();
+        recognition.continuous = false;
+        recognition.interimResults = false;
 
-        // In production, this would call your backend API
-        try {
-            // Example: await fetch('/api/callbacks', { method: 'POST', body: JSON.stringify({ phone, reason, time, language }) });
-            console.log('Callback requested:', { phone, reason, time, language });
-            
-            document.getElementById('callbackSuccess').style.display = 'block';
-            setTimeout(() => {
-                document.getElementById('callbackSuccess').style.display = 'none';
-                document.getElementById('callbackPhone').value = '';
-            }, 5000);
-        } catch (error) {
-            console.error('Callback request failed:', error);
+        recognition.onresult = function(event) {
+            const userText = event.results[0][0].transcript;
+            document.getElementById('phoneTranscript').textContent = `You: "${userText}"`;
+            processVoiceCommand(userText);
+        };
+
+        recognition.onend = function() {
+            if (isCalling) {
+                // Restart listening if call is still active
+                try { recognition.start(); } catch(e){}
+            }
+        };
+
+        try { recognition.start(); } catch(e){}
+    }
+
+    function stopListening() {
+        if (recognition) recognition.stop();
+    }
+
+    function speak(text) {
+        if (synthesis.speaking) synthesis.cancel();
+        const utterance = new SpeechSynthesisUtterance(text);
+        utterance.rate = 1;
+        utterance.pitch = 1;
+        synthesis.speak(utterance);
+        
+        // Log the interaction
+        const lastUserText = document.getElementById('phoneTranscript').textContent.replace('You: "', '').replace('"', '') || 'Greeting';
+        logPhoneInteraction(lastUserText, text);
+    }
+
+    function processVoiceCommand(text) {
+        const lowerText = text.toLowerCase();
+        let response = "I'm sorry, I didn't quite catch that. Could you please repeat?";
+
+        if (lowerText.includes('hour') || lowerText.includes('open') || lowerText.includes('close')) {
+            response = "We are open Monday to Saturday, from 8 AM to 5 PM. We are closed on Sundays.";
+        } else if (lowerText.includes('book') || lowerText.includes('appointment') || lowerText.includes('schedule')) {
+            response = "You can book an appointment by visiting our website at the Book Appointment page, or by calling our clinic directly.";
+        } else if (lowerText.includes('price') || lowerText.includes('cost') || lowerText.includes('magkano')) {
+            response = "For our most up-to-date pricing and packages, please call our clinic or check our services page.";
+        } else if (lowerText.includes('hello') || lowerText.includes('hi')) {
+            response = "Hello! How can I assist you with your maternity or pediatric care needs today?";
         }
+
+        document.getElementById('phoneStatus').textContent = 'Speaking...';
+        speak(response);
+        setTimeout(() => {
+            if(isCalling) document.getElementById('phoneStatus').textContent = 'Listening...';
+        }, 3000);
     }
 
-    followUp(phone) {
-        alert(`Initiating follow-up call to ${phone}...\n\nIn production, the AI will call this number and speak in the detected language.`);
+    // Initialize when page loads
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', createPhoneAgentUI);
+    } else {
+        createPhoneAgentUI();
     }
-}
 
-document.addEventListener('DOMContentLoaded', () => {
-    window.phoneAgent = new AIPhoneAgent();
-});
+})();
