@@ -1,4 +1,4 @@
-// chatbot.js - Complete AI with Website Knowledge, Manners, and Smart Matching
+// chatbot.js - Complete AI with Booking Info
 window.chatBot = {
     approvedFAQs: [],
     
@@ -30,7 +30,7 @@ window.chatBot = {
 
         const toggle = document.createElement('button');
         toggle.className = 'chatbot-toggle';
-        toggle.innerHTML = '💬'; // Chat bubble icon kept
+        toggle.innerHTML = '💬'; 
         toggle.onclick = () => document.getElementById('chatBox').classList.toggle('active');
 
         const box = document.createElement('div');
@@ -80,7 +80,6 @@ window.chatBot = {
         div.scrollTop = div.scrollHeight;
     },
 
-    // 1. Basic Manners
     getBasicResponse: function(text) {
         const lower = text.toLowerCase();
         if (lower.includes('thank') || lower.includes('salamat') || lower.includes('thanks')) {
@@ -98,41 +97,38 @@ window.chatBot = {
         return null;
     },
 
-    // 2. NEW: Website Knowledge Base
     getWebsiteInfo: function(text) {
         const lower = text.toLowerCase();
         
-        // Location / Address
+        // NEW: Booking/Appointment Info
+        if (lower.includes('book') || lower.includes('appointment') || lower.includes('schedule') || lower.includes('reserve') || lower.includes('pa book') || lower.includes('mag book') || lower.includes('pwede') || lower.includes('how to book')) {
+            return "To book an appointment, you can click the 'Book Appointment' button at the top of our website, or call us at +63 970 471 6507. We're open Monday to Saturday, 8 AM to 5 PM.";
+        }
+        
         if (lower.includes('where') || lower.includes('location') || lower.includes('address') || lower.includes('saan') || lower.includes('nasaan') || lower.includes('map')) {
             return "We are located at Trece Martires - Indang Road, Trece Martires City, Cavite 4109.";
         }
         
-        // Contact Info (Phone/Email)
         if (lower.includes('contact') || lower.includes('number') || lower.includes('call') || lower.includes('phone') || lower.includes('email') || lower.includes('tawag')) {
             return "You can reach us at Mobile: +63 970 471 6507, Landline: +63 (46) 419-0201, or Email: ersmaternityclinic@gmail.com.";
         }
         
-        // Hours / Time
-        if (lower.includes('hour') || lower.includes('time') || lower.includes('open') || lower.includes('close') || lower.includes('schedule') || lower.includes('oras') || lower.includes('bukas')) {
+        if (lower.includes('hour') || lower.includes('time') || lower.includes('open') || lower.includes('close') || lower.includes('oras') || lower.includes('bukas')) {
             return "We are open Monday to Saturday from 8:00 AM to 5:00 PM. We are closed on Sundays.";
         }
         
-        // Doctors
         if (lower.includes('doctor') || lower.includes('physician') || lower.includes('sino') || lower.includes('dr.')) {
             return "Our attending physicians are Dr. Evalyn Rivera-Castillo and Dr. Elli Sinsay.";
         }
         
-        // Services
         if (lower.includes('service') || lower.includes('offer') || lower.includes('do you have') || lower.includes('meron') || lower.includes('treatment')) {
             return "We offer Prenatal Care, Postpartum Care, Pediatric Care, Newborn Care, Vaccinations, Ultrasound, and General Check-ups.";
         }
         
-        // Portal / Records
         if (lower.includes('portal') || lower.includes('record') || lower.includes('result') || lower.includes('login')) {
             return "You can access your medical records and results through our Patient Portal on the website.";
         }
         
-        // Blog / Articles
         if (lower.includes('blog') || lower.includes('article') || lower.includes('read') || lower.includes('tips')) {
             return "We have a Blog section on our website with helpful articles about maternity and pediatric care.";
         }
@@ -140,7 +136,6 @@ window.chatBot = {
         return null;
     },
 
-    // 3. Detect Intent (Price vs Availability)
     detectIntent: function(text) {
         const lower = text.toLowerCase();
         if (lower.includes('magkano') || lower.includes('price') || lower.includes('cost') || lower.includes('how much') || lower.includes('bayad')) {
@@ -152,7 +147,6 @@ window.chatBot = {
         return 'general';
     },
 
-    // 4. Convert staff instructions
     convertInstructionToResponse: function(text) {
         const lower = text.toLowerCase();
         if (lower.includes('tell the customer to call') || lower.includes('tell them to call')) {
@@ -164,19 +158,15 @@ window.chatBot = {
         return text;
     },
 
-    // 5. Find Best Answer
     findBestAnswer: function(question) {
         const lower = question.toLowerCase();
         
-        // First, check basic manners
         const basicResponse = this.getBasicResponse(question);
         if (basicResponse) return basicResponse;
 
-        // Second, check website knowledge
         const websiteInfo = this.getWebsiteInfo(question);
         if (websiteInfo) return websiteInfo;
 
-        // Third, check database FAQs (for pricing and specific medical info)
         const intent = this.detectIntent(question);
         const qWords = lower.split(/\s+/).filter(w => w.length > 2);
         
