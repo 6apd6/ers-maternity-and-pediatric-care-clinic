@@ -1,4 +1,4 @@
-// phone-agent.js - Smart Voice Agent with Basic Manners and FAQ Matching
+// phone-agent.js - Complete Voice Agent with Website Knowledge
 (function() {
     let supabase = null;
     let FAQs = [];
@@ -7,7 +7,6 @@
     let recorder = null;
     let audioData = [];
 
-    // 1. Initialize
     function init() {
         if (window.supabaseClient) {
             supabase = window.supabaseClient;
@@ -25,78 +24,82 @@
         console.log('📞 Phone FAQs loaded:', FAQs.length);
     }
 
-    // NEW: Handle basic manners and greetings for Voice Agent
+    // 1. Basic Manners
     function getBasicResponse(text) {
         const lower = text.toLowerCase();
-        
-        if (lower.includes('thank') || lower.includes('salamat') || lower.includes('thanks')) {
-            return "You're very welcome! Is there anything else I can help you with?";
-        }
-        if (lower.includes('hello') || lower.includes('hi') || lower.includes('good morning') || lower.includes('good afternoon')) {
-            return "Hello! Welcome to ERS Maternity. How can I assist you today?";
-        }
-        if (lower.includes('bye') || lower.includes('goodbye')) {
-            return "Thank you for calling ERS Maternity. Have a wonderful day!";
-        }
-        if (lower.includes('who are you') || lower.includes('assistant')) {
-            return "I am the ERS virtual voice assistant. I can answer questions about our services.";
-        }
-
+        if (lower.includes('thank') || lower.includes('salamat')) return "You're very welcome! Is there anything else I can help you with?";
+        if (lower.includes('hello') || lower.includes('hi') || lower.includes('good morning')) return "Hello! Welcome to ERS Maternity. How can I assist you today?";
+        if (lower.includes('bye') || lower.includes('goodbye')) return "Thank you for calling ERS Maternity. Have a wonderful day!";
         return null;
     }
 
-    // 2. Convert staff instructions to natural responses
+    // 2. NEW: Website Knowledge Base for Voice
+    function getWebsiteInfo(text) {
+        const lower = text.toLowerCase();
+        if (lower.includes('where') || lower.includes('location') || lower.includes('address') || lower.includes('saan')) {
+            return "We are located at Trece Martires - Indang Road, Trece Martires City, Cavite 4109.";
+        }
+        if (lower.includes('contact') || lower.includes('number') || lower.includes('email')) {
+            return "You can reach us at Mobile: 0917 471 6507, Landline: 419-0201, or Email: ersmaternityclinic@gmail.com.";
+        }
+        if (lower.includes('hour') || lower.includes('time') || lower.includes('open') || lower.includes('oras')) {
+            return "We are open Monday to Saturday from 8:00 AM to 5:00 PM. We are closed on Sundays.";
+        }
+        if (lower.includes('doctor') || lower.includes('sino') || lower.includes('dr.')) {
+            return "Our attending physicians are Dr. Evalyn Rivera-Castillo and Dr. Elli Sinsay.";
+        }
+        if (lower.includes('service') || lower.includes('offer') || lower.includes('meron')) {
+            return "We offer Prenatal Care, Postpartum Care, Pediatric Care, Newborn Care, Vaccinations, Ultrasound, and General Check-ups.";
+        }
+        if (lower.includes('portal') || lower.includes('record') || lower.includes('result')) {
+            return "You can access your medical records through our Patient Portal on the website.";
+        }
+        return null;
+    }
+
+    // 3. Convert staff instructions
     function convertInstruction(text) {
         const lower = text.toLowerCase();
-        
         if (lower.includes('tell the customer to call') || lower.includes('tell them to call')) {
-            return "For more information, please call us at +63 970 471 6507.";
+            return "For more information, please call us at 0917 471 6507.";
         }
         if (lower.includes('tell the patient')) {
             return text.replace(/tell the patient/gi, 'please').replace(/to call/gi, 'call');
         }
-        if (lower.includes('price') && lower.includes('call')) {
-            return "For pricing information, please call our clinic at +63 970 471 6507.";
-        }
-        if (lower.includes('appointment') && lower.includes('call')) {
-            return "To book an appointment, please call us at +63 970 471 6507.";
-        }
-        
         return text;
     }
 
-    // 3. Smart matching with scoring
+    // 4. Smart Matching
     function getBestAnswer(question) {
         const lower = question.toLowerCase();
         
-        // 1. Check for basic manners first
         const basicResponse = getBasicResponse(question);
         if (basicResponse) return basicResponse;
 
-        // 2. Look for FAQ match
-        const qWords = lower.split(/\s+/);
+        const websiteInfo = getWebsiteInfo(question);
+        if (websiteInfo) return websiteInfo;
+
+        const qWords = lower.split(/\s+/).filter(w => w.length > 2);
         let bestMatch = null;
         let bestScore = 0;
 
         for (let faq of FAQs) {
             const faqLower = faq.question.toLowerCase();
-            const fWords = faqLower.split(/\s+/);
+            const fWords = faqLower.split(/\s+/).filter(w => w.length > 2);
             let score = 0;
+
+            if (lower.includes(faqLower) || faqLower.includes(lower)) score += 100;
 
             for (let qw of qWords) {
                 for (let fw of fWords) {
-                    if (qw === fw) score += 2;
-                    else if (qw.includes(fw) || fw.includes(qw)) score += 1;
+                    if (qw === fw) score += 10;
+                    else if (qw.includes(fw) || fw.includes(qw)) score += 5;
                 }
             }
 
-            // Boost for medical terms
-            if (lower.includes('cs') && faqLower.includes('cs')) score += 10;
-            if (lower.includes('nsd') && faqLower.includes('nsd')) score += 10;
-            if (lower.includes('check') && faqLower.includes('check')) score += 5;
-            if (lower.includes('checkup') && faqLower.includes('checkup')) score += 5;
-
-            if (lower.includes(faqLower) || faqLower.includes(lower)) score += 20;
+            if (lower.includes('cs') && faqLower.includes('cs')) score += 50;
+            if (lower.includes('nsd') && faqLower.includes('nsd')) score += 50;
+            if (lower.includes('check') && faqLower.includes('check')) score += 50;
 
             if (score > bestScore) {
                 bestScore = score;
@@ -108,29 +111,16 @@
             return convertInstruction(bestMatch.approved_answer);
         }
         
-        return "I'm not sure about that. Please call our clinic at +63 970 471 6507 for more information.";
+        return "I'm not sure about that. Please call our clinic at 0917 471 6507 for more information.";
     }
 
-    // 4. Create UI (With the Phone Icon restored)
+    // 5. Create UI
     function createUI() {
         const style = document.createElement('style');
         style.innerHTML = `
-            .phone-icon { 
-                position: fixed; bottom: 100px; right: 30px; 
-                width: 60px; height: 60px; 
-                background: #9b59b6; border-radius: 50%; 
-                border: none; color: white; font-size: 24px; 
-                cursor: pointer; z-index: 9998; 
-                display: flex; align-items: center; justify-content: center; 
-                box-shadow: 0 4px 10px rgba(0,0,0,0.2); 
-            }
+            .phone-icon { position: fixed; bottom: 100px; right: 30px; width: 60px; height: 60px; background: #9b59b6; border-radius: 50%; border: none; color: white; font-size: 24px; cursor: pointer; z-index: 9998; display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 10px rgba(0,0,0,0.2); }
             .phone-icon:hover { transform: scale(1.1); }
-            .phone-box { 
-                display: none; position: fixed; bottom: 170px; right: 30px; 
-                width: 300px; background: white; border-radius: 15px; 
-                padding: 20px; box-shadow: 0 5px 20px rgba(0,0,0,0.2); 
-                z-index: 9999; text-align: center; font-family: sans-serif; 
-            }
+            .phone-box { display: none; position: fixed; bottom: 170px; right: 30px; width: 300px; background: white; border-radius: 15px; padding: 20px; box-shadow: 0 5px 20px rgba(0,0,0,0.2); z-index: 9999; text-align: center; font-family: sans-serif; }
             .phone-box.show { display: block; animation: fadeIn 0.3s; }
             @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
             .start-btn { background: #27ae60; color: white; border: none; padding: 10px 20px; border-radius: 20px; cursor: pointer; margin-top: 10px; font-weight: 600; }
@@ -143,7 +133,7 @@
 
         const btn = document.createElement('button');
         btn.className = 'phone-icon';
-        btn.innerHTML = '📞'; // <-- The phone icon
+        btn.innerHTML = '📞'; // Phone icon kept
         btn.title = 'Voice Assistant';
         btn.onclick = () => document.getElementById('phoneBox').classList.toggle('show');
 
@@ -162,7 +152,7 @@
         document.body.appendChild(box);
     }
 
-    // 5. Call Logic
+    // 6. Call Logic
     window.toggleCall = async function() {
         const btn = document.getElementById('phBtn');
         const ring = document.getElementById('ring');
@@ -182,7 +172,7 @@
                 recorder.start();
             } catch(e) { 
                 console.error(e); 
-                alert('Please allow microphone access to use the voice assistant.');
+                alert('Please allow microphone access.');
                 isCalling = false;
                 btn.textContent = 'Start Call';
                 btn.classList.remove('end');
@@ -225,11 +215,7 @@
         };
 
         recognition.onend = () => { 
-            if (isCalling) {
-                setTimeout(() => {
-                    if (isCalling) recognition.start();
-                }, 1000);
-            }
+            if (isCalling) setTimeout(() => { if (isCalling) recognition.start(); }, 1000);
         };
         
         try { recognition.start(); } catch(err) {}
@@ -240,18 +226,12 @@
         u.rate = 0.95;
         window.speechSynthesis.speak(u);
         document.getElementById('phStatus').textContent = 'Speaking...';
-        u.onend = () => { 
-            if(isCalling) document.getElementById('phStatus').textContent = 'Listening...'; 
-        };
+        u.onend = () => { if(isCalling) document.getElementById('phStatus').textContent = 'Listening...'; };
     }
 
     async function logCall(q, a) {
         if (!supabase) return;
-        await supabase.from('ai_conversations').insert([{ 
-            user_message: q, 
-            ai_response: a, 
-            source: 'phone_agent' 
-        }]);
+        await supabase.from('ai_conversations').insert([{ user_message: q, ai_response: a, source: 'phone_agent' }]);
     }
 
     async function saveAudio() {
@@ -262,6 +242,5 @@
         audioData = [];
     }
 
-    // Start the agent
     init();
 })();
