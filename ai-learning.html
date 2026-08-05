@@ -9,191 +9,258 @@
         body { font-family: 'Poppins', sans-serif; background: #f4f6f9; margin: 0; }
         
         /* Top Navigation */
-        .top-nav { background: #2C3E50; color: white; padding: 1rem 2rem; display: flex; justify-content: space-between; align-items: center; }
-        .top-nav h2 { margin: 0; font-size: 1.5rem; }
-        .top-nav a { color: white; text-decoration: none; font-size: 0.9rem; }
-
-        /* Tab Navigation */
-        .tab-container { max-width: 1200px; margin: 2rem auto 0; padding: 0 2rem; }
-        .tabs { display: flex; gap: 10px; margin-bottom: 0; }
-        .tab-btn { padding: 12px 24px; background: #e0e0e0; border: none; border-radius: 8px 8px 0 0; cursor: pointer; font-size: 1rem; font-weight: 600; color: #555; transition: 0.3s; }
-        .tab-btn.active { background: white; color: #2C3E50; box-shadow: 0 -2px 5px rgba(0,0,0,0.05); }
+        .top-nav { background: #2C3E50; color: white; padding: 1rem 2rem; display: flex; justify-content: space-between; align-items: center; position: fixed; top: 0; left: 0; right: 0; z-index: 1000; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
+        .nav-brand { display: flex; align-items: center; gap: 1rem; }
+        .nav-logo { background: #9b59b6; width: 40px; height: 40px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: bold; font-size: 1.2rem; }
+        .nav-title h2 { margin: 0; font-size: 1.3rem; }
+        .nav-title p { margin: 0; font-size: 0.8rem; opacity: 0.8; }
+        .nav-links { display: flex; align-items: center; gap: 1.5rem; }
+        .nav-links a { color: white; text-decoration: none; font-size: 0.9rem; font-weight: 500; }
+        .nav-links a:hover { text-decoration: underline; }
         
-        /* Content Area */
-        .content-area { background: white; padding: 2rem; border-radius: 0 8px 8px 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.05); min-height: 500px; }
+        /* Main Layout */
+        .main-content { padding: 100px 2rem 2rem 2rem; max-width: 1400px; margin: 0 auto; }
+        
+        /* Tab Navigation */
+        .tab-nav { display: flex; gap: 0.5rem; margin-bottom: 2rem; border-bottom: 2px solid #e0e0e0; flex-wrap: wrap; }
+        .tab-btn { padding: 12px 24px; background: none; border: none; border-bottom: 3px solid transparent; cursor: pointer; font-size: 1rem; font-weight: 600; color: #7F8C8D; transition: 0.3s; }
+        .tab-btn:hover { color: #2C3E50; }
+        .tab-btn.active { color: #9b59b6; border-bottom-color: #9b59b6; }
+        .tab-btn .badge-count { background: #e74c3c; color: white; padding: 2px 8px; border-radius: 10px; font-size: 0.75rem; margin-left: 5px; }
+        
+        /* Tab Content */
         .tab-content { display: none; }
-        .tab-content.active { display: block; }
-
+        .tab-content.active { display: block; animation: fadeIn 0.3s; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        
         /* Stats Grid */
         .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1.5rem; margin-bottom: 2rem; }
-        .stat-card { background: #f8f9fa; padding: 1.5rem; border-radius: 8px; border-left: 4px solid #3498db; }
-        .stat-card h3 { margin: 0; color: #7F8C8D; font-size: 0.9rem; text-transform: uppercase; }
-        .stat-card p { font-size: 2rem; font-weight: bold; margin: 0.5rem 0 0; color: #2C3E50; }
-
-        /* Toolbar (Batch Actions) */
-        .toolbar { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem; padding-bottom: 1rem; border-bottom: 1px solid #eee; }
-        .btn { border: none; padding: 8px 16px; border-radius: 4px; cursor: pointer; font-size: 0.9rem; color: white; font-weight: 500; }
+        .stat-card { background: white; padding: 1.5rem; border-radius: 12px; box-shadow: 0 2px 10px rgba(0,0,0,0.05); display: flex; align-items: center; gap: 1rem; }
+        .stat-icon { font-size: 2.5rem; }
+        .stat-info h3 { margin: 0; color: #7F8C8D; font-size: 0.85rem; text-transform: uppercase; letter-spacing: 0.5px; }
+        .stat-info p { font-size: 2rem; font-weight: bold; margin: 0.25rem 0 0; color: #2C3E50; }
+        
+        /* Section Cards */
+        .section-card { background: white; padding: 2rem; border-radius: 12px; box-shadow: 0 2px 10px rgba(0,0,0,0.05); margin-bottom: 2rem; }
+        .section-card h2 { margin-top: 0; color: #2C3E50; display: flex; align-items: center; gap: 0.5rem; font-size: 1.5rem; }
+        
+        /* Toolbar */
+        .toolbar { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem; padding-bottom: 1rem; border-bottom: 1px solid #eee; flex-wrap: wrap; gap: 10px; }
+        .toolbar-left { display: flex; align-items: center; gap: 10px; font-weight: 600; color: #555; }
+        .toolbar-right { display: flex; gap: 10px; flex-wrap: wrap; }
+        
+        /* Buttons */
+        .btn { border: none; padding: 8px 16px; border-radius: 6px; cursor: pointer; font-size: 0.9rem; color: white; font-weight: 500; transition: 0.2s; }
+        .btn:hover { opacity: 0.9; transform: translateY(-1px); }
         .btn-danger { background: #e74c3c; }
-        .btn-danger:hover { background: #c0392b; }
         .btn-primary { background: #3498db; }
         .btn-success { background: #27ae60; }
-        .btn-warning { background: #f39c12; }
-
-        /* Tables & Lists */
-        .data-list { width: 100%; border-collapse: collapse; }
-        .data-list th, .data-list td { padding: 12px; text-align: left; border-bottom: 1px solid #eee; }
-        .data-list th { background: #f8f9fa; color: #7F8C8D; font-weight: 600; font-size: 0.85rem; text-transform: uppercase; }
-        .data-list tr:hover { background: #fafafa; }
+        .btn-secondary { background: #95a5a6; }
+        .btn-sm { padding: 4px 8px; font-size: 0.8rem; }
         
-        .status-badge { padding: 4px 8px; border-radius: 12px; font-size: 0.75rem; font-weight: bold; }
-        .status-bad { background: #ffebee; color: #c62828; }
-        .status-good { background: #e8f5e9; color: #2e7d32; }
-
-        .action-cell { display: flex; gap: 5px; }
-        textarea { width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px; box-sizing: border-box; font-family: inherit; margin-top: 5px; }
+        /* Tables */
+        .data-table { width: 100%; border-collapse: collapse; }
+        .data-table th, .data-table td { padding: 12px; text-align: left; border-bottom: 1px solid #eee; vertical-align: middle; }
+        .data-table th { background: #f8f9fa; color: #7F8C8D; font-weight: 600; font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.5px; }
+        .data-table tr:hover { background: #fafafa; }
+        .data-table input[type="checkbox"] { transform: scale(1.2); cursor: pointer; }
         
-        /* Checkbox styling */
-        input[type="checkbox"] { transform: scale(1.2); cursor: pointer; }
+        /* Badges */
+        .source-badge { padding: 4px 8px; border-radius: 12px; font-size: 0.75rem; font-weight: bold; display: inline-block; }
+        .source-chat { background: #e8f5e9; color: #2e7d32; }
+        .source-phone { background: #f3e5f5; color: #7b1fa2; }
+        
+        /* Audio Player */
+        audio { height: 30px; width: 100%; max-width: 200px; }
+        
+        /* Notes Input */
+        .notes-input { width: 100%; padding: 6px; border: 1px solid #ddd; border-radius: 4px; font-family: inherit; font-size: 0.85rem; resize: vertical; min-height: 40px; box-sizing: border-box; }
+        
+        .hidden { display: none !important; }
     </style>
 </head>
 <body>
 
-    <!-- Top Header -->
+    <!-- Top Navigation -->
     <div class="top-nav">
-        <h2>🤖 AI Learning Dashboard</h2>
-        <a href="staff.html">← Back to Staff Dashboard</a>
+        <div class="nav-brand">
+            <div class="nav-logo">ERS</div>
+            <div class="nav-title">
+                <h2>AI Learning Dashboard</h2>
+                <p>ADMINISTRATION PANEL</p>
+            </div>
+        </div>
+        <div class="nav-links">
+            <a href="staff.html">← Back to Staff Dashboard</a>
+        </div>
     </div>
 
-    <!-- Tab Navigation -->
-    <div class="tab-container">
-        <div class="tabs">
-            <button class="tab-btn active" onclick="switchTab('dashboard')">📊 Dashboard Overview</button>
+    <div class="main-content">
+        
+        <!-- Tab Navigation -->
+        <div class="tab-nav">
+            <button class="tab-btn active" onclick="switchTab('overview')">📊 Overview</button>
             <button class="tab-btn" onclick="switchTab('knowledge')">📚 Knowledge Base (FAQs)</button>
             <button class="tab-btn" onclick="switchTab('pending')">💡 Pending Review</button>
         </div>
 
-        <div class="content-area">
-            
-            <!-- TAB 1: DASHBOARD OVERVIEW -->
-            <div id="tab-dashboard" class="tab-content active">
-                <div class="stats-grid">
-                    <div class="stat-card" style="border-color: #3498db;">
+        <!-- Overview Tab -->
+        <div id="tab-overview" class="tab-content active">
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-icon">💬</div>
+                    <div class="stat-info">
                         <h3>Total Conversations</h3>
                         <p id="totalConv">0</p>
                     </div>
-                    <div class="stat-card" style="border-color: #e74c3c;">
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon">⚠️</div>
+                    <div class="stat-info">
                         <h3>Needs Improvement</h3>
                         <p id="needsImp" style="color: #e74c3c;">0</p>
                     </div>
-                    <div class="stat-card" style="border-color: #f39c12;">
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon">⏳</div>
+                    <div class="stat-info">
                         <h3>Pending Updates</h3>
                         <p id="pendingFaq" style="color: #f39c12;">0</p>
                     </div>
                 </div>
-
-                <h3>Recent Activity</h3>
-                <div class="toolbar">
-                    <label style="font-weight: bold; cursor: pointer;"><input type="checkbox" id="selectAllConv" onchange="toggleSelectAll('conv')"> Select All</label>
-                    <button onclick="batchDelete('conv')" class="btn btn-danger">🗑️ Delete Selected</button>
-                </div>
-                <table class="data-list" id="convTable">
-                    <thead>
-                        <tr>
-                            <th style="width: 40px;"></th>
-                            <th>Date</th>
-                            <th>Patient Question</th>
-                            <th>AI Response</th>
-                            <th>Status</th>
-                        </tr>
-                    </thead>
-                    <tbody id="convListBody">
-                        <tr><td colspan="5" style="text-align:center; color:#7F8C8D;">Loading...</td></tr>
-                    </tbody>
-                </table>
             </div>
 
-            <!-- TAB 2: KNOWLEDGE BASE -->
-            <div id="tab-knowledge" class="tab-content">
-                <h3>Manage Approved FAQs</h3>
+            <div class="section-card">
+                <h2> Recent AI Conversations</h2>
+                <div class="toolbar">
+                    <div class="toolbar-left">
+                        <input type="checkbox" id="selectAllConv" onchange="toggleSelectAll('conv')"> 
+                        <label for="selectAllConv">Select All</label>
+                    </div>
+                    <div class="toolbar-right">
+                        <button onclick="batchDelete('conv')" class="btn btn-danger">🗑️ Delete Selected</button>
+                    </div>
+                </div>
+                <div style="overflow-x: auto;">
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th style="width: 40px;"></th>
+                                <th>Date</th>
+                                <th>Source</th>
+                                <th>Patient Question</th>
+                                <th>AI Response</th>
+                                <th>Audio</th>
+                                <th>Staff Notes</th>
+                                <th>Status</th>
+                            </tr>
+                        </thead>
+                        <tbody id="convListBody">
+                            <tr><td colspan="8" style="text-align:center; color:#7F8C8D; padding: 2rem;">Loading...</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- Knowledge Base Tab -->
+        <div id="tab-knowledge" class="tab-content">
+            <div class="section-card">
+                <h2>📚 Manage Approved FAQs</h2>
                 <p style="color: #7F8C8D; margin-bottom: 1rem;">These are the answers the AI is currently using. Edit prices or info here.</p>
                 
                 <div class="toolbar">
-                    <label style="font-weight: bold; cursor: pointer;"><input type="checkbox" id="selectAllApproved" onchange="toggleSelectAll('approved')"> Select All</label>
-                    <button onclick="batchDelete('approved')" class="btn btn-danger">🗑️ Delete Selected</button>
+                    <div class="toolbar-left">
+                        <input type="checkbox" id="selectAllApproved" onchange="toggleSelectAll('approved')"> 
+                        <label for="selectAllApproved">Select All</label>
+                    </div>
+                    <div class="toolbar-right">
+                        <button onclick="batchDelete('approved')" class="btn btn-danger">🗑️ Delete Selected</button>
+                    </div>
                 </div>
 
-                <table class="data-list" id="approvedTable">
+                <table class="data-table">
                     <thead>
                         <tr>
                             <th style="width: 40px;"></th>
                             <th>Question</th>
                             <th>Current Answer</th>
-                            <th style="width: 250px;">Actions</th>
+                            <th style="width: 150px;">Actions</th>
                         </tr>
                     </thead>
                     <tbody id="approvedListBody">
-                        <tr><td colspan="4" style="text-align:center; color:#7F8C8D;">Loading...</td></tr>
+                        <tr><td colspan="4" style="text-align:center; color:#7F8C8D; padding: 2rem;">Loading...</td></tr>
                     </tbody>
                 </table>
             </div>
+        </div>
 
-            <!-- TAB 3: PENDING REVIEW -->
-            <div id="tab-pending" class="tab-content">
-                <h3>Suggested Improvements</h3>
+        <!-- Pending Review Tab -->
+        <div id="tab-pending" class="tab-content">
+            <div class="section-card">
+                <h2>💡 Suggested Improvements</h2>
                 <p style="color: #7F8C8D; margin-bottom: 1rem;">Corrections submitted by staff. Approve them to teach the AI.</p>
 
                 <div class="toolbar">
-                    <label style="font-weight: bold; cursor: pointer;"><input type="checkbox" id="selectAllPending" onchange="toggleSelectAll('pending')"> Select All</label>
-                    <button onclick="batchDelete('pending')" class="btn btn-danger">️ Delete Selected</button>
+                    <div class="toolbar-left">
+                        <input type="checkbox" id="selectAllPending" onchange="toggleSelectAll('pending')"> 
+                        <label for="selectAllPending">Select All</label>
+                    </div>
+                    <div class="toolbar-right">
+                        <button onclick="batchDelete('pending')" class="btn btn-danger">🗑️ Delete Selected</button>
+                    </div>
                 </div>
 
-                <table class="data-list" id="pendingTable">
+                <table class="data-table">
                     <thead>
                         <tr>
                             <th style="width: 40px;"></th>
                             <th>Question</th>
                             <th>Suggested Answer</th>
-                            <th style="width: 200px;">Actions</th>
+                            <th style="width: 150px;">Actions</th>
                         </tr>
                     </thead>
                     <tbody id="pendingListBody">
-                        <tr><td colspan="4" style="text-align:center; color:#7F8C8D;">Loading...</td></tr>
+                        <tr><td colspan="4" style="text-align:center; color:#7F8C8D; padding: 2rem;">Loading...</td></tr>
                     </tbody>
                 </table>
             </div>
-
         </div>
+
     </div>
 
-    <!-- Scripts -->
+    <!-- Load Supabase -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="config.js"></script>
+    
     <script>
+        // Initialize Supabase
         if (window.API_CONFIG && window.supabase) {
-            window.supabaseClient = window.supabase.createClient(window.API_CONFIG.SUPABASE_URL, window.API_CONFIG.SUPABASE_KEY);
+            window.supabaseClient = window.supabase.createClient(
+                window.API_CONFIG.SUPABASE_URL,
+                window.API_CONFIG.SUPABASE_KEY
+            );
+            console.log('✅ Supabase client initialized for dashboard');
         }
 
-        // Tab Switching Logic
-        function switchTab(tabId) {
-            document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
-            document.querySelectorAll('.tab-btn').forEach(el => el.classList.remove('active'));
-            document.getElementById('tab-' + tabId).classList.add('active');
+        function switchTab(tabName) {
+            document.querySelectorAll('.tab-content').forEach(tab => tab.classList.remove('active'));
+            document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+            document.getElementById('tab-' + tabName).classList.add('active');
             event.target.classList.add('active');
         }
 
-        // Select All Logic
         function toggleSelectAll(type) {
             const checkbox = document.getElementById('selectAll' + type.charAt(0).toUpperCase() + type.slice(1));
             const checkboxes = document.querySelectorAll('.cb-' + type);
             checkboxes.forEach(cb => cb.checked = checkbox.checked);
         }
 
-        // Main Load Function
-        setTimeout(async function() {
+        async function loadAllData() {
             const supabase = window.supabaseClient;
             if (!supabase) return;
 
-            // 1. Stats
+            // 1. Load Stats
             const { count: convCount } = await supabase.from('ai_conversations').select('*', { count: 'exact', head: true });
             const { count: impCount } = await supabase.from('ai_conversations').select('*', { count: 'exact', head: true }).eq('needs_improvement', true);
             const { count: faqCount } = await supabase.from('faq_improvements').select('*', { count: 'exact', head: true }).eq('is_approved', false);
@@ -202,118 +269,151 @@
             document.getElementById('needsImp').textContent = impCount || 0;
             document.getElementById('pendingFaq').textContent = faqCount || 0;
 
-            // 2. Load Conversations (Tab 1)
+            // 2. Load Conversations
             const { data: conversations } = await supabase.from('ai_conversations').select('*').order('created_at', { ascending: false }).limit(50);
-            const convBody = document.getElementById('convListBody');
-            convBody.innerHTML = '';
-            
-            if (conversations && conversations.length > 0) {
-                conversations.forEach(c => {
-                    const isBad = c.needs_improvement === true || c.was_helpful === false;
-                    const statusBadge = isBad ? '<span class="status-badge status-bad">Needs Fix</span>' : '<span class="status-badge status-good">Good</span>';
-                    const shortAns = c.ai_response.length > 50 ? c.ai_response.substring(0, 50) + '...' : c.ai_response;
-                    
-                    convBody.innerHTML += `
-                        <tr>
-                            <td><input type="checkbox" class="cb-conv" value="${c.id}"></td>
-                            <td style="font-size:0.85rem; color:#7F8C8D;">${new Date(c.created_at).toLocaleDateString()}</td>
-                            <td><strong>${c.user_message}</strong></td>
-                            <td style="color:#555;">${shortAns}</td>
-                            <td>${statusBadge}</td>
-                        </tr>
-                    `;
-                });
-            } else {
-                convBody.innerHTML = '<tr><td colspan="5" style="text-align:center;">No data</td></tr>';
-            }
+            renderConversations(conversations || []);
 
-            // 3. Load Approved FAQs (Tab 2)
+            // 3. Load Approved FAQs
             const { data: approvedFaqs } = await supabase.from('faq_improvements').select('*').eq('is_approved', true);
-            const appBody = document.getElementById('approvedListBody');
-            appBody.innerHTML = '';
+            renderApprovedFaqs(approvedFaqs || []);
 
-            if (approvedFaqs && approvedFaqs.length > 0) {
-                approvedFaqs.forEach(f => {
-                    appBody.innerHTML += `
-                        <tr>
-                            <td><input type="checkbox" class="cb-approved" value="${f.id}"></td>
-                            <td><strong>${f.question}</strong></td>
-                            <td>
-                                <textarea id="update-ans-${f.id}" rows="1">${f.approved_answer}</textarea>
-                            </td>
-                            <td class="action-cell">
-                                <button onclick="updateFaq('${f.id}')" class="btn btn-primary" style="padding: 4px 8px; font-size: 0.8rem;">Save</button>
-                            </td>
-                        </tr>
-                    `;
-                });
-            } else {
-                appBody.innerHTML = '<tr><td colspan="4" style="text-align:center;">No approved FAQs yet.</td></tr>';
-            }
-
-            // 4. Load Pending FAQs (Tab 3)
+            // 4. Load Pending FAQs
             const { data: pendingFaqs } = await supabase.from('faq_improvements').select('*').eq('is_approved', false);
-            const penBody = document.getElementById('pendingListBody');
-            penBody.innerHTML = '';
+            renderPendingFaqs(pendingFaqs || []);
+        }
 
-            if (pendingFaqs && pendingFaqs.length > 0) {
-                pendingFaqs.forEach(f => {
-                    penBody.innerHTML += `
-                        <tr>
-                            <td><input type="checkbox" class="cb-pending" value="${f.id}"></td>
-                            <td><strong>${f.question}</strong></td>
-                            <td>${f.suggested_answer}</td>
-                            <td class="action-cell">
-                                <button onclick="approveFaq('${f.id}')" class="btn btn-success" style="padding: 4px 8px; font-size: 0.8rem;">Approve</button>
-                            </td>
-                        </tr>
-                    `;
-                });
-            } else {
-                penBody.innerHTML = '<tr><td colspan="4" style="text-align:center;">No pending suggestions.</td></tr>';
+        function renderConversations(conversations) {
+            const tbody = document.getElementById('convListBody');
+            if (conversations.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="8" style="text-align:center; color:#7F8C8D; padding: 2rem;">No conversations yet</td></tr>';
+                return;
             }
 
-        }, 500);
+            tbody.innerHTML = conversations.map(c => {
+                const isBad = c.needs_improvement === true || c.was_helpful === false;
+                const statusBadge = isBad ? '<span class="source-badge" style="background:#ffebee; color:#c62828;">❌ Needs Fix</span>' : '<span class="source-badge" style="background:#e8f5e9; color:#2e7d32;">✅ Good</span>';
+                
+                const sourceBadge = c.source === 'phone_agent' 
+                    ? '<span class="source-badge source-phone">📞 Phone</span>' 
+                    : '<span class="source-badge source-chat">🤖 Chat</span>';
+                
+                const audioPlayer = c.audio_url 
+                    ? `<audio controls src="${c.audio_url}"></audio>` 
+                    : '<span style="color:#bdc3c7;">-</span>';
+
+                return `
+                    <tr>
+                        <td><input type="checkbox" class="cb-conv" value="${c.id}"></td>
+                        <td style="font-size:0.85rem; color:#7F8C8D;">${new Date(c.created_at).toLocaleDateString()}</td>
+                        <td>${sourceBadge}</td>
+                        <td><strong>${c.user_message}</strong></td>
+                        <td style="max-width: 200px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;" title="${c.ai_response}">${c.ai_response}</td>
+                        <td>${audioPlayer}</td>
+                        <td>
+                            <textarea class="notes-input" id="note-${c.id}" placeholder="Add notes...">${c.staff_notes || ''}</textarea>
+                            <button onclick="saveNote('${c.id}')" class="btn btn-primary btn-sm" style="margin-top:5px;"> Save</button>
+                        </td>
+                        <td>${statusBadge}</td>
+                    </tr>
+                `;
+            }).join('');
+        }
+
+        function renderApprovedFaqs(faqs) {
+            const tbody = document.getElementById('approvedListBody');
+            if (faqs.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="4" style="text-align:center; color:#7F8C8D; padding: 2rem;">No approved FAQs yet</td></tr>';
+                return;
+            }
+
+            tbody.innerHTML = faqs.map(f => `
+                <tr>
+                    <td><input type="checkbox" class="cb-approved" value="${f.id}"></td>
+                    <td><strong>${f.question}</strong></td>
+                    <td>
+                        <textarea id="update-ans-${f.id}" style="width:100%; padding:6px; border:1px solid #ddd; border-radius:4px;">${f.approved_answer}</textarea>
+                    </td>
+                    <td>
+                        <button onclick="updateFaq('${f.id}')" class="btn btn-primary btn-sm">Save</button>
+                    </td>
+                </tr>
+            `).join('');
+        }
+
+        function renderPendingFaqs(faqs) {
+            const tbody = document.getElementById('pendingListBody');
+            if (faqs.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="4" style="text-align:center; color:#7F8C8D; padding: 2rem;">No pending suggestions</td></tr>';
+                return;
+            }
+
+            tbody.innerHTML = faqs.map(f => `
+                <tr>
+                    <td><input type="checkbox" class="cb-pending" value="${f.id}"></td>
+                    <td><strong>${f.question}</strong></td>
+                    <td>${f.suggested_answer}</td>
+                    <td>
+                        <button onclick="approveFaq('${f.id}')" class="btn btn-success btn-sm">Approve</button>
+                    </td>
+                </tr>
+            `).join('');
+        }
 
         // --- Actions ---
+
+        async function saveNote(id) {
+            const noteText = document.getElementById(`note-${id}`).value;
+            const supabase = window.supabaseClient;
+            
+            const { error } = await supabase
+                .from('ai_conversations')
+                .update({ staff_notes: noteText })
+                .eq('id', id);
+                
+            if (error) {
+                alert('Error saving note: ' + error.message);
+            } else {
+                alert('✅ Note saved!');
+            }
+        }
 
         async function updateFaq(id) {
             const newAns = document.getElementById(`update-ans-${id}`).value;
             const supabase = window.supabaseClient;
             await supabase.from('faq_improvements').update({ approved_answer: newAns }).eq('id', id);
-            alert('Updated!');
+            alert('✅ FAQ Updated!');
         }
 
         async function approveFaq(id) {
             const supabase = window.supabaseClient;
-            // Move from pending to approved
             await supabase.from('faq_improvements').update({ is_approved: true }).eq('id', id);
-            alert('Approved! AI will now use this answer.');
-            location.reload();
+            alert('✅ FAQ Approved! AI will now use this answer.');
+            loadAllData();
         }
 
-        // Batch Delete Logic
         async function batchDelete(type) {
             const checkboxes = document.querySelectorAll('.cb-' + type + ':checked');
             if (checkboxes.length === 0) return alert('Please select items to delete.');
             
-            if (!confirm(`Are you sure you want to delete ${checkboxes.length} items?`)) return;
-
+            if (!confirm(`️ Are you sure you want to delete ${checkboxes.length} items?`)) return;
+            
             const ids = Array.from(checkboxes).map(cb => cb.value);
             const supabase = window.supabaseClient;
             
             let table = type === 'conv' ? 'ai_conversations' : 'faq_improvements';
             
             const { error } = await supabase.from(table).delete().in('id', ids);
-
+            
             if (error) {
-                console.error(error);
-                alert('Error deleting items.');
+                alert('Error deleting items: ' + error.message);
             } else {
-                alert('Deleted successfully!');
-                location.reload();
+                alert('🗑️ Items deleted successfully');
+                loadAllData();
             }
         }
+
+        // Load data on start
+        setTimeout(loadAllData, 500);
     </script>
 </body>
 </html>
