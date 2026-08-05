@@ -1,4 +1,4 @@
-// chatbot.js - Smart AI that understands instructions
+// chatbot.js - Smart AI with Basic Manners and FAQ Matching
 window.chatBot = {
     approvedFAQs: [],
     
@@ -30,7 +30,7 @@ window.chatBot = {
 
         const toggle = document.createElement('button');
         toggle.className = 'chatbot-toggle';
-        toggle.innerHTML = '💬';
+        toggle.innerHTML = '';
         toggle.onclick = () => document.getElementById('chatBox').classList.toggle('active');
 
         const box = document.createElement('div');
@@ -80,38 +80,62 @@ window.chatBot = {
         div.scrollTop = div.scrollHeight;
     },
 
+    // NEW: Handle basic manners and greetings
+    getBasicResponse: function(text) {
+        const lower = text.toLowerCase();
+        
+        // Thank you
+        if (lower.includes('thank') || lower.includes('salamat') || lower.includes('thanks')) {
+            return "You're very welcome! Is there anything else I can help you with today?";
+        }
+        
+        // Greetings
+        if (lower.includes('hello') || lower.includes('hi') || lower.includes('good morning') || lower.includes('good afternoon') || lower.includes('kumusta')) {
+            return "Hello! Welcome to ERS Maternity and Pediatric Care. How can I assist you today?";
+        }
+        
+        // Goodbye
+        if (lower.includes('bye') || lower.includes('goodbye') || lower.includes('salamat ulit')) {
+            return "Thank you for contacting us. Have a wonderful day!";
+        }
+        
+        // Who are you
+        if (lower.includes('who are you') || lower.includes('ano ka') || lower.includes('assistant')) {
+            return "I am the ERS virtual assistant. I can answer questions about our services, pricing, and appointments.";
+        }
+
+        return null; // Return null if no basic match found
+    },
+
     // Convert staff instructions to natural responses
     convertInstructionToResponse: function(text) {
         const lower = text.toLowerCase();
         
-        // If staff wrote "tell the customer to call" → convert to direct response
         if (lower.includes('tell the customer to call') || lower.includes('tell them to call')) {
             return "For more information, please call us at +63 970 471 6507.";
         }
-        
-        // If staff wrote "tell the patient" → convert to direct response
         if (lower.includes('tell the patient')) {
             return text.replace(/tell the patient/gi, 'please').replace(/to call/gi, 'call');
         }
-        
-        // If it's an instruction about pricing
         if (lower.includes('price') && lower.includes('call')) {
             return "For pricing information, please call our clinic at +63 970 471 6507.";
         }
-        
-        // If it's an instruction about appointments
         if (lower.includes('appointment') && lower.includes('call')) {
             return "To book an appointment, please call us at +63 970 471 6507.";
         }
         
-        // Default: return as-is if no instruction detected
         return text;
     },
 
     findBestAnswer: function(question) {
         const lower = question.toLowerCase();
-        const qWords = lower.split(/\s+/);
         
+        // 1. Check for basic manners first
+        const basicResponse = this.getBasicResponse(question);
+        if (basicResponse) return basicResponse;
+
+        // 2. If not a basic greeting, look for FAQ match
+        const qWords = lower.split(/\s+/);
         let bestMatch = null;
         let bestScore = 0;
 
@@ -120,7 +144,6 @@ window.chatBot = {
             const fWords = faqLower.split(/\s+/);
             let score = 0;
 
-            // Count matching words
             for (let qw of qWords) {
                 for (let fw of fWords) {
                     if (qw === fw) score += 2;
@@ -134,7 +157,6 @@ window.chatBot = {
             if (lower.includes('check') && faqLower.includes('check')) score += 5;
             if (lower.includes('checkup') && faqLower.includes('checkup')) score += 5;
 
-            // Exact phrase match
             if (lower.includes(faqLower) || faqLower.includes(lower)) score += 20;
 
             if (score > bestScore) {
@@ -144,7 +166,6 @@ window.chatBot = {
         }
 
         if (bestMatch && bestScore > 0) {
-            // Convert any staff instructions to natural responses
             return this.convertInstructionToResponse(bestMatch.approved_answer);
         }
         
