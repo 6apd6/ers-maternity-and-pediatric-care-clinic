@@ -1,4 +1,4 @@
-// chatbot.js - Smart AI with Basic Manners and FAQ Matching
+// chatbot.js - Smart AI with Basic Manners, FAQ Matching, and Correct Icons
 window.chatBot = {
     approvedFAQs: [],
     
@@ -28,9 +28,10 @@ window.chatBot = {
         `;
         document.head.appendChild(style);
 
+        // Create the pink toggle button
         const toggle = document.createElement('button');
         toggle.className = 'chatbot-toggle';
-        toggle.innerHTML = '';
+        toggle.innerHTML = '💬'; // <-- I restored the chat bubble icon here
         toggle.onclick = () => document.getElementById('chatBox').classList.toggle('active');
 
         const box = document.createElement('div');
@@ -80,7 +81,7 @@ window.chatBot = {
         div.scrollTop = div.scrollHeight;
     },
 
-    // NEW: Handle basic manners and greetings
+    // Handle basic manners and greetings
     getBasicResponse: function(text) {
         const lower = text.toLowerCase();
         
